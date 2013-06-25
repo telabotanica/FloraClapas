@@ -1,0 +1,60 @@
+<div class="header">
+    <a href="#" class="header-button header-button-left header-back-button">
+        <button>Retour</button>
+    </a>
+    <a href="#parcours" class="header-button header-button-icon header-button-right search" id="view-home-refresh">
+        <button>Liste des parcours</button>
+    </a>
+</div>
+
+<div class="" style="top:44px;">
+    <div class="employee-summary">
+        <header>
+			<h1 class="text-center"><%= nom %></h1>
+			
+			<span class="metadata">
+				<!-- <span class="link-text">Lat: <%= latitude_centre %> <br /> Lng: <%= longitude_centre %></span><br/> -->
+			</span>
+        </header>
+    </div>
+
+    <div class="description-parcours">
+		<div class="wrapper row-fluid">
+			<ul id="galerie_images" class="gallery">
+				<li class="span8 carte">
+					<a href="pics/<%= fichier_carte %>" rel="external">
+					<img src="pics/<%= fichier_carte %>" />
+					</a>
+				</li>
+				<li class="span4">
+					<% _.each(photos, function (photo, i) { %>
+						<a href="pics/<%= photo %>" rel="external">
+							<img src="pics/<%= photo %>" width="100"/>
+						</a>
+					<% }); %>
+				</li>
+			</ul>
+		</div>
+		
+		<%= description %>
+    </div>
+</div>
+
+
+<div class="navbar">
+	<ul class="nav parc-nav">
+		<li class="active"><a href="#parcours/<%= id %>">Parcours</a></li>
+		<li><a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">Liste</a></li>
+		<li><a href="#clef/<%= id %>" data-toggle="modal">Recherche...</a></li>
+	</ul>
+</div>
+
+
+<script>
+var psi = $('#galerie_images a').photoSwipe({ 
+	enableMouseWheel: false, 
+	enableKeyboard: false,
+	preventSlideshow: true,
+	captionAndToolbarAutoHideDelay: 0
+});
+</script>

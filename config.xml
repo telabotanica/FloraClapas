@@ -3,13 +3,13 @@
 <!-- config.xml reference: https://build.phonegap.com/docs/config-xml -->
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
-        id        = "org.tela-botanica.cel_mobile"
+        id        = "org.tela-botanica.flora_clapas"
         version   = "2.0.0">
 
-    <name>CeL Mobile</name>
+    <name>Flora Clapas</name>
 
     <description>
-        Le Carnet en ligne (CEL) est l'équivalent numérique de votre carnet de terrain. Il permet de saisir vos observations, de les vérifier, de les illustrer avec vos propres images, puis de les partager avec le réseau.
+        Flora Clapas est la nouvelle grande application de la Ville de Montpellier pour découvrir les plantes à travers des parcours géolocalisés dans toute l'agglomération.
     </description>
 
     <author href="http://i.nembrot.free.fr" email="i.nembrot@laposte.net">
@@ -37,7 +37,7 @@
     -->
 
     <!-- Customize your app and platform with the preference element. -->
-    <preference name="phonegap-version"           value="2.3.0" />          <!-- all: current version of PhoneGap -->
+    <preference name="phonegap-version"           value="2.7.0" />          <!-- all: current version of PhoneGap -->
     <preference name="orientation"                value="default" />        <!-- all: default means both landscape and portrait are enabled -->
     <preference name="target-device"              value="universal" />      <!-- all: possible values handset, tablet, or universal -->
     <preference name="fullscreen"                 value="true" />           <!-- all: hides the status bar at the top of the screen -->
