@@ -142,7 +142,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 		console.log('Inserting parcours');
         $.ajax( {
 			type: 'GET',
-			url: './bdd:parcours.csv',
+			url: './parcours.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
@@ -302,7 +302,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 		console.log('Inserting espece');
 		$.ajax( {
 			type: 'GET',
-			url: './bdd:espece.csv',
+			url: './espece.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
@@ -406,7 +406,7 @@ _.extend(directory.dao.CritereDAO.prototype, {
 		console.log('Inserting critere');
 		$.ajax( {
 			type: 'GET',
-			url: './bdd:critere.csv',
+			url: './critere.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
@@ -488,7 +488,7 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 		console.log('Inserting avoir_critere');
 		$.ajax( {
 			type: 'GET',
-			url: './bdd:avoir_critere.csv',
+			url: './avoir_critere.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
