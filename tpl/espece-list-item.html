@@ -3,5 +3,8 @@
     <div class="story">
     	<b><%= nom_vernaculaire %></b> <br />
     	<i><%= nom_sci %></i> (<%= famille %>)
+    	<% if (typeof pourcentage  !== 'undefined') { %>
+			<span class="pull-right btn-info btn-mini"><%= pourcentage %></span>
+		<% } %>
     </div>
 </a>

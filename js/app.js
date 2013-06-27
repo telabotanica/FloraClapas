@@ -794,12 +794,21 @@ directory.views.EspeceListView = Backbone.View.extend({
     render: function(eventName) {
 		var arr_especes = new Array(),
 			arr_temp = this.model.models,
+			arr_ids = new Array(),
 			nbre_triees = directory.liste.length;
+			
 		if (nbre_triees != 0) {
-			for (var c = 0; c < arr_temp.length; c++) {
-				var index = $.inArray(arr_temp[c].attributes.num_nom, directory.liste);
+			for (var i = 0; i < arr_temp.length; i++) {
+				arr_temp[i].attributes.pourcentage = 0 +'/' + directory.liste.total;
+				arr_ids.push(arr_temp[i].attributes.num_nom);
+			}
+			for (var c = 0; c < nbre_triees; c++) {
+				var pourcentage = 0,
+					index = $.inArray(directory.liste[c], arr_ids);
 				if (index != -1) {
-					arr_especes.push(arr_temp[c]);
+					pourcentage = directory.liste.nbre_criteres[c];
+					arr_temp[index].attributes.pourcentage = pourcentage + '/' + directory.liste.total;
+					arr_especes.push(arr_temp[index]);
 				}
 			}
 			for (var i = 0; i < arr_temp.length; i++) {
@@ -810,7 +819,7 @@ directory.views.EspeceListView = Backbone.View.extend({
 			}
 			this.model.models = arr_especes;
 		}
-		
+		console.log(this.model.models);
         $(this.el).empty();
         _.each(this.model.models, function(espece) {
 			espece.attributes.ce_critere = this.ce_critere;
@@ -1088,7 +1097,7 @@ directory.Router = Backbone.Router.extend({
         $('#content').on('click', '.criterium', function(event) {			
 			var sql_where = '',
 				arr_ids = new Array(),
-				nb_choix = 0,
+				nbre_choix = 0,
 				hash = window.location.hash,
 				arr_hash = hash.split('/'),
 				id_parcours = arr_hash[arr_hash.length - 1],
@@ -1111,7 +1120,7 @@ directory.Router = Backbone.Router.extend({
 			
 			for (var i = 0; i < inputs.length; i++) {
 				if (inputs[i].checked) {
-					nb_choix++;
+					nbre_choix++;
 					var id = inputs[i].value.split(';')[0];
 					arr_ids.push(id);
 				}
@@ -1125,7 +1134,7 @@ directory.Router = Backbone.Router.extend({
 					sql_conditions += ', ';
 				}
 			}
-			console.log(arr_ids);
+			//console.log(arr_ids);
 			
 			directory.db.transaction(
 				function(tx) {
@@ -1137,7 +1146,7 @@ directory.Router = Backbone.Router.extend({
 						"id_critere IN (" +
 							sql_conditions + 
 						") " +
-						"GROUP BY nom_vernaculaire " + 
+						"GROUP BY num_nom " + 
 						"ORDER BY count DESC ";
 					/*
 					var sql =
@@ -1154,22 +1163,26 @@ directory.Router = Backbone.Router.extend({
 						//") " + 
 						//"WHERE id_critere = :ce_parcours ";
 					*/
-					console.log(sql);
+					//console.log(sql);
 					tx.executeSql(sql, arr_ids, function(tx, results) {
 						var nbre = results.rows.length,
 							criteres = [],
-							nbre_tous_criteres = 0,
+							nbre_criteres = [],
+							especes_tous_criteres = 0,
 							i = 0;
 						for (; i < nbre; i = i + 1) {
 							criteres[i] = results.rows.item(i).num_nom;
-							if (results.rows.item(i).count == nb_choix) {
-								nbre_tous_criteres++;
+							nbre_criteres[i] = results.rows.item(i).count;
+							if (results.rows.item(i).count == nbre_choix) {
+								especes_tous_criteres++;
 							}
 						}
-						$('#resultats-recherche').html(nbre_tous_criteres);
+						$('#resultats-recherche').html('Nbre de résultats : ' + especes_tous_criteres);
 						
 						directory.liste = criteres;
-						console.log(nb_choix, criteres);
+						directory.liste.nbre_criteres = nbre_criteres;
+						directory.liste.total = nbre_choix;
+						//console.log(nbre_choix, criteres);
 						this.model =  new directory.models.EspeceCollection();
 						this.model.findByParcours(id_parcours);
 						var nbre = this.model.length,
