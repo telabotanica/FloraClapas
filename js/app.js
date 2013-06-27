@@ -259,10 +259,17 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 
                 var sql = 
 					'SELECT num_nom, nom_sci, famille, nom_vernaculaire, photos ' +
-                    'FROM espece';
+                    'FROM espece ' +
+                    'ORDER BY nom_vernaculaire';
 
                 tx.executeSql(sql, [], function(tx, results) {
-                    callback(results.rows.length === 1 ? results.rows.item(0) : null);
+                     var nbre = results.rows.length,
+                        especes = [],
+                        i = 0;
+                    for (; i < nbre; i = i + 1) {
+                        especes[i] = results.rows.item(i);
+                    }
+                    callback(especes);
                 });
             },
             function(tx, error) {
@@ -634,6 +641,15 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
             self.reset(data);
 			//console.log("EspeceCollection | findByParcours ", data);
         });
+    },
+    
+    findAll: function() {
+        var especeDAO = new directory.dao.EspeceDAO(directory.db),
+            self = this;
+        especeDAO.findAll(function(data) {
+            self.reset(data);
+			//console.log("EspeceCollection | findAll ", data);
+        });
     }
 
 });
@@ -744,7 +760,11 @@ directory.views.ListPage = Backbone.View.extend({
 		this.model.id = data.model.attributes.id;
 		this.model.name = data.model.attributes.name;
         this.model.id_critere = data.model.attributes.id_critere;
-        this.model.findByParcours(this.model.id_critere);
+        if (this.model.id == 0) {
+			this.model.findAll();
+		} else {
+			this.model.findByParcours(this.model.id_critere);
+		}
         this.template = _.template(this.templateLoader.get('list-page'));
     },
 
@@ -851,7 +871,12 @@ directory.views.EspecePage = Backbone.View.extend({
 					'WHERE id_espece = :num_nom ' +
 					'AND id_critere = :ce_critere ';
 				tx.executeSql(sql, [num_nom, ce_critere], function(tx, results) {
-					console.log(sql, num_nom, ce_critere, results);
+					if (results.rows.length != 0) {
+						if (results.rows.item(0).vue == 1) {
+							$('#btn-vue-espece').html('Déjà vue !');
+							$('#btn-vue-espece').addClass('bleu');
+						}
+					}
 				});
 			},
 			function(error) {
@@ -872,7 +897,7 @@ directory.views.CriterePage = Backbone.View.extend({
 		this.model = new directory.models.CritereCollection();
 		this.model.id = data.model.attributes.id;
 		this.model.nom = data.model.attributes.nom;
-		this.model.ce_critere = data.model.attributes.ce_critere;
+		this.model.ce_critere = data.model.attributes.ce_parcours;
         this.model.findAll(this.model.id);
         this.model.bind('reset', this.render, this);
         this.template = _.template(directory.utils.templateLoader.get('critere-list'));
@@ -1061,13 +1086,28 @@ directory.Router = Backbone.Router.extend({
         });
         
         $('#content').on('click', '.criterium', function(event) {			
-			var arr_ids = new Array(),
+			var sql_where = '',
+				arr_ids = new Array(),
+				nb_choix = 0,
 				hash = window.location.hash,
 				arr_hash = hash.split('/'),
 				id_parcours = arr_hash[arr_hash.length - 1],
 				parent = document.getElementById('criteres-liste'),
-				nb_choix = 0,
 				inputs = document.getElementsByTagName('input', parent);
+			
+			if (id_parcours != 0) {
+				sql_where = 
+					"num_nom IN ( " +
+							"SELECT num_nom " +
+							"FROM espece e " +  
+							"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
+							"WHERE id_critere = :ce_parcours " +
+						" ) " +
+						"AND ";
+				arr_ids.push(id_parcours);
+			} else {
+				sql_where = "";
+			}
 			
 			for (var i = 0; i < inputs.length; i++) {
 				if (inputs[i].checked) {
@@ -1076,34 +1116,26 @@ directory.Router = Backbone.Router.extend({
 					arr_ids.push(id);
 				}
 			}
-			//console.log(arr_ids);
 			
-			arr_ids.push(id_parcours);
-			var sql_conditions = ''; 
-			for (var i = 1; i < arr_ids.length; i++) {
-				//sql_conditions += ' AND id_critere = ? ';
-				//*
+			var sql_conditions = '',
+				index = (id_parcours == 0) ? 0 : 1; 
+			for (var i = index; i < arr_ids.length; i++) {
 				sql_conditions += '?';
 				if (i <= arr_ids.length - 2) {
 					sql_conditions += ', ';
 				}
-				//*/
 			}
-			//*
+			console.log(arr_ids);
+			
 			directory.db.transaction(
 				function(tx) {
 					var sql =
 						"SELECT num_nom, count(num_nom) AS count " + 
 						"FROM espece e " +
 						"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
-						"WHERE num_nom IN ( " +
-							"SELECT num_nom " +
-							"FROM espece e " +  
-							"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
-							"WHERE id_critere = :ce_parcours " +
-						" ) " +
-						"AND id_critere IN (" +
-						sql_conditions + 
+						"WHERE " + sql_where + 
+						"id_critere IN (" +
+							sql_conditions + 
 						") " +
 						"GROUP BY nom_vernaculaire " + 
 						"ORDER BY count DESC ";
@@ -1122,7 +1154,7 @@ directory.Router = Backbone.Router.extend({
 						//") " + 
 						//"WHERE id_critere = :ce_parcours ";
 					*/
-					//console.log(sql);
+					console.log(sql);
 					tx.executeSql(sql, arr_ids, function(tx, results) {
 						var nbre = results.rows.length,
 							criteres = [],
@@ -1153,10 +1185,8 @@ directory.Router = Backbone.Router.extend({
 					console.log('DB | Error processing SQL: ' + error.code, error);
 				}
 			);
-			//*/
-			
-			//console.log(directory.liste);
         });
+        
         
         $('#content').on('click', '#criteres-reset', function(event) {			
 			var parent = document.getElementById('criteres-liste'),
