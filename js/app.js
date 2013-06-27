@@ -94,7 +94,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 					'SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos ' +
                     'FROM parcours';
 
-                tx.executeSql(sql, function(tx, results) {
+                tx.executeSql(sql, [], function(tx, results) {
                     callback(results.rows.item);
                 });
             },
@@ -142,7 +142,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 		console.log('Inserting parcours');
         $.ajax( {
 			type: 'GET',
-			url: './parcours.csv',
+			url: './bdd:parcours.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
@@ -302,7 +302,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 		console.log('Inserting espece');
 		$.ajax( {
 			type: 'GET',
-			url: './espece.csv',
+			url: './bdd:espece.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
@@ -354,8 +354,12 @@ _.extend(directory.dao.CritereDAO.prototype, {
             function(tx) {
 
                 var sql = 
-					'SELECT intitule, url_img, ce_parent ' +
-                    'FROM critere ';
+						"SELECT c.id_critere, intitule, ce_parent FROM critere c " +
+						"WHERE ce_parent NOT IN ( " +
+							"SELECT id_critere FROM critere " +
+							"WHERE intitule LIKE '%parcours%' " + 
+						") " + 
+						"AND intitule NOT LIKE '%parcours%' ";
 
                 tx.executeSql(sql, [], function(tx, results) {
 					var nbre = results.rows.length,
@@ -367,8 +371,9 @@ _.extend(directory.dao.CritereDAO.prototype, {
                     callback(criteres);
                 });
             },
-            function(tx, error) {
-                alert('Transaction Error: ' + error);
+            function(error) {
+                //alert('Transaction Error: ' + error);
+				console.log('DB | Error processing SQL: ' + error.code, error);
             }
         );
     },
@@ -406,7 +411,7 @@ _.extend(directory.dao.CritereDAO.prototype, {
 		console.log('Inserting critere');
 		$.ajax( {
 			type: 'GET',
-			url: './critere.csv',
+			url: './bdd:critere.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
@@ -488,7 +493,7 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 		console.log('Inserting avoir_critere');
 		$.ajax( {
 			type: 'GET',
-			url: './avoir_critere.csv',
+			url: './bdd:avoir_critere.csv',
 			dataType: 'text',
 			success: function(fichier) { 
 				var arr_lignes = fichier.split(/\r\n|\r|\n/),
@@ -571,7 +576,7 @@ directory.models.EmployeeCollection = Backbone.Collection.extend({
         var employeeDAO = new directory.dao.ParcoursDAO(directory.db),
             self = this;
         employeeDAO.findByName(key, function(data) {
-			console.log("EmployeeCollection " + data);
+			//console.log("EmployeeCollection " + data);
             self.reset(data);
         });
     },
@@ -653,7 +658,7 @@ directory.models.CritereCollection = Backbone.Collection.extend({
         var critereDAO = new directory.dao.CritereDAO(directory.db),
             self = this;
         critereDAO.findAll(function(data) {
-			console.log("critereCollection ", data);
+			//console.log("critereCollection ", data);
             self.reset(data);
         });
     }
@@ -749,6 +754,7 @@ directory.views.ListPage = Backbone.View.extend({
 			"id_parcours" : this.model.id,
 			"id_critere" : this.model.id_critere
 		};
+		
         $(this.el).html(this.template(json));
         this.listView = new directory.views.EspeceListView({el: $('ul', this.el), model: this.model});
         this.listView.render();
@@ -766,6 +772,25 @@ directory.views.EspeceListView = Backbone.View.extend({
     },
 
     render: function(eventName) {
+		var arr_especes = new Array(),
+			arr_temp = this.model.models,
+			nbre_triees = directory.liste.length;
+		if (nbre_triees != 0) {
+			for (var c = 0; c < arr_temp.length; c++) {
+				var index = $.inArray(arr_temp[c].attributes.num_nom, directory.liste);
+				if (index != -1) {
+					arr_especes.push(arr_temp[c]);
+				}
+			}
+			for (var i = 0; i < arr_temp.length; i++) {
+				var index = $.inArray(arr_temp[i].attributes.num_nom, directory.liste);
+				if (index == -1) {
+					arr_especes.push(arr_temp[i]);
+				}
+			}
+			this.model.models = arr_especes;
+		}
+		
         $(this.el).empty();
         _.each(this.model.models, function(espece) {
 			espece.attributes.ce_critere = this.ce_critere;
@@ -846,23 +871,65 @@ directory.views.CriterePage = Backbone.View.extend({
 		//console.log(data);
 		this.model = new directory.models.CritereCollection();
 		this.model.id = data.model.attributes.id;
+		this.model.nom = data.model.attributes.nom;
+		this.model.ce_critere = data.model.attributes.ce_critere;
         this.model.findAll(this.model.id);
+        this.model.bind('reset', this.render, this);
+        this.template = _.template(directory.utils.templateLoader.get('critere-list'));
     },
 
     render: function(eventName) {
-	/*
+		var arr_criteres = new Array(),
+			models = this.model.models;
+		for (var i = 0; i < models.length; i++) {
+			var critere = models[i].attributes;
+			if (critere.ce_parent == 'null') {
+				arr_criteres[critere.id_critere] = new Array();
+				arr_criteres[critere.id_critere].push(critere.intitule);
+			} else {
+				arr_criteres[critere.ce_parent].push(critere.id_critere+';'+critere.intitule);
+			}
+		}
+		//console.log(arr_criteres);
+		
+		
 		var json = {
-			"nom_parcours" : this.model.name,
-			"id_parcours" : this.model.id,
-			"id_critere" : this.model.id_critere
+			"id" : this.model.id,
+			"nom" : this.model.nom,
+			"ce_critere" : this.model.ce_critere,
+			"criteres" : arr_criteres
 		};
+        $(this.el).empty();
         $(this.el).html(this.template(json));
-        this.listView = new directory.views.EspeceListView({el: $('ul', this.el), model: this.model});
-        this.listView.render();
-    */
+         _.each(arr_criteres, function(criteres) {
+            $(this.el).append(new directory.views.CritereListItemView({el: $('#criteres-liste', this.el), model: criteres}).render().el);
+        }, this);
         return this;
     }
 });
+
+directory.views.CritereListItemView = Backbone.View.extend({
+    initialize: function(data) {
+		//console.log(data);
+        this.template = _.template(directory.utils.templateLoader.get('critere-list-item'));
+    },
+
+    render: function(eventName) {
+		var arr_valeurs = new Array();
+		for (var i = 1; i < this.model.length; i++) {
+			arr_valeurs.push(this.model[i]);
+		}
+		var json = {
+			"titre" : this.model[0],
+			"valeurs" : arr_valeurs
+		};
+        $(this.el).append(this.template(json));
+        return this;
+        
+    }
+
+});
+
 
 directory.views.Accueil = Backbone.View.extend({
     templateLoader: directory.utils.templateLoader,
@@ -878,6 +945,10 @@ directory.views.Accueil = Backbone.View.extend({
     }
 });
 
+// ------------------------------------------------------ Globals ------------------------------------------------- //
+directory.liste = new Array();
+
+
 // ----------------------------------------------- The Application Router ------------------------------------------ //
 
 directory.Router = Backbone.Router.extend({
@@ -887,7 +958,7 @@ directory.Router = Backbone.Router.extend({
         "parcours/:id_parcours" : "employeeDetails",
         "liste/:id_parcours/:nom_parcours/:id_critere" : "listeEspeces",
         "espece/:id_espece/:ce_parcours" : "especeDetails",
-        "clef/:id_parcours" : "clefByParcours"
+        "clef/:id_parcours/:nom_parcours/:ce_parcours" : "clefByParcours"
     },
 
     initialize: function() {
@@ -989,6 +1060,114 @@ directory.Router = Backbone.Router.extend({
 			$('#btn-vue-espece').html('Bien joué ! ');
         });
         
+        $('#content').on('click', '.criterium', function(event) {			
+			var arr_ids = new Array(),
+				hash = window.location.hash,
+				arr_hash = hash.split('/'),
+				id_parcours = arr_hash[arr_hash.length - 1],
+				parent = document.getElementById('criteres-liste'),
+				nb_choix = 0,
+				inputs = document.getElementsByTagName('input', parent);
+			
+			for (var i = 0; i < inputs.length; i++) {
+				if (inputs[i].checked) {
+					nb_choix++;
+					var id = inputs[i].value.split(';')[0];
+					arr_ids.push(id);
+				}
+			}
+			//console.log(arr_ids);
+			
+			arr_ids.push(id_parcours);
+			var sql_conditions = ''; 
+			for (var i = 1; i < arr_ids.length; i++) {
+				//sql_conditions += ' AND id_critere = ? ';
+				//*
+				sql_conditions += '?';
+				if (i <= arr_ids.length - 2) {
+					sql_conditions += ', ';
+				}
+				//*/
+			}
+			//*
+			directory.db.transaction(
+				function(tx) {
+					var sql =
+						"SELECT num_nom, count(num_nom) AS count " + 
+						"FROM espece e " +
+						"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
+						"WHERE num_nom IN ( " +
+							"SELECT num_nom " +
+							"FROM espece e " +  
+							"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
+							"WHERE id_critere = :ce_parcours " +
+						" ) " +
+						"AND id_critere IN (" +
+						sql_conditions + 
+						") " +
+						"GROUP BY nom_vernaculaire " + 
+						"ORDER BY count DESC ";
+					/*
+					var sql =
+						//"SELECT num_nom, id_critere " +
+						//"FROM ( " +
+							"SELECT num_nom, nom_sci, famille, nom_vernaculaire, vue, photos, count(num_nom) AS count " + 
+							"FROM espece e " +
+							"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
+							"WHERE id_critere IN (" +
+							sql_conditions + 
+							") " +
+							"GROUP BY num_nom " + 
+							"ORDER BY count DESC ";
+						//") " + 
+						//"WHERE id_critere = :ce_parcours ";
+					*/
+					//console.log(sql);
+					tx.executeSql(sql, arr_ids, function(tx, results) {
+						var nbre = results.rows.length,
+							criteres = [],
+							nbre_tous_criteres = 0,
+							i = 0;
+						for (; i < nbre; i = i + 1) {
+							criteres[i] = results.rows.item(i).num_nom;
+							if (results.rows.item(i).count == nb_choix) {
+								nbre_tous_criteres++;
+							}
+						}
+						$('#resultats-recherche').html(nbre_tous_criteres);
+						
+						directory.liste = criteres;
+						console.log(nb_choix, criteres);
+						this.model =  new directory.models.EspeceCollection();
+						this.model.findByParcours(id_parcours);
+						var nbre = this.model.length,
+							especes = [],
+							i = 0;
+						for (; i < nbre; i = i + 1) {
+							especes[i] = this.model.models[i].attributes;
+						}
+						
+					});
+				},
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				}
+			);
+			//*/
+			
+			//console.log(directory.liste);
+        });
+        
+        $('#content').on('click', '#criteres-reset', function(event) {			
+			var parent = document.getElementById('criteres-liste'),
+				inputs = document.getElementsByTagName('input', parent);
+				
+			for (var i = 0; i < inputs.length; i++) {
+				inputs[i].checked = false;
+			}
+			$('#resultats-recherche').html('');
+        });
+        
 
         // Check of browser supports touch events...
         if (document.documentElement.hasOwnProperty('ontouchstart')) {
@@ -1049,7 +1228,7 @@ directory.Router = Backbone.Router.extend({
             self = this;
         espece.fetch({
             success: function(data) {
-				//console.log(data);
+				//console.log(data); //viens fumer un joint
                 self.slidePage(new directory.views.ListPage({model: data}).render());
             }
         });
@@ -1066,8 +1245,8 @@ directory.Router = Backbone.Router.extend({
         });
     },
     
-    clefByParcours: function(id) {
-        var critere = new directory.models.Espece({id: id}),
+    clefByParcours: function(id, nom, ce_parcours) {
+        var critere = new directory.models.Critere({id: id, nom: nom, ce_parcours: ce_parcours}),
             self = this;
         critere.fetch({
             success: function(data) {
@@ -1075,6 +1254,7 @@ directory.Router = Backbone.Router.extend({
                 self.slidePage(new directory.views.CriterePage({model: data}).render());
             }
         });
+        directory.liste = new Array();
 		
 	},
 
@@ -1139,7 +1319,7 @@ employeeDAO.populate();
 critereDAO.populate();
 avr_critereDAO.populate();
 $().ready(function() {
-    directory.utils.templateLoader.load(['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 'espece-list-item', 'list-page', 'espece-page'],
+    directory.utils.templateLoader.load(['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list'],
         function() {
             directory.app = new directory.Router();
             Backbone.history.start();

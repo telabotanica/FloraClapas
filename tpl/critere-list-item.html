@@ -1,0 +1,11 @@
+<h4><%= titre %></h4>
+<% _.each(valeurs, function (critere, i) { 
+		var arr_critere = critere.split(';');
+	%>
+	<div class="pull-left">
+		<input type="radio" name="<%= titre %>" value="<%= critere %>" class="criterium"> 
+		<br />
+		<%= arr_critere[1] %> 
+	</div>
+<% }); %>
+<div class="clearfix"></div>
