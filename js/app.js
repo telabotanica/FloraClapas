@@ -836,6 +836,7 @@ directory.views.EspeceListItemView = Backbone.View.extend({
 
     initialize: function(data) {
 		//console.log(data);
+        directory.liste = new Array();
         this.template = _.template(directory.utils.templateLoader.get('espece-list-item'));
     },
 
@@ -1107,12 +1108,12 @@ directory.Router = Backbone.Router.extend({
 			if (id_parcours != 0) {
 				sql_where = 
 					"num_nom IN ( " +
-							"SELECT num_nom " +
-							"FROM espece e " +  
-							"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
-							"WHERE id_critere = :ce_parcours " +
-						" ) " +
-						"AND ";
+						"SELECT num_nom " +
+						"FROM espece e " +  
+						"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
+						"WHERE id_critere = :ce_parcours " +
+					" ) " +
+					"AND ";
 				arr_ids.push(id_parcours);
 			} else {
 				sql_where = "";
@@ -1147,7 +1148,7 @@ directory.Router = Backbone.Router.extend({
 							sql_conditions + 
 						") " +
 						"GROUP BY num_nom " + 
-						"ORDER BY count DESC ";
+						"ORDER BY nom_vernaculaire ASC, count DESC ";
 					/*
 					var sql =
 						//"SELECT num_nom, id_critere " +
@@ -1297,8 +1298,6 @@ directory.Router = Backbone.Router.extend({
                 self.slidePage(new directory.views.CriterePage({model: data}).render());
             }
         });
-        directory.liste = new Array();
-		
 	},
 
     slidePage: function(page) {
