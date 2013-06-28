@@ -366,7 +366,12 @@ _.extend(directory.dao.CritereDAO.prototype, {
 							"SELECT id_critere FROM critere " +
 							"WHERE intitule LIKE '%parcours%' " + 
 						") " + 
-						"AND intitule NOT LIKE '%parcours%' ";
+						"AND ce_parent NOT IN ( " +
+							"SELECT id_critere FROM critere " +
+							"WHERE intitule LIKE '%pheno%' " + 
+						") " + 
+						"AND intitule NOT LIKE '%parcours%' " +
+						"AND intitule NOT LIKE '%pheno%' ";
 
                 tx.executeSql(sql, [], function(tx, results) {
 					var nbre = results.rows.length,
@@ -819,7 +824,7 @@ directory.views.EspeceListView = Backbone.View.extend({
 			}
 			this.model.models = arr_especes;
 		}
-		console.log(this.model.models);
+		//console.log(this.model.models);
         $(this.el).empty();
         _.each(this.model.models, function(espece) {
 			espece.attributes.ce_critere = this.ce_critere;
@@ -836,7 +841,7 @@ directory.views.EspeceListItemView = Backbone.View.extend({
 
     initialize: function(data) {
 		//console.log(data);
-        directory.liste = new Array();
+        //directory.liste = new Array();
         this.template = _.template(directory.utils.templateLoader.get('espece-list-item'));
     },
 
@@ -926,7 +931,25 @@ directory.views.CriterePage = Backbone.View.extend({
 			}
 		}
 		//console.log(arr_criteres);
+		var arr_floraison = new Array(),
+			arr_feuillaison = new Array(),
+			arr_fructification = new Array();
+			
+		arr_floraison.push("Floraison ?");
+		arr_floraison.push("Fleur;Oui");
+		arr_floraison.push("Fleur;Non");
 		
+		arr_feuillaison.push("Feuillaison ?");
+		arr_feuillaison.push("Feuille;Oui");
+		arr_feuillaison.push("Feuille;Non");
+		
+		arr_fructification.push("Fructification ?");
+		arr_fructification.push("Fruit;Oui");
+		arr_fructification.push("Fruit;Non");
+		
+		arr_criteres.push(arr_floraison);
+		arr_criteres.push(arr_feuillaison);
+		arr_criteres.push(arr_fructification);
 		
 		var json = {
 			"id" : this.model.id,
@@ -934,11 +957,18 @@ directory.views.CriterePage = Backbone.View.extend({
 			"ce_critere" : this.model.ce_critere,
 			"criteres" : arr_criteres
 		};
+		;
         $(this.el).empty();
         $(this.el).html(this.template(json));
          _.each(arr_criteres, function(criteres) {
             $(this.el).append(new directory.views.CritereListItemView({el: $('#criteres-liste', this.el), model: criteres}).render().el);
         }, this);
+        
+        var bouton_resultats = 
+			'<div class="text-center">' + 
+				'<a href="#liste/'+this.model.id+'/'+this.model.nom+'/'+this.model.ce_critere+'" class="btn btn-primary">Afficher les résultats</a>' +
+			'</div>';
+        $(this.el).append(bouton_resultats);
         return this;
     }
 });
@@ -950,14 +980,19 @@ directory.views.CritereListItemView = Backbone.View.extend({
     },
 
     render: function(eventName) {
-		var arr_valeurs = new Array();
+		var arr_valeurs = new Array(),
+			arr_checked = new Array();
 		for (var i = 1; i < this.model.length; i++) {
+			arr_checked.push(directory.criteria[this.model[0]] == this.model[i]);
 			arr_valeurs.push(this.model[i]);
 		}
 		var json = {
 			"titre" : this.model[0],
-			"valeurs" : arr_valeurs
+			"valeurs" : arr_valeurs,
+			"checked" : arr_checked
 		};
+		//console.log(json);
+		
         $(this.el).append(this.template(json));
         return this;
         
@@ -982,6 +1017,7 @@ directory.views.Accueil = Backbone.View.extend({
 
 // ------------------------------------------------------ Globals ------------------------------------------------- //
 directory.liste = new Array();
+directory.criteria = new Array();
 
 
 // ----------------------------------------------- The Application Router ------------------------------------------ //
@@ -993,7 +1029,8 @@ directory.Router = Backbone.Router.extend({
         "parcours/:id_parcours" : "employeeDetails",
         "liste/:id_parcours/:nom_parcours/:id_critere" : "listeEspeces",
         "espece/:id_espece/:ce_parcours" : "especeDetails",
-        "clef/:id_parcours/:nom_parcours/:ce_parcours" : "clefByParcours"
+        "clef/:id_parcours/:nom_parcours/:ce_parcours" : "clefByParcours", 
+        "obs/:id_espece/:nom_sci" : "nouvelleObs"
     },
 
     initialize: function() {
@@ -1093,6 +1130,7 @@ directory.Router = Backbone.Router.extend({
 			);
 			
 			$('#btn-vue-espece').html('Bien joué ! ');
+			window.history.back();
         });
         
         $('#content').on('click', '.criterium', function(event) {			
@@ -1120,12 +1158,19 @@ directory.Router = Backbone.Router.extend({
 			}
 			
 			for (var i = 0; i < inputs.length; i++) {
-				if (inputs[i].checked) {
-					nbre_choix++;
-					var id = inputs[i].value.split(';')[0];
-					arr_ids.push(id);
+				if (inputs[i].checked) {;
+					if (directory.criteria[inputs[i].name] == this.value) {
+						inputs[i].checked = false;
+						delete directory.criteria[inputs[i].name];
+					} else {
+						directory.criteria[inputs[i].name] = inputs[i].value;
+						nbre_choix++;
+						var id = inputs[i].value.split(';')[0];
+						arr_ids.push(id);
+					}
 				}
 			}
+			console.log(directory.criteria);
 			
 			var sql_conditions = '',
 				index = (id_parcours == 0) ? 0 : 1; 
@@ -1148,7 +1193,7 @@ directory.Router = Backbone.Router.extend({
 							sql_conditions + 
 						") " +
 						"GROUP BY num_nom " + 
-						"ORDER BY nom_vernaculaire ASC, count DESC ";
+						"ORDER BY count DESC, nom_vernaculaire ASC ";
 					/*
 					var sql =
 						//"SELECT num_nom, id_critere " +
@@ -1209,6 +1254,8 @@ directory.Router = Backbone.Router.extend({
 			for (var i = 0; i < inputs.length; i++) {
 				inputs[i].checked = false;
 			}
+			directory.liste = new Array();
+			directory.criteria = new Array();
 			$('#resultats-recherche').html('');
         });
         
@@ -1299,6 +1346,22 @@ directory.Router = Backbone.Router.extend({
             }
         });
 	},
+	
+	nouvelleObs: function(num_nom, nom_sci) {
+        var espece = new directory.models.Espece({id: num_nom, nom_sci: nom_sci}),
+            self = this;
+            
+        directory.liste = new Array();
+        directory.criteria = new Array();
+        espece.fetch({
+            success: function(data) {
+				//console.log(data);
+                //self.slidePage(new directory.views.ObservationPage({model: data}).render());
+                window.history.back();
+            }
+        });
+	},
+	
 
     slidePage: function(page) {
 

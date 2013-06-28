@@ -27,7 +27,9 @@
 		
 		<div id="btn-vue-espece" class="text-center">
 			<% if (ce_critere != 0) { %>
-				<button class="btn btn-primary vue-espece">Je l'ai vue !</button>
+				<a href="#obs/<%= num_nom %>/<%= nom_sci %>" class="btn btn-primary">Sauvegarder l'observation</a>
+			<% } else { %>
+			
 			<% } %>
 		</div>
 		

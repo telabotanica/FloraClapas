@@ -1,5 +1,8 @@
 /* Many of the styles below come from the app documented in this article http://cheeaun.com/blog/2012/03/how-i-built-hacker-news-mobile-web-app */
-
+			.nav {
+				width: 100%;
+				background: #2b3891;
+			}
 			.navbar .nav > li > a {
 				color: #FFF;
 				background: #2b3891;

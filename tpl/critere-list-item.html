@@ -1,9 +1,13 @@
 <h4><%= titre %></h4>
 <% _.each(valeurs, function (critere, i) { 
-		var arr_critere = critere.split(';');
+		var check_text = '',
+			arr_critere = critere.split(';');
+		if (checked[i] == true) {
+			check_text = ' checked="true"';
+		}
 	%>
 	<div class="pull-left div-critere">
-		<input type="radio" name="<%= titre %>" value="<%= critere %>" class="criterium"> 
+		<input type="radio" name="<%= titre %>" value="<%= critere %>" class="criterium" <%= check_text %> > 
 		<br />
 		<%= arr_critere[1] %> 
 	</div>
