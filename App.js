@@ -999,7 +999,7 @@ directory.views.EspeceListView = Backbone.View.extend({
 			nbre_triees = directory.liste.length;
 			
 		if (nbre_triees != 0 && directory.liste.total != 0) {
-			console.log(arr_temp);
+			//console.log(arr_temp);
 			for (var pourcentage = directory.liste.total; pourcentage >= 0; pourcentage--) {
 				for (var i = 0; i < arr_temp.length; i++) {
 					if (directory.nbre_criteres[arr_temp[i].attributes.num_nom] == pourcentage) {
@@ -1131,14 +1131,14 @@ directory.views.CriterePage = Backbone.View.extend({
 			arr_feuillaison = new Array(),
 			arr_fructification = new Array();
 			
-		arr_floraison.push("Floraison");
+		arr_floraison.push("La plante est-elle en fleur ?");
 		arr_floraison.push("floraison;La plante est en fleur.");
 		
-		arr_feuillaison.push("Feuillaison");
+		arr_feuillaison.push("L'espèce est-elle en feuille ?");
 		arr_feuillaison.push("feuillaison;L'espèce est en feuille.");
 		
-		arr_fructification.push("Fructification");
-		arr_fructification.push("fructification;Il y a des fruits.");
+		arr_fructification.push("Des fruits sont-ils présents ?");
+		arr_fructification.push("fructification;Il y a des fruits.;reports.png");
 		
 		arr_criteres.push(arr_floraison);
 		arr_criteres.push(arr_feuillaison);
@@ -1286,7 +1286,7 @@ directory.pheno["feuillaison"] = new Array();
 directory.pheno["fructification"] = new Array();
 directory.pheno.liste = new Array();
 directory.nbre_criteres = new Array();
-directory.nbre_especes = 0;
+directory.nbre_especes = null;
 
 
 // ----------------------------------------------- The Application Router ------------------------------------------ //
@@ -1493,9 +1493,9 @@ directory.Router = Backbone.Router.extend({
 				if (inputs[i].checked) {
 					if (directory.criteria[inputs[i].name] == this.value) {
 						inputs[i].checked = false;
-						$('#img_'+this.id).removeClass('selection-critere');
 						delete directory.criteria[inputs[i].name];
 					} else {
+						$('#img_'+inputs[i].id).addClass('selection-critere');
 						directory.criteria[inputs[i].name] = inputs[i].value;
 						nbre_choix++;
 						var id = inputs[i].value.split(';')[0];
@@ -1504,10 +1504,6 @@ directory.Router = Backbone.Router.extend({
 						} else {
 							directory.pheno.liste.push(id);
 						}
-						
-						if (inputs[i].id == this.id) {
-							$('#img_'+this.id).addClass('selection-critere');
-						} 
 					}
 				}
 			}
@@ -1615,7 +1611,7 @@ directory.Router = Backbone.Router.extend({
 										}
 										$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
 									}
-									console.log(directory.nbre_criteres);
+									//console.log(directory.nbre_criteres);
 								});
 							}
 						}
@@ -1648,6 +1644,7 @@ directory.Router = Backbone.Router.extend({
 			directory.liste = new Array();
 			directory.criteria = new Array();
 			directory.nbre_criteres = new Array();
+			directory.nbre_especes = null;
 			$('#resultats-recherche').html('');
 		});
 		

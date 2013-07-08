@@ -3,9 +3,11 @@
         <button>Retour</button>
     </a>
     
-    <a href="#parcours" class="header-button header-button-icon header-button-right search" id="view-home-refresh">
-        <button>Liste des parcours</button>
-    </a>
+	<% if (id_parcours != 0) { %>
+		<a href="#parcours" class="header-button header-button-icon header-button-right search" id="view-home-refresh">
+			<button>Liste des parcours</button>
+		</a>
+	<% } %>
     
     <h1><i><%= nom_parcours %></i></h1>
 </div>
