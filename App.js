@@ -1687,6 +1687,9 @@ directory.Router = Backbone.Router.extend({
 		});
 		$('#content').on('click', '#ajouter-photos', function(event) {
 
+	        pictureSource=navigator.camera.PictureSourceType;
+	        destinationType=navigator.camera.DestinationType;
+
 			navigator.camera.getPicture(function(imageData){
 				$('#obs-photos-info').append(imageData);
 			}, 
