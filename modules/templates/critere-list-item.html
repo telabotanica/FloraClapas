@@ -7,8 +7,11 @@
 		}
 	%>
 	<div class="pull-left div-critere">
-		<input type="radio" name="<%= titre %>" value="<%= critere %>" class="criterium" <%= check_text %> > 
-		<br />
+		<input type="radio" name="<%= titre %>" id="<%= arr_critere[0] %>" value="<%= critere %>" class="criterium" <%= check_text %> > 
+		<% if (arr_critere.length > 2) { %>
+			<img src="css/images/<%= arr_critere[2] %>" id="img_<%= arr_critere[0] %>" />
+			<br />
+		<% } %>
 		<%= arr_critere[1] %> 
 	</div>
 <% }); %>

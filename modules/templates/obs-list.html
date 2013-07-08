@@ -1,0 +1,44 @@
+<div class="header" style="height:60px">
+	<a href="#" class="header-button header-button-left header-back-button">
+		<button>Retour</button>
+	</a>
+	
+	<h4 class="text-center">Mes observations</h4>
+	<button class="btn btn-warning btn-block">Transmettre au CEL</button>
+</div>
+
+<div class="scroll striped">
+	<div class="row-fluid">
+		<ul class="tableview tableview-links">
+			<% if (taille == 0) { %>
+				Aucune observation enregistrée.
+			<% } else { 
+				_.each(obs, function(observation) {
+					var attributs = observation.attributes;
+			%>
+				<li>
+					<a href='#observation/<%= attributs.id_obs %>' class="pad-right">
+						<%= attributs.nom_vernaculaire %> <i>(<%= attributs.nom_sci %>)</i>
+						<br />
+						Vue le <%= attributs.date %> 
+						<% if (attributs.commune != '') { %>
+							à <%= attributs.commune %>
+						<% } %>
+					</a>
+					
+					<a href="#observation/<%= attributs.id_obs %>" class="detail-disclosure"><span></span></a>
+				</li>
+			<%	}, this);
+			} %>
+		</ul>
+	</div>
+</div>
+
+
+<div class="navbar navbar-fixed-bottom">
+	<ul class="nav parc-nav">
+		<li class="active"><a href="#transmission">Mes obs.</a></li>
+		<li><a href="#compte">Mon compte</a></li>
+		<li><a href="#" class="header-back-button">Retour...</a></li>
+	</ul>
+</div>

@@ -1,0 +1,53 @@
+<div class="header">
+    <a href="#" class="header-button header-button-left header-back-button">
+        <button>Retour</button>
+    </a>
+    
+	<h4 class="text-center">Saisie</h4>
+</div>
+
+<div>
+    <div class="tableview tableview-links">
+		<div>
+			<label for="nom">Espèce :
+				<span id="nom" name="nom"><%= nom_sci %></span>
+			</label>
+
+			<label for="date">Date :
+				<span id="date" name="date"><%= date %></span>
+			</label>
+		</div>
+		
+		<hr />
+		<div class="row-fluid">
+			<button id="geolocaliser" class="btn btn-info btn-block" >
+				Recalculer ma position
+				<i class="icon-search"></i>
+			</button>
+			
+			<label for="lat">
+				Latitude :
+				<span id="lat"></span>
+			</label>
+			
+			<label for="lng">
+				Longitude :
+				<span id="lng"></span>
+			</label>
+			
+			<label for="location">
+				Commune :
+				<span id="location"></span>
+				<input id="code_insee" type="hidden" name="code_insee" value="0" />
+			</label>
+			
+			<hr />
+			<button id="sauver-obs" class="btn btn-success btn-block btn-large">
+				<i class="icon-ok"></i>
+				Sauver
+			</button>
+	
+			<input id="num_nom_select" type="hidden" name="num_nom_select" value="<%= id %>" />
+		</div>
+    </div>
+</div>

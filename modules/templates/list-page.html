@@ -17,9 +17,12 @@
 <div class="modal-footer">
 	<div class="navbar navbar-fixed-bottom">
 		<ul class="nav parc-nav">
-			<li><a href="#parcours/<%= id_parcours %>">Parcours</a></li>
+			<li><a href="#<%= lien_parcours %>">Parcours</a></li>
 			<li class="active"><a href="#liste/<%= id_parcours %>/<%= nom_parcours %>/<%= id_critere %>">Liste</a></li>
-			<li><a href="#clef/<%= id_parcours %>/<%= nom_parcours %>/<%= id_critere %>">Recherche...</a></li>
+			<li><a href="#clef/<%= id_parcours %>/<%= nom_parcours %>/<%= id_critere %>">Recherche</a></li>
+			<% if (id_parcours == 0) { %>
+			<li><a href="#transmission">-_-</a></li>
+			<% } %>
 		</ul>
 	</div>
 </div>

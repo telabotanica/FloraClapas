@@ -2,37 +2,35 @@
 
 // Creating the application namespace
 var directory = {
-    models: {},
-    views: {},
-    utils: {},
-    dao: {}
+	models: {},
+	views: {},
+	utils: {},
+	dao: {}
 };
 
 // -------------------------------------------------- Utilities ---------------------------------------------------- //
 
 // The Template Loader. Used to asynchronously load templates located in separate .html files
 directory.utils.templateLoader = {
+	templates: {},
 
-    templates: {},
+	load: function(names, callback) {
+		var deferreds = [],
+			self = this;
 
-    load: function(names, callback) {
+		$.each(names, function(index, name) {
+			deferreds.push($.get('modules/templates/' + name + '.html', function(data) {
+				self.templates[name] = data;
+			}));
+		});
 
-        var deferreds = [],
-            self = this;
+		$.when.apply(null, deferreds).done(callback);
+	},
 
-        $.each(names, function(index, name) {
-            deferreds.push($.get('tpl/' + name + '.html', function(data) {
-                self.templates[name] = data;
-            }));
-        });
-
-        $.when.apply(null, deferreds).done(callback);
-    },
-
-    // Get template by name from hash of preloaded templates
-    get: function(name) {
-        return this.templates[name];
-    }
+	// Get template by name from hash of preloaded templates
+	get: function(name) {
+		return this.templates[name];
+	}
 
 };
 
@@ -153,7 +151,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 						arr_valeurs = arr_lignes[i].split(';');
 					for (var j = 0; j < arr_valeurs.length; j++) {
 						sql += arr_valeurs[j];
-						if (j < (arr_valeurs.length - 2)) {
+						if (j < (arr_valeurs.length - 1)) {
 							sql += ',';
 						}
 					}
@@ -213,7 +211,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
         this.db.transaction(
             function(tx) {
                 var sql = 
-					'SELECT num_nom, nom_sci, famille, nom_vernaculaire, description, photos ' +
+					'SELECT num_nom, nom_sci, famille, nom_vernaculaire, description, photos, referentiel, famille, num_taxon ' +
                     'FROM espece ' +
                     'WHERE num_nom = :id_espece';
 
@@ -272,8 +270,8 @@ _.extend(directory.dao.EspeceDAO.prototype, {
                     callback(especes);
                 });
             },
-            function(tx, error) {
-                alert('Transaction Error: ' + error);
+            function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
             }
         );
     },
@@ -359,9 +357,8 @@ _.extend(directory.dao.CritereDAO.prototype, {
     findAll: function(callback) {
         this.db.transaction(
             function(tx) {
-
                 var sql = 
-						"SELECT c.id_critere, intitule, ce_parent FROM critere c " +
+						"SELECT c.id_critere, intitule, url_img, ce_parent FROM critere c " +
 						"WHERE ce_parent NOT IN ( " +
 							"SELECT id_critere FROM critere " +
 							"WHERE intitule LIKE '%parcours%' " + 
@@ -392,7 +389,7 @@ _.extend(directory.dao.CritereDAO.prototype, {
     
     // Populate Employee table with sample data
     populate: function(callback) {
-        directory.db.transaction(
+        this.db.transaction(
             function(tx) {
                 console.log('Dropping CRITERE table');
                 tx.executeSql('DROP TABLE IF EXISTS critere');
@@ -434,7 +431,7 @@ _.extend(directory.dao.CritereDAO.prototype, {
 						arr_valeurs = arr_lignes[i].split(';');
 					for (var j = 0; j < arr_valeurs.length; j++) {
 						sql += arr_valeurs[j];
-						if (j < (arr_valeurs.length - 2)) {
+						if (j < (arr_valeurs.length - 1)) {
 							sql += ',';
 						}
 					}
@@ -547,11 +544,153 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 _.extend(directory.dao.AvoirCritereDAO.prototype, directory.dao.baseDAOBD);
 
 
+
+directory.dao.ObsDAO = function(db) {
+    this.db = db;
+};
+
+_.extend(directory.dao.ObsDAO.prototype, {
+    findById: function(id, callback) {
+        this.db.transaction(
+            function(tx) {
+                var sql = 
+					'SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee ' +
+                    'FROM espece e ' +
+                    'JOIN obs o ON e.num_nom = o.ce_espece ' +
+                    'WHERE id_obs = :id_obs';
+				//console.log(sql, id);
+                tx.executeSql(sql, [id], function(tx, results) {
+                    callback(results.rows.length === 1 ? results.rows.item(0) : null);
+                });
+            },
+            function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+            }
+        );
+    },
+
+    findAll: function(callback) {
+        this.db.transaction(
+            function(tx) {
+                var sql = 
+					'SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee ' +
+                    'FROM espece ' +
+                    'JOIN obs ON num_nom = ce_espece ' +
+                    'ORDER BY id_obs DESC';
+
+                tx.executeSql(sql, [], function(tx, results) {
+                     var nbre = results.rows.length,
+                        especes = [],
+                        i = 0;
+                    for (; i < nbre; i = i + 1) {
+                        especes[i] = results.rows.item(i);
+                    }
+                    callback(especes);
+                });
+            },
+            function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+            }
+        );
+    },
+
+    populate: function(callback) {
+        directory.db.transaction(
+            function(tx) {
+                console.log('Dropping OBS table');
+                tx.executeSql('DROP TABLE IF EXISTS obs');
+                var sql =
+					'CREATE TABLE IF NOT EXISTS obs (' +
+						'id_obs INT NOT NULL ,'+
+						'date DATE NOT NULL ,' +
+						'latitude DECIMAL NULL ,' +
+						'longitude DECIMAL NULL ,' +
+						'commune VARCHAR(255) NULL ,' +
+						'code_insee INT NULL ,' +
+						'mise_a_jour TINYINT(1) NOT NULL DEFAULT 0 ,' +
+						'ce_espece INT NOT NULL,' +
+						'PRIMARY KEY (id_obs),' +
+						'CONSTRAINT ce_espece ' +
+							'FOREIGN KEY (ce_espece)' +
+							'REFERENCES espece (num_nom)' +
+							'ON DELETE NO ACTION ' +
+							'ON UPDATE NO ACTION ' +
+					')';
+                console.log('Creating OBS table');
+                tx.executeSql(sql);
+            },
+            function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+            },
+            function(tx) {
+                //callback();
+            }
+        );
+    }
+});
+_.extend(directory.dao.ObsDAO.prototype, directory.dao.baseDAOBD);
+
+
+directory.dao.PhotoDAO = function(db) {
+    this.db = db;
+};
+
+_.extend(directory.dao.PhotoDAO.prototype, {
+    findByObs: function(id, callback) {
+        this.db.transaction(
+            function(tx) {
+                var sql = 
+					'SELECT id_photo, chemin ' +
+                    'FROM photo ' +
+                    'WHERE ce_obs = :id_obs';
+
+                tx.executeSql(sql, [id], function(tx, results) {
+                    callback(results.rows.length === 1 ? results.rows.item(0) : null);
+                });
+            },
+            function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+            }
+        );
+    },
+
+    populate: function(callback) {
+        directory.db.transaction(
+            function(tx) {
+                console.log('Dropping PHOTO table');
+                tx.executeSql('DROP TABLE IF EXISTS photo');
+                var sql =
+					'CREATE TABLE IF NOT EXISTS photo (' +
+						'id_photo INT NOT NULL ,' +
+						'chemin VARCHAR(255) NOT NULL ,' +
+						'ce_obs INT NOT NULL ,' +
+						'PRIMARY KEY (id_photo) ,' +
+						'CONSTRAINT ce_obs ' +
+							'FOREIGN KEY (ce_obs) ' +
+							'REFERENCES obs (id_obs) ' +
+							'ON DELETE NO ACTION ' + 
+							'ON UPDATE NO ACTION ' +
+					')';
+                console.log('Creating PHOTO table');
+                tx.executeSql(sql);
+            },
+            function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+            },
+            function(tx) {
+                //callback();
+            }
+        );
+    }
+});
+_.extend(directory.dao.PhotoDAO.prototype, directory.dao.baseDAOBD);
+
+
 // Overriding Backbone's sync method. Replace the default RESTful services-based implementation
 // with a simple local database approach.
 Backbone.sync = function(method, model, options) {
     var dao = new model.dao(directory.db);
-
+	
     if (method === "read") {
         if (model.id) {
             dao.findById(model.id, function(data) {
@@ -686,6 +825,61 @@ directory.models.CritereCollection = Backbone.Collection.extend({
 });
 
 
+
+
+directory.models.Obs = Backbone.Model.extend({
+    dao: directory.dao.ObsDAO,
+
+    initialize: function() {    }
+});
+
+directory.models.ObsCollection = Backbone.Collection.extend({
+    dao: directory.dao.ObsDAO,
+    model: directory.models.Obs,
+
+    findById: function(key) {
+        var obs = new directory.dao.ObsDAO(directory.db),
+            self = this;
+        obs.findById(key, function(data) {
+			//console.log("ObsCollection " + data);
+            self.reset(data);
+        });
+    },
+    
+    findAll: function() {
+        var obs = new directory.dao.ObsDAO(directory.db),
+            self = this;
+        obs.findAll(function(data) {
+			//console.log("ObsCollection " + data);
+            self.reset(data);
+        });
+    }
+
+});
+
+
+directory.models.Photo = Backbone.Model.extend({
+    dao: directory.dao.PhotoDAO,
+
+    initialize: function() {    }
+});
+
+directory.models.PhotoCollection = Backbone.Collection.extend({
+    dao: directory.dao.PhotoDAO,
+    model: directory.models.Photo,
+
+    findByObs: function(key) {
+        var photo = new directory.dao.PhotoDAO(directory.db),
+            self = this;
+        photo.findByObs(key, function(data) {
+			//console.log("EmployeeCollection " + data);
+            self.reset(data);
+        });
+    }
+});
+
+
+
 // -------------------------------------------------- The Views ---------------------------------------------------- //
 
 directory.views.SearchPage = Backbone.View.extend({
@@ -774,10 +968,12 @@ directory.views.ListPage = Backbone.View.extend({
     },
 
     render: function(eventName) {
-		var json = {
+		var lien = (this.model.id == 0) ? '' : '/'+this.model.id,
+			json = {
 			"nom_parcours" : this.model.name,
 			"id_parcours" : this.model.id,
-			"id_critere" : this.model.id_critere
+			"id_critere" : this.model.id_critere,
+			"lien_parcours" : 'parcours'+lien
 		};
 		
         $(this.el).html(this.template(json));
@@ -802,28 +998,27 @@ directory.views.EspeceListView = Backbone.View.extend({
 			arr_ids = new Array(),
 			nbre_triees = directory.liste.length;
 			
-		if (nbre_triees != 0) {
-			for (var i = 0; i < arr_temp.length; i++) {
-				arr_temp[i].attributes.pourcentage = 0 +'/' + directory.liste.total;
-				arr_ids.push(arr_temp[i].attributes.num_nom);
-			}
-			for (var c = 0; c < nbre_triees; c++) {
-				var pourcentage = 0,
-					index = $.inArray(directory.liste[c], arr_ids);
-				if (index != -1) {
-					pourcentage = directory.liste.nbre_criteres[c];
-					arr_temp[index].attributes.pourcentage = pourcentage + '/' + directory.liste.total;
-					arr_especes.push(arr_temp[index]);
+		if (nbre_triees != 0 && directory.liste.total != 0) {
+			console.log(arr_temp);
+			for (var pourcentage = directory.liste.total; pourcentage >= 0; pourcentage--) {
+				for (var i = 0; i < arr_temp.length; i++) {
+					if (directory.nbre_criteres[arr_temp[i].attributes.num_nom] == pourcentage) {
+						arr_temp[i].attributes.pourcentage = pourcentage + '/' + directory.liste.total;
+						arr_especes.push(arr_temp[i]);
+					}
 				}
 			}
+			
 			for (var i = 0; i < arr_temp.length; i++) {
 				var index = $.inArray(arr_temp[i].attributes.num_nom, directory.liste);
 				if (index == -1) {
+					arr_temp[i].attributes.pourcentage = 0 + '/' + directory.liste.total;
 					arr_especes.push(arr_temp[i]);
 				}
 			}
 			this.model.models = arr_especes;
 		}
+		
 		//console.log(this.model.models);
         $(this.el).empty();
         _.each(this.model.models, function(espece) {
@@ -841,7 +1036,6 @@ directory.views.EspeceListItemView = Backbone.View.extend({
 
     initialize: function(data) {
 		//console.log(data);
-        //directory.liste = new Array();
         this.template = _.template(directory.utils.templateLoader.get('espece-list-item'));
     },
 
@@ -927,25 +1121,24 @@ directory.views.CriterePage = Backbone.View.extend({
 				arr_criteres[critere.id_critere] = new Array();
 				arr_criteres[critere.id_critere].push(critere.intitule);
 			} else {
-				arr_criteres[critere.ce_parent].push(critere.id_critere+';'+critere.intitule);
+				var valeur = critere.id_critere+';'+critere.intitule;
+				valeur += (critere.url_img == '') ? '' : ';'+critere.url_img;
+				arr_criteres[critere.ce_parent].push(valeur);
 			}
-		}
+		}		
 		//console.log(arr_criteres);
 		var arr_floraison = new Array(),
 			arr_feuillaison = new Array(),
 			arr_fructification = new Array();
 			
-		arr_floraison.push("Floraison ?");
-		arr_floraison.push("Fleur;Oui");
-		arr_floraison.push("Fleur;Non");
+		arr_floraison.push("Floraison");
+		arr_floraison.push("floraison;La plante est en fleur.");
 		
-		arr_feuillaison.push("Feuillaison ?");
-		arr_feuillaison.push("Feuille;Oui");
-		arr_feuillaison.push("Feuille;Non");
+		arr_feuillaison.push("Feuillaison");
+		arr_feuillaison.push("feuillaison;L'espèce est en feuille.");
 		
-		arr_fructification.push("Fructification ?");
-		arr_fructification.push("Fruit;Oui");
-		arr_fructification.push("Fruit;Non");
+		arr_fructification.push("Fructification");
+		arr_fructification.push("fructification;Il y a des fruits.");
 		
 		arr_criteres.push(arr_floraison);
 		arr_criteres.push(arr_feuillaison);
@@ -955,20 +1148,15 @@ directory.views.CriterePage = Backbone.View.extend({
 			"id" : this.model.id,
 			"nom" : this.model.nom,
 			"ce_critere" : this.model.ce_critere,
-			"criteres" : arr_criteres
+			"criteres" : arr_criteres,
+			"total": directory.nbre_especes
 		};
-		;
+		
         $(this.el).empty();
         $(this.el).html(this.template(json));
          _.each(arr_criteres, function(criteres) {
-            $(this.el).append(new directory.views.CritereListItemView({el: $('#criteres-liste', this.el), model: criteres}).render().el);
+            $('#criteres-liste').append(new directory.views.CritereListItemView({el: $('#criteres-liste', this.el), model: criteres}).render().el);
         }, this);
-        
-        var bouton_resultats = 
-			'<div class="text-center">' + 
-				'<a href="#liste/'+this.model.id+'/'+this.model.nom+'/'+this.model.ce_critere+'" class="btn btn-primary">Afficher les résultats</a>' +
-			'</div>';
-        $(this.el).append(bouton_resultats);
         return this;
     }
 });
@@ -986,18 +1174,15 @@ directory.views.CritereListItemView = Backbone.View.extend({
 			arr_checked.push(directory.criteria[this.model[0]] == this.model[i]);
 			arr_valeurs.push(this.model[i]);
 		}
+		
 		var json = {
 			"titre" : this.model[0],
 			"valeurs" : arr_valeurs,
 			"checked" : arr_checked
 		};
-		//console.log(json);
-		
         $(this.el).append(this.template(json));
         return this;
-        
     }
-
 });
 
 
@@ -1015,40 +1200,183 @@ directory.views.Accueil = Backbone.View.extend({
     }
 });
 
+
+directory.views.saisieObs = Backbone.View.extend({
+    initialize: function() {
+		geolocaliser();
+	
+		var date = new Date(),
+			jour = date.getDate(),
+			mois = date.getMonth() + 1,
+			annee = date.getFullYear(),
+			aujourdhui = 
+				( (''+jour).length < 2 ? '0' : '') + jour + '/' +
+				( (''+mois).length < 2 ? '0' : '') + mois + '/' +
+				annee;
+		this.model.attributes.date = aujourdhui;
+        this.template = _.template(directory.utils.templateLoader.get('saisie-obs'));
+    },
+
+    render: function(eventName) {
+		this.model.attributes.position = this.position;
+		//console.log(this.model);
+		
+        $(this.el).html(this.template(this.model.toJSON()));
+        return this;
+    }
+});
+
+directory.views.ObsPage = Backbone.View.extend({
+    initialize: function(data) {
+		//console.log(data);
+		this.data = data.model.attributes;
+		this.model = new directory.models.PhotoCollection();
+		this.model.findByObs(data.model.attributes.id);
+        this.model.bind('reset', this.render, this);
+        this.template = _.template(directory.utils.templateLoader.get('obs-page'));
+    },
+
+    render: function(eventName) { 	
+		console.log(this.model);
+        $(this.el).html(this.template(this.data));
+        return this;
+    }
+});
+
+directory.views.transmissionObs = Backbone.View.extend({
+	initialize: function(data) {
+		this.model = new directory.models.ObsCollection();
+		this.model.findAll();
+		this.model.bind('reset', this.render, this);
+		this.template = _.template(directory.utils.templateLoader.get('obs-list'));
+	},
+
+	render: function(eventName) { 
+		var json = {
+			"taille" : this.model.models.length,
+			"obs" : this.model.models
+		}
+		
+		$(this.el).html(this.template(json));
+		return this;
+	}
+});
+
+
+directory.views.comptePage = Backbone.View.extend({
+	initialize: function() {
+		this.template = _.template(directory.utils.templateLoader.get('compte'));
+	},
+
+	render: function(eventName) {
+		//console.log(this.model);
+		
+		$(this.el).html(this.template());
+		return this;
+	}
+});
+
+
 // ------------------------------------------------------ Globals ------------------------------------------------- //
 directory.liste = new Array();
 directory.criteria = new Array();
+directory.pheno = new Object();
+directory.pheno["floraison"] = new Array();
+directory.pheno["feuillaison"] = new Array();
+directory.pheno["fructification"] = new Array();
+directory.pheno.liste = new Array();
+directory.nbre_criteres = new Array();
+directory.nbre_especes = 0;
 
 
 // ----------------------------------------------- The Application Router ------------------------------------------ //
 
 directory.Router = Backbone.Router.extend({
-    routes: {
-        "" : "accueil",
-        "parcours" : "list",
-        "parcours/:id_parcours" : "employeeDetails",
-        "liste/:id_parcours/:nom_parcours/:id_critere" : "listeEspeces",
-        "espece/:id_espece/:ce_parcours" : "especeDetails",
-        "clef/:id_parcours/:nom_parcours/:ce_parcours" : "clefByParcours", 
-        "obs/:id_espece/:nom_sci" : "nouvelleObs"
+	routes: {
+		"" : "accueil",
+		"parcours" : "list",
+		"parcours/:id_parcours" : "employeeDetails",
+		"liste/:id_parcours/:nom_parcours/:id_critere" : "listeEspeces",
+		"espece/:id_espece/:ce_parcours" : "especeDetails",
+		"clef/:id_parcours/:nom_parcours/:ce_parcours" : "clefByParcours", 
+		"obs/:id_espece/:nom_sci" : "nouvelleObs",
+		"observation/:id_obs" : "detailsObs",
+		"transmission" : "transmissionObs",
+		"compte" : "compteUtilisateur"
     },
 
-    initialize: function() {
+	initialize: function() {
+		var self = this;
 
-        var self = this;
+		
+		directory.db.transaction(function (tx) {
+			var sql = 
+				"SELECT id_critere, intitule FROM critere  " +
+				"WHERE intitule LIKE '%feuillaison%' ";
 
+			tx.executeSql(sql, [], function(tx, results) {
+				var nbre = results.rows.length,
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					var critere = results.rows.item(i);
+					if (critere.intitule.indexOf("debut") != -1) {
+						directory.pheno["feuillaison"]["debut"] = critere.id_critere;
+					} else {
+						directory.pheno["feuillaison"]["fin"] = critere.id_critere;
+					}
+				}
+			});
+		});
+		directory.db.transaction(function (tx) {
+			var sql = 
+				"SELECT id_critere, intitule FROM critere  " +
+				"WHERE intitule LIKE '%floraison%' ";
+
+			tx.executeSql(sql, [], function(tx, results) {
+				var nbre = results.rows.length,
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					var critere = results.rows.item(i);
+					if (critere.intitule.indexOf("debut") != -1) {
+						directory.pheno["floraison"]["debut"] = critere.id_critere;
+					} else {
+						directory.pheno["floraison"]["fin"] = critere.id_critere;
+					}
+				}
+			});
+		});
+		directory.db.transaction(function (tx) {
+			var sql = 
+				"SELECT id_critere, intitule FROM critere  " +
+				"WHERE intitule LIKE '%fructification%' ";
+
+			tx.executeSql(sql, [], function(tx, results) {
+				var nbre = results.rows.length,
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					var critere = results.rows.item(i);
+					if (critere.intitule.indexOf("debut") != -1) {
+						directory.pheno["fructification"]["debut"] = critere.id_critere;
+					} else {
+						directory.pheno["fructification"]["fin"] = critere.id_critere;
+					}
+				}
+			});
+		});
+		
+		
 	
-        // Keep track of the history of pages (we only store the page URL). Used to identify the direction
-        // (left or right) of the sliding transition between pages.
-        this.pageHistory = [];
+		// Keep track of the history of pages (we only store the page URL). Used to identify the direction
+		// (left or right) of the sliding transition between pages.
+		this.pageHistory = [];
+		
+		// Register event listener for back button troughout the app
+		$('#content').on('click', '.header-back-button', function(event) {
+			window.history.back();
+			return false;
+		});
 
-        // Register event listener for back button troughout the app
-        $('#content').on('click', '.header-back-button', function(event) {
-            window.history.back();
-            return false;
-        });
-        
-        $('body').on('click', '#modalReset', function(event) {
+		$('body').on('click', '#modalReset', function(event) {
 			var id = event.currentTarget.attributes.id.value;
 			var hash = window.location.hash,
 				arr_hash = hash.split('/'),
@@ -1075,9 +1403,9 @@ directory.Router = Backbone.Router.extend({
 				}
 			);
 			$('#myModal').modal('hide');
-        });
-        
-        $('#content').on('click', '.choix-parcours', function(event) {
+		});
+		
+		$('#content').on('click', '.choix-parcours', function(event) {
 			var id = this.id;
 			directory.db.transaction(
 				function(tx) {
@@ -1107,9 +1435,9 @@ directory.Router = Backbone.Router.extend({
 					console.log('DB | Error processing SQL: ' + error.code, error);
 				}
 			);
-        });
-        
-        $('#content').on('click', '.vue-espece', function(event) {
+		});
+		
+		$('#content').on('click', '.vue-espece', function(event) {
 			var hash = window.location.hash,
 				arr_hash = hash.split('/'),
 				num_nom = arr_hash[arr_hash.length - 2],
@@ -1129,12 +1457,15 @@ directory.Router = Backbone.Router.extend({
 				}
 			);
 			
-			$('#btn-vue-espece').html('Bien joué ! ');
+			$('#vue-modal').modal('show');
 			window.history.back();
-        });
-        
-        $('#content').on('click', '.criterium', function(event) {			
-			var sql_where = '',
+		});
+		
+		$('#content').on('click', '.criterium', function(event) {
+			var sql_select = '',
+				sql_and = '',
+				sql_where = '',
+				sql_order_by = '',
 				arr_ids = new Array(),
 				nbre_choix = 0,
 				hash = window.location.hash,
@@ -1145,32 +1476,43 @@ directory.Router = Backbone.Router.extend({
 			
 			if (id_parcours != 0) {
 				sql_where = 
-					"num_nom IN ( " +
+					"WHERE num_nom IN ( " +
 						"SELECT num_nom " +
 						"FROM espece e " +  
 						"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
 						"WHERE id_critere = :ce_parcours " +
-					" ) " +
-					"AND ";
+					" ) ";
 				arr_ids.push(id_parcours);
 			} else {
 				sql_where = "";
 			}
-			
+
+			directory.pheno.liste = new Array();
 			for (var i = 0; i < inputs.length; i++) {
-				if (inputs[i].checked) {;
+				$('#img_'+inputs[i].id).removeClass('selection-critere');
+				if (inputs[i].checked) {
 					if (directory.criteria[inputs[i].name] == this.value) {
 						inputs[i].checked = false;
+						$('#img_'+this.id).removeClass('selection-critere');
 						delete directory.criteria[inputs[i].name];
 					} else {
 						directory.criteria[inputs[i].name] = inputs[i].value;
 						nbre_choix++;
 						var id = inputs[i].value.split(';')[0];
-						arr_ids.push(id);
+						if (id % 1 === 0) {		//id est un nombre ?
+							arr_ids.push(id);
+						} else {
+							directory.pheno.liste.push(id);
+						}
+						
+						if (inputs[i].id == this.id) {
+							$('#img_'+this.id).addClass('selection-critere');
+						} 
 					}
 				}
 			}
-			console.log(directory.criteria);
+			//console.log(directory.criteria);
+			//console.log(arr_ids, directory.pheno.liste);
 			
 			var sql_conditions = '',
 				index = (id_parcours == 0) ? 0 : 1; 
@@ -1180,74 +1522,123 @@ directory.Router = Backbone.Router.extend({
 					sql_conditions += ', ';
 				}
 			}
-			//console.log(arr_ids);
+			if (arr_ids.length != 0) {
+				sql_select = ", count(num_nom) AS count ";
+				sql_and = (sql_where == "") ? "WHERE" : "AND";
+				sql_and += 
+				" id_critere IN (" +
+					sql_conditions + 
+				") ";
+				sql_order_by = "count DESC, ";
+			}
 			
+			
+			var i = 0,
+				criteres = [];
+			directory.nbre_especes = 0;
 			directory.db.transaction(
-				function(tx) {
+				function(ta) {
 					var sql =
-						"SELECT num_nom, count(num_nom) AS count " + 
+						"SELECT num_nom " + sql_select + 
 						"FROM espece e " +
 						"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
-						"WHERE " + sql_where + 
-						"id_critere IN (" +
-							sql_conditions + 
-						") " +
-						"GROUP BY num_nom " + 
-						"ORDER BY count DESC, nom_vernaculaire ASC ";
-					/*
-					var sql =
-						//"SELECT num_nom, id_critere " +
-						//"FROM ( " +
-							"SELECT num_nom, nom_sci, famille, nom_vernaculaire, vue, photos, count(num_nom) AS count " + 
-							"FROM espece e " +
-							"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
-							"WHERE id_critere IN (" +
-							sql_conditions + 
-							") " +
-							"GROUP BY num_nom " + 
-							"ORDER BY count DESC ";
-						//") " + 
-						//"WHERE id_critere = :ce_parcours ";
-					*/
+						sql_where + 
+						sql_and + 
+						"GROUP BY num_nom " +
+						"ORDER BY " + sql_order_by + "nom_vernaculaire ASC " ;
 					//console.log(sql);
-					tx.executeSql(sql, arr_ids, function(tx, results) {
+					ta.executeSql(sql, arr_ids, function(tx, results) {
 						var nbre = results.rows.length,
-							criteres = [],
-							nbre_criteres = [],
-							especes_tous_criteres = 0,
-							i = 0;
-						for (; i < nbre; i = i + 1) {
+							arr_pheno = directory.pheno.liste;
+						//console.log('Total rows : ' + nbre);
+						for (i = 0; i < nbre; i = i + 1) {	
 							criteres[i] = results.rows.item(i).num_nom;
-							nbre_criteres[i] = results.rows.item(i).count;
-							if (results.rows.item(i).count == nbre_choix) {
-								especes_tous_criteres++;
+							if (results.rows.item(i).count !== undefined) {
+								directory.nbre_criteres[criteres[i]] = results.rows.item(i).count;		
+							} else {
+								directory.nbre_criteres[criteres[i]] = 0;
+							}
+							
+							if (directory.nbre_criteres[criteres[i]] == nbre_choix) {
+								directory.nbre_especes++;
+							}
+							$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
+							
+							
+							var j = 0;
+							for (; j < arr_pheno.length; j++) {
+								var parametres = new Array(),
+									sql = 
+										"SELECT id_espece, intitule, ce_parent, " + 
+										"COALESCE(NULL, NULL, ?) AS valeur_index, COALESCE(NULL, NULL, ?) AS tour_boucle " +
+										"FROM critere c " +
+										"JOIN avoir_critere ac ON c.id_critere = ac.id_critere " +
+										"WHERE id_espece = " + criteres[i] + "  " +
+										"AND ce_parent IN ( ?, ? )";
+								
+								parametres.push(i);
+								parametres.push(j);
+								parametres.push(directory.pheno[arr_pheno[j]]["debut"]); 
+								parametres.push(directory.pheno[arr_pheno[j]]["fin"]);
+								//console.log(sql, parametres);
+								ta.executeSql(sql, parametres, function(tx, results) {
+									var debut = -1,
+										fin = -1,
+										tour = -1,
+										mois_actuel = new Date().getMonth() + 1,
+										nbre = results.rows.length,
+										k = 0;
+									for (; k < nbre; k = k + 1) {
+										tour++;
+										var num_nom = results.rows.item(k).id_espece;
+										for (var m = 0; m < directory.pheno.liste.length; m++) {
+											if (results.rows.item(k).ce_parent == directory.pheno[directory.pheno.liste[m]]["debut"]) {
+												debut = results.rows.item(k).intitule;
+											} 
+											if (results.rows.item(k).ce_parent == directory.pheno[directory.pheno.liste[m]]["fin"]) {
+												fin = results.rows.item(k).intitule;
+											}
+										}
+										if (moisPhenoEstCouvert(mois_actuel, debut, fin) && tour == 1) {
+											tour = -1;
+											directory.nbre_criteres[num_nom]++;
+										}	
+									}
+									
+									if (results.rows.item(k-1).valeur_index == criteres.length-1
+									 && results.rows.item(k-1).tour_boucle == arr_pheno.length-1) {
+										for (var l = 0; l < criteres.length; l++) {
+											var index = criteres[l];
+											if (directory.nbre_criteres[index] == nbre_choix) {
+												directory.nbre_especes++;
+											}
+										}
+										$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
+									}
+									console.log(directory.nbre_criteres);
+								});
 							}
 						}
-						$('#resultats-recherche').html('Nbre de résultats : ' + especes_tous_criteres);
-						
-						directory.liste = criteres;
-						directory.liste.nbre_criteres = nbre_criteres;
-						directory.liste.total = nbre_choix;
-						//console.log(nbre_choix, criteres);
-						this.model =  new directory.models.EspeceCollection();
-						this.model.findByParcours(id_parcours);
-						var nbre = this.model.length,
-							especes = [],
-							i = 0;
-						for (; i < nbre; i = i + 1) {
-							especes[i] = this.model.models[i].attributes;
-						}
-						
 					});
 				},
 				function(error) {
 					console.log('DB | Error processing SQL: ' + error.code, error);
 				}
-			);
-        });
-        
-        
-        $('#content').on('click', '#criteres-reset', function(event) {			
+			);		
+			
+			directory.liste = criteres;
+			directory.liste.total = nbre_choix;
+			this.model =  new directory.models.EspeceCollection();
+			this.model.findByParcours(id_parcours);
+			var nbre = this.model.length,
+				especes = [],
+				i = 0;
+			for (; i < nbre; i = i + 1) {
+				especes[i] = this.model.models[i].attributes;
+			}
+		});
+		
+		$('#content').on('click', '#criteres-reset', function(event) {			
 			var parent = document.getElementById('criteres-liste'),
 				inputs = document.getElementsByTagName('input', parent);
 				
@@ -1256,55 +1647,118 @@ directory.Router = Backbone.Router.extend({
 			}
 			directory.liste = new Array();
 			directory.criteria = new Array();
+			directory.nbre_criteres = new Array();
 			$('#resultats-recherche').html('');
-        });
-        
+		});
+		
+		
+		
+		$('#content').on('click', '#geolocaliser', geolocaliser);
+		$('#content').on('click', '#sauver-obs', function(event) {
+			directory.db.transaction(
+				function(tx) {
+					var sql =
+						'SELECT id_obs ' +
+						'FROM obs ' + 
+						'ORDER BY id_obs DESC';
+					tx.executeSql(sql, [], function(tx, results) {
+						var obs = new Array(),
+							id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_obs+1;
+							sql =
+							'INSERT INTO obs ' +
+							'(id_obs, date, latitude, longitude, commune, code_insee, mise_a_jour, ce_espece) VALUES ' + 
+							'(?, ?, ?, ?, ?, ?, ?, ?) ';
+							
+						obs.push(id);
+						obs.push($('#date').html());
+						obs.push($('#lat').html());
+						obs.push($('#lng').html());
+						obs.push($('#location').html());
+						obs.push($('#code_insee').val());
+						obs.push(($('#code_insee').val() == 0) ? 0 : 1);
+						obs.push($('#num_nom_select').val());
+						
+						tx.executeSql(sql, obs);
+						self.transmissionObs();
+					});
+				},
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				}
+			);
+			//console.log(obs);
+		});
+		$('#content').on('change', '#ajouter-photos', function(event) {
+			$.each($('#ajouter-photos').get(0).files, function(index, valeur) {
+				for (var attribut in valeur) {
+					$('#obs-photos-info').append(attribut + ' : ' + valeur[attribut] + '<br />');
+				}
+/*
+			var reader = new FileReader(),
+			    binary, base64;
+			reader.addEventListener('loadend', function () {
+			    binary = reader.result; // binary data (stored as string), unsafe for most actions
+			    base64 = btoa(binary); 	// base64 data, safer but takes up more memory
+			}, false);
+			reader.readAsBinaryString(valeur);
+//*/
+			});
+		});
+		
+		$('#content').on('blur', '#courriel', requeterIdentite);
+		$('#content').on('keypress', '#courriel', function(event) {
+			if (event.which == 13) {
+				requeterIdentite(event);
+			}
+		});
+		$('#content').on('click', '#valider_courriel', requeterIdentite);
+		
+		
+		// Check of browser supports touch events...
+		if (document.documentElement.hasOwnProperty('ontouchstart')) {
+			// ... if yes: register touch event listener to change the "selected" state of the item
+			$('#content').on('touchstart', 'a', function(event) {
+				self.selectItem(event);
+			});
+			$('#content').on('touchend', 'a', function(event) {
+				self.deselectItem(event);
+			});
+		} else {
+			// ... if not: register mouse events instead
+			$('#content').on('mousedown', 'a', function(event) {
+				self.selectItem(event);
+			});
+			$('#content').on('mouseup', 'a', function(event) {
+				self.deselectItem(event);
+			});
+		}
 
-        // Check of browser supports touch events...
-        if (document.documentElement.hasOwnProperty('ontouchstart')) {
-            // ... if yes: register touch event listener to change the "selected" state of the item
-            $('#content').on('touchstart', 'a', function(event) {
-                self.selectItem(event);
-            });
-            $('#content').on('touchend', 'a', function(event) {
-                self.deselectItem(event);
-            });
-        } else {
-            // ... if not: register mouse events instead
-            $('#content').on('mousedown', 'a', function(event) {
-                self.selectItem(event);
-            });
-            $('#content').on('mouseup', 'a', function(event) {
-                self.deselectItem(event);
-            });
-        }
-
-        // We keep a single instance of the SearchPage and its associated Employee collection throughout the app
-        this.searchResults = new directory.models.EmployeeCollection();
-        this.searchPage = new directory.views.SearchPage({model: this.searchResults});
-        this.searchPage.render();
-        $(this.searchPage.el).attr('id', 'searchPage');
-    },
-    
-    accueil: function() {
-        var self = this;
-        self.slidePage(new directory.views.Accueil().render());
+		// We keep a single instance of the SearchPage and its associated Employee collection throughout the app
+		this.searchResults = new directory.models.EmployeeCollection();
+		this.searchPage = new directory.views.SearchPage({model: this.searchResults});
+		this.searchPage.render();
+		$(this.searchPage.el).attr('id', 'searchPage');
+	},
+	
+	accueil: function() {
+		var self = this;
+		self.slidePage(new directory.views.Accueil().render());
+	},
+			
+	selectItem: function(event) {
+		$(event.target).addClass('tappable-active');
 	},
 
-    selectItem: function(event) {
-        $(event.target).addClass('tappable-active');
-    },
+	deselectItem: function(event) {
+		$(event.target).removeClass('tappable-active');
+	},
 
-    deselectItem: function(event) {
-        $(event.target).removeClass('tappable-active');
-    },
+	list: function() {
+		var self = this;
+		this.slidePage(this.searchPage);
+	},
 
-    list: function() {
-        var self = this;
-        this.slidePage(this.searchPage);
-    },
-
-    employeeDetails: function(id) {
+	employeeDetails: function(id) {
         var employee = new directory.models.Employee({id: id}),
             self = this;
         employee.fetch({
@@ -1348,23 +1802,42 @@ directory.Router = Backbone.Router.extend({
 	},
 	
 	nouvelleObs: function(num_nom, nom_sci) {
-        var espece = new directory.models.Espece({id: num_nom, nom_sci: nom_sci}),
+        var obs = new directory.models.Obs({ id: num_nom, nom_sci: nom_sci }),
             self = this;
             
         directory.liste = new Array();
         directory.criteria = new Array();
-        espece.fetch({
+        obs.fetch({
             success: function(data) {
 				//console.log(data);
-                //self.slidePage(new directory.views.ObservationPage({model: data}).render());
-                window.history.back();
+                self.slidePage(new directory.views.saisieObs({model: data}).render());
+                //window.history.back();
             }
         });
 	},
 	
+	detailsObs: function(id_obs) {
+        var obs = new directory.models.Obs({ id: id_obs }),
+            self = this;
+            
+        obs.fetch({
+            success: function(data) {
+				//console.log(data);
+                self.slidePage(new directory.views.ObsPage({model: data}).render());
+            }
+        });
+	},
+	
+	transmissionObs: function(data) {
+		this.slidePage(new directory.views.transmissionObs().render());
+	},
+	
+	compteUtilisateur: function(data) {
+		this.slidePage(new directory.views.comptePage().render());
+	},
+	
 
     slidePage: function(page) {
-
         var slideFrom,
             self = this;
 
@@ -1423,10 +1896,143 @@ especeDAO.populate();
 employeeDAO.populate();
 critereDAO.populate();
 avr_critereDAO.populate();
+(new directory.dao.ObsDAO(directory.db)).populate();
+(new directory.dao.PhotoDAO(directory.db)).populate();
+//(new directory.dao.UtilisateurDAO(directory.db)).populate();
+
 $().ready(function() {
-    directory.utils.templateLoader.load(['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list'],
+    directory.utils.templateLoader.load(
+		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 
+		 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list', 
+		 'saisie-obs', 'compte', 'obs-list', 'obs-page'],
         function() {
             directory.app = new directory.Router();
             Backbone.history.start();
         });
 });
+
+
+function moisPhenoEstCouvert(mois_actuel, debut, fin) {
+	//console.log(mois_actuel, debut, fin);
+	var flag = false;
+	
+	if (debut != -1 && fin != -1) {
+		if (debut < fin) {
+			flag = (mois_actuel >= debut && mois_actuel <= fin);
+		}
+		if (debut == fin) {
+			flag = (mois_actuel == debut);
+		}
+		if (debut > fin) {
+			flag = (mois_actuel >= debut && mois_actuel <= 12 || mois_actuel >= 1 && mois_actuel <= fin);
+		}
+	}
+	
+	return(flag);
+}
+
+
+/*
+
+		directory.db.transaction(function (tx) {
+		var arr_pheno = new Array("feuillaison", "floraison", "fructification");
+			for(var i = 0; i < arr_pheno.length; i++) {
+				var sql = 
+					"SELECT id_critere, intitule FROM critere  " +
+					"WHERE intitule LIKE '%" + arr_pheno[i] + "%' ";
+
+				tx.executeSql(sql, [], function(tx, results) {
+					var nbre = results.rows.length,
+						j = 0;
+					for (; j < nbre; j = j + 1) {
+						var critere = results.rows.item(j);
+						if (critere.intitule.indexOf("debut") != -1) {
+							directory.pheno[arr_pheno[i]]["debut"] = critere.id_critere;
+						} else {
+							directory.pheno[arr_pheno[i]]["fin"] = critere.id_critere;
+						}
+					}
+				});
+			}
+		});
+*/
+
+
+function geolocaliser() {
+	if (navigator.geolocation) {
+	    navigator.geolocation.getCurrentPosition(surSuccesGeoloc, surErreurGeoloc);
+	} else {
+	    var erreur = { code: '0', message: 'Géolocalisation non supportée par le navigateur'};
+	    surErreurGeoloc(erreur);
+	}
+}
+function surSuccesGeoloc(position) {
+	var TEXTE_HORS_LIGNE = 'Aucune connexion.',
+		SERVICE_NOM_COMMUNE_URL = 'http://www.tela-botanica.org/service:eflore:0.1/osm/nom-commune?lon={lon}&lat={lat}';
+	if (position) {
+		var lat = position.coords.latitude;
+		var lng = position.coords.longitude;
+		$('#lat').html(lat);
+		$('#lng').html(lng);
+
+		console.log('Geolocation SUCCESS');
+		var url_service = SERVICE_NOM_COMMUNE_URL;
+		var urlNomCommuneFormatee = url_service.replace('{lat}', lat).replace('{lon}', lng);
+		var jqxhr = $.getJSON(urlNomCommuneFormatee, function(data) {
+			console.log('NOM_COMMUNE found.');
+			$('#location').html(data['nom']);
+			$('#code_insee').val(data['codeINSEE']);
+		})
+		.complete(function() { 
+			//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
+			//$('#location').html(texte);
+		})
+		;
+	}
+}
+function surErreurGeoloc(error){
+	console.log('Echec de la géolocalisation, code: ' + error.code + ' message: '+ error.message);
+}
+
+
+
+function requeterIdentite() {
+	var SERVICE_ANNUAIRE = "http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/";
+	var courriel = $('#courriel').val();
+	if (courriel != '') {
+		//miseAJourCourriel();
+		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
+		$.ajax({
+			url : urlAnnuaire,
+			type : 'GET',
+			dataType: 'jsonp',
+			success : function(data, textStatus, jqXHR) {
+				console.log('Annuaire SUCCESS : ' + textStatus);
+				if (data != undefined && data[courriel] != undefined) {
+					var infos = data[courriel];
+					$('#id_utilisateur').val(infos.id);
+					$('#prenom_utilisateur').val(infos.prenom);
+					$('#nom_utilisateur').val(infos.nom);
+					$('#courriel_confirmation').val(courriel);
+					$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').attr('disabled', 'disabled');
+				} else {
+					surErreurCompletionCourriel();
+				}
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				console.log('Annuaire ERREUR : ' + textStatus);
+				surErreurCompletionCourriel();
+			},
+			complete : function(jqXHR, textStatus) {
+				console.log('Annuaire COMPLETE : ' + textStatus);
+				$('#zone_prenom_nom').removeClass('hide');
+				$('#zone_courriel_confirmation').removeClass('hide');
+			}
+		});
+	}
+}
+
+function surErreurCompletionCourriel() {
+	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').val('');
+	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').removeAttr('disabled');
+}

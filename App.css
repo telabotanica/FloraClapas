@@ -1,0 +1,88 @@
+.nav {
+	width: 100%;
+	background: #2b3891;
+}
+.navbar .nav > li > a {
+	color: #FFF;
+	background: #2b3891;
+	text-shadow: none;
+}
+.navbar .nav > li > a:hover, .navbar .nav > .active > a, .navbar .nav > .active > a:hover, .navbar .nav > .active > a:focus {
+	color: #2b3891;
+	background: #FFF;
+}
+
+.description-parcours {
+	padding: 10px;
+	background: #FFF;
+}
+.description-parcours .photos:after {
+	clear: both;
+}
+
+.description-espece {
+	padding: 10px;
+}
+
+.modal-body {
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+.modal {
+	top: 0%;
+	width: 320px;
+	overflow-x: scroll;
+	margin-left: -160px;
+}
+
+.blanc {
+	background: #FFF;
+}
+
+.bleu {
+	background: #CCC;
+}
+
+input[type="radio"].criterium  {
+	width: 60px;
+	height: 40px;
+	opacity: 0.5;
+}
+.selection-critere {
+	opacity: 0.5;
+}
+
+#criteres-liste {
+	padding-left: 20px;
+}
+
+#resultats-recherche {
+	top: -20px;
+	position: relative;
+	border-radius: 2px;
+	background: #F00;
+	color: #FFF;
+	font-weight: bold;
+	padding: 0px 2px;
+}
+
+.div-critere {
+	margin: 2px;
+	width: 60px;
+}
+
+.div-critere img {
+	position:relative;
+	z-index:-1000;
+	top: -40px;
+}
+
+label {
+	font-size: 16px;
+}
+
+/* correction barre noire photoswipe */
+div.ps-uilayer {
+	background: transparent;
+	cursor: pointer;
+}

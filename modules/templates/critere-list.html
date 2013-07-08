@@ -8,9 +8,19 @@
 <div class="text-center">
 	<a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>" class="btn btn-primary">Afficher les résultats</a>
 	<button id="criteres-reset" class="btn btn-warning">Réinitialiser la clef</button>
-	<h4 id="resultats-recherche"></h4>
 </div>
 
 <div id="criteres-liste"></div>
 
-
+<div class="navbar navbar-fixed-bottom">
+	<ul class="nav parc-nav">
+		<li><a href="#" class="header-back-button">Liste</a></li>
+		<li class="active"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>">Clef</a></li>
+		<li>
+			<a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">
+				<small id="resultats-recherche" class="pull-right"> <%= total %> </small>
+				Résultats...
+			</a>
+		</li>
+	</ul>
+</div>

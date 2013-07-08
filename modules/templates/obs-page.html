@@ -1,0 +1,31 @@
+<div class="header">
+    <a href="#" class="header-button header-button-left header-back-button">
+        <button>Retour</button>
+    </a>
+    
+	<h4 class="text-center">Observation n°<%= id_obs %></h4>
+</div>
+
+<div class="tableview" style="top:44px;">
+	<div class="row-fluid">
+		<%= nom_vernaculaire %> <i>(<%= nom_sci %>)</i>
+		<br />
+		Vue le <%= date %> 
+		<% if (commune != "") { %>
+			à <%= commune %>
+		<% } %>
+		
+		<input type="file" multiple id="ajouter-photos" />
+	</div>
+	<div class="row-fluid" id="obs-photos-info"></div>
+	<div class="row-fluid" id="obs-photos"></div>
+</div>
+
+
+<div class="navbar navbar-fixed-bottom">
+	<ul class="nav parc-nav">
+		<li class="active"><a href="#transmission">Mes obs.</a></li>
+		<li><a href="#compte">Mon compte</a></li>
+		<li><a href="#" class="header-back-button">Retour...</a></li>
+	</ul>
+</div>
