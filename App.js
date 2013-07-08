@@ -1690,9 +1690,21 @@ directory.Router = Backbone.Router.extend({
 		});
 		$('#content').on('change', '#ajouter-photos', function(event) {
 			$.each($('#ajouter-photos').get(0).files, function(index, valeur) {
+			/*
 				for (var attribut in valeur) {
 					$('#obs-photos-info').append(attribut + ' : ' + valeur[attribut] + '<br />');
 				}
+			*/
+				navigator.camera.getPicture(function(imageData){
+					$('#obs-photos-info').append(imageData);
+				}, 
+				function(imageData){
+					$('#obs-photos-info').append(imageData);
+				}, 
+				{ quality: 50, 
+		        	destinationType: destinationType.FILE_URI
+		        });
+
 /*
 			var reader = new FileReader(),
 			    binary, base64;
@@ -2004,8 +2016,7 @@ function requeterIdentite() {
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
 		$.ajax({
 			url : urlAnnuaire,
-			type : 'GET',
-			dataType: 'jsonp',
+			type : 'GET', 
 			success : function(data, textStatus, jqXHR) {
 				console.log('Annuaire SUCCESS : ' + textStatus);
 				if (data != undefined && data[courriel] != undefined) {

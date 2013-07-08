@@ -7,7 +7,7 @@
 	background: #2b3891;
 	text-shadow: none;
 }
-.navbar .nav > li > a:hover, .navbar .nav > .active > a, .navbar .nav > .active > a:hover, .navbar .nav > .active > a:focus {
+.navbar .nav > li > a:hover, .navbar .nav > .active > a, .navbar .nav > .active > a:hover {
 	color: #2b3891;
 	background: #FFF;
 }
