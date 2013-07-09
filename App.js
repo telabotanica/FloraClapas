@@ -1742,12 +1742,13 @@ directory.Router = Backbone.Router.extend({
 				options = { sourceType: pictureSource.PHOTOLIBRARY };
 			}
 			navigator.camera.getPicture(
-			onPhotoSuccess, 
-			function(message){
-				alert('Erreur camera: ' + message);
-				console.log('CAMERA failed because: ' + message);
-			},
-			options);
+				onPhotoSuccess, 
+				function(message){
+					alert('Erreur camera: ' + message);
+					console.log('CAMERA failed because: ' + message);
+				},
+				options
+			);
 		});
 		
 		
@@ -1980,8 +1981,8 @@ function moisPhenoEstCouvert( debut, fin) {
 
 
 function onPhotoSuccess(imageData){
-	imageData.replace("file:///",'');
-	imageData.replace("content://",'');
+	imageData = imageData.replace("file:///",'');
+	imageData = imageData.replace("content://",'');
 	$('#obs-photos-info').append(imageData);			
 	directory.db.transaction(
 		function(tx) {
