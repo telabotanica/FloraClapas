@@ -2,12 +2,13 @@
 	width: 100%;
 	background: #2b3891;
 }
-.navbar .nav > li > a {
+.navbar .nav > li > a, .navbar .nav > li > a:hover, .navbar .nav > li > a:focus {
 	color: #FFF;
 	background: #2b3891;
 	text-shadow: none;
-}
-.navbar .nav > .active > a {
+}			
+
+.navbar .nav > .active > a, .navbar .nav > .active > a:hover, .navbar .nav > .active > a:focus {
 	color: #2b3891;
 	background: #FFF;
 }
