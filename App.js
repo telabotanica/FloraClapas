@@ -2013,7 +2013,7 @@ function requeterIdentite() {
 			url : urlAnnuaire,
 			type : 'GET', 
 			success : function(data, textStatus, jqXHR) {
-				alert('Annuaire SUCCESS : ' + textStatus);
+				alert('Annuaire SUCCESS : ' + data);
 				console.log('Annuaire SUCCESS : ' + textStatus);
 				if (data != undefined && data[courriel] != undefined) {
 					var infos = data[courriel];
