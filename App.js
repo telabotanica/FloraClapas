@@ -1333,13 +1333,6 @@ directory.Router = Backbone.Router.extend({
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
 		});
-
-		directory.db.transaction(function (tx) {
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (6, 'content://media/external/images/media/354', 1)");
-		},
-		function(error) {
-			console.log('DB | Error processing SQL: ' + error.code, error);
-		});
 		
 		directory.db.transaction(function (tx) {
 			var sql = 
@@ -1987,6 +1980,8 @@ function moisPhenoEstCouvert( debut, fin) {
 
 
 function onPhotoSuccess(imageData){
+	imageData.replace("file:///",'');
+	imageData.replace("content://",'');
 	$('#obs-photos-info').append(imageData);			
 	directory.db.transaction(
 		function(tx) {
@@ -1994,7 +1989,7 @@ function onPhotoSuccess(imageData){
 				sql =
 					'SELECT id_photo ' +
 					'FROM photo ' + 
-					'ORDER BY id_obs DESC';
+					'ORDER BY id_photo DESC';
 			tx.executeSql(sql, [], function(tx, results) {
 				var photo = new Array(),
 					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
@@ -2006,14 +2001,14 @@ function onPhotoSuccess(imageData){
 				photo.push(id);
 				photo.push("'"+imageData+"'");
 				photo.push(hash[hash.length - 1]);
-				
+
 				alert(sql);
 				tx.executeSql(sql, photo);
 				//self.transmissionObs();
 			});
 		},
 		function(error) {
-			alert('DB | Error processing SQL: ' + error.code, error);
+			alert('DB | Error processing SQL: ' + error.code + '\n' + error);
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		}
 	);
