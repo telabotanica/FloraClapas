@@ -997,7 +997,7 @@ directory.views.EspeceListView = Backbone.View.extend({
 			console.log(arr_temp);
 			console.log(directory.liste);
 			console.log(directory.nbre_criteres);
-			for (var pourcentage = directory.liste.total; pourcentage > 0; pourcentage--) {
+			for (var pourcentage = directory.liste.total; pourcentage >= 0; pourcentage--) {
 				for (var i = 0; i < arr_temp.length; i++) {
 					if (directory.nbre_criteres[arr_temp[i].attributes.num_nom] == pourcentage) {
 						arr_temp[i].attributes.pourcentage = pourcentage + '/' + directory.liste.total;
@@ -1007,8 +1007,9 @@ directory.views.EspeceListView = Backbone.View.extend({
 			}
 			
 			for (var i = 0; i < arr_temp.length; i++) {
-				var index = $.inArray(arr_temp[i].attributes.num_nom, directory.liste);
-				if (index == -1) {
+				var index_liste = $.inArray(arr_temp[i].attributes.num_nom, directory.liste),
+					index_criteres = (typeof directory.nbre_criteres[arr_temp[i].attributes.num_nom] === 'undefined') ? -1 : 0;
+				if (index_liste == -1 && index_criteres == -1) {
 					arr_temp[i].attributes.pourcentage = 0 + '/' + directory.liste.total;
 					arr_especes.push(arr_temp[i]);
 				}
@@ -1200,6 +1201,7 @@ directory.views.Accueil = Backbone.View.extend({
 
 directory.views.saisieObs = Backbone.View.extend({
 	initialize: function() {
+		geolocaliser();
 		var date = new Date(),
 			jour = date.getDate(),
 			mois = date.getMonth() + 1,
@@ -1216,7 +1218,6 @@ directory.views.saisieObs = Backbone.View.extend({
 		this.model.attributes.position = this.position;
 		//console.log(this.model);
 		$(this.el).html(this.template(this.model.toJSON()));
-		geolocaliser();
 		return this;
 	}
 });
