@@ -106,8 +106,8 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
-				console.log('Dropping PARCOURS table');
-				tx.executeSql('DROP TABLE IF EXISTS parcours');
+				//console.log('Dropping PARCOURS table');
+				//tx.executeSql('DROP TABLE IF EXISTS parcours');
 				var sql =
 					'CREATE TABLE IF NOT EXISTS parcours (' +
 						'id INT NOT NULL ,' +
@@ -134,41 +134,41 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
 			function(tx) {
-				console.log('Inserting parcours');
-				$.ajax({
-					type: 'GET',
-					url: './parcours.csv',
-					dataType: 'text',
-					success: function(fichier) { 
-						var arr_lignes = fichier.split(/\r\n|\r|\n/),
-						arr_sql = new Array(),
-						max = arr_lignes.length - 1;
-						for (var i = 1; i < max; i++) {
-							var sql = '',
-						arr_valeurs = arr_lignes[i].split(';');
-						for (var j = 0; j < arr_valeurs.length; j++) {
-							sql += arr_valeurs[j];
-							if (j < (arr_valeurs.length - 1)) {
-								sql += ',';
-							}
-						}
-						arr_sql.push('INSERT INTO parcours '
-							+ '(id, nom, latitude_centre, longitude_centre, fichier_carte, photos, description, ce_critere) '
-							+ 'VALUES ('+sql+')');
-						}
-						//console.log(arr_sql);
-						directory.db.transaction(function (tx) {
-							for (var c = 0; c < arr_sql.length; c++) {
-								tx.executeSql(arr_sql[c]);
-							}
-						});
-					},
-					error : function(jqXHR, textStatus, errorThrown) {
-						console.log(textStatus);
-					}
-				});
 			}
 		);
+		console.log('Inserting parcours');
+		$.ajax({
+			type: 'GET',
+			url: './parcours.csv',
+			dataType: 'text',
+			success: function(fichier) { 
+				var arr_lignes = fichier.split(/\r\n|\r|\n/),
+				arr_sql = new Array(),
+				max = arr_lignes.length - 1;
+				for (var i = 1; i < max; i++) {
+					var sql = '',
+				arr_valeurs = arr_lignes[i].split(';');
+				for (var j = 0; j < arr_valeurs.length; j++) {
+					sql += arr_valeurs[j];
+					if (j < (arr_valeurs.length - 1)) {
+						sql += ',';
+					}
+				}
+				arr_sql.push('INSERT INTO parcours '
+					+ '(id, nom, latitude_centre, longitude_centre, fichier_carte, photos, description, ce_critere) '
+					+ 'VALUES ('+sql+')');
+				}
+				//console.log(arr_sql);
+				directory.db.transaction(function (tx) {
+					for (var c = 0; c < arr_sql.length; c++) {
+						tx.executeSql(arr_sql[c]);
+					}
+				});
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				console.log(textStatus);
+			}
+		});
 	}
 });
 _.extend(directory.dao.ParcoursDAO.prototype, directory.dao.baseDAOBD);
@@ -278,8 +278,8 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
-				console.log('Dropping ESPECE table');
-				tx.executeSql('DROP TABLE IF EXISTS espece');
+				//console.log('Dropping ESPECE table');
+				//tx.executeSql('DROP TABLE IF EXISTS espece');
 				var sql =
 					'CREATE TABLE IF NOT EXISTS espece (' +
 						'num_nom INT NOT NULL ,' +
@@ -1862,18 +1862,18 @@ directory.Router = Backbone.Router.extend({
 
 		if (page === this.searchPage) {
 			// Always apply a Back (slide from left) transition when we go back to the search page
-			slideFrom = 'left';
+			slideFrom = "left";
 			$(page.el).attr('class', 'page stage-left');
 			// Reinitialize page history
 			this.pageHistory = [window.location.hash];
 		} else if (this.pageHistory.length > 1 && window.location.hash === this.pageHistory[this.pageHistory.length - 2]) {
 			// The new page is the same as the previous page -> Back transition
-			slideFrom = 'left';
+			slideFrom = "left";
 			$(page.el).attr('class', 'page stage-left');
 			this.pageHistory.pop();
 		} else {
 			// Forward transition (slide from right)
-			slideFrom = 'right';
+			slideFrom = "right";
 			$(page.el).attr('class', 'page stage-right');
 			this.pageHistory.push(window.location.hash);
 		}
@@ -1981,6 +1981,7 @@ function surSuccesGeoloc(position) {
 		var lng = position.coords.longitude;
 		$('#lat').html(lat);
 		$('#lng').html(lng);
+		$('#geo-infos').html('Calcul en cours...');
 
 		console.log('Geolocation SUCCESS');
 		var url_service = SERVICE_NOM_COMMUNE_URL;
@@ -1989,6 +1990,7 @@ function surSuccesGeoloc(position) {
 			console.log('NOM_COMMUNE found.');
 			$('#location').html(data['nom']);
 			$('#code_insee').val(data['codeINSEE']);
+			$('#geo-infos').html('');
 		})
 		.complete(function() { 
 			//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
@@ -2013,7 +2015,7 @@ function requeterIdentite() {
 			url : urlAnnuaire,
 			type : 'GET', 
 			success : function(data, textStatus, jqXHR) {
-				alert('Annuaire SUCCESS : ' + data);
+				$('#utilisateur-infos').html(data);
 				console.log('Annuaire SUCCESS : ' + textStatus);
 				if (data != undefined && data[courriel] != undefined) {
 					var infos = data[courriel];
@@ -2027,7 +2029,6 @@ function requeterIdentite() {
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
-				alert('Annuaire ERREUR : ' + textStatus);
 				console.log('Annuaire ERREUR : ' + textStatus);
 				surErreurCompletionCourriel();
 			},
