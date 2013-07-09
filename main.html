@@ -56,5 +56,21 @@
 			<button class="btn btn-block btn-primary pull-right" data-dismiss="modal" aria-hidden="true">Continuer</button>
 		  </div>
 		</div>
+<script type="text/javascript" charset="utf-8">
+
+    var pictureSource;   // picture source
+    var destinationType; // sets the format of returned value 
+
+    // Wait for Cordova to connect with the device
+    //
+    document.addEventListener("deviceready",onDeviceReady,false);
+
+    // Cordova is ready to be used!
+    //
+    function onDeviceReady() {
+        pictureSource=navigator.camera.PictureSourceType;
+        destinationType=navigator.camera.DestinationType;
+    }
+</script>
 	</body>
 </html>

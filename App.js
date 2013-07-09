@@ -106,8 +106,8 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
-				//console.log('Dropping PARCOURS table');
-				//tx.executeSql('DROP TABLE IF EXISTS parcours');
+				console.log('Dropping PARCOURS table');
+				tx.executeSql('DROP TABLE IF EXISTS parcours');
 				var sql =
 					'CREATE TABLE IF NOT EXISTS parcours (' +
 						'id INT NOT NULL ,' +
@@ -133,8 +133,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 				//alert('Transaction error ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
-			function(tx) {
-			}
+			function(tx) {	}
 		);
 		console.log('Inserting parcours');
 		$.ajax({
@@ -147,16 +146,16 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 				max = arr_lignes.length - 1;
 				for (var i = 1; i < max; i++) {
 					var sql = '',
-				arr_valeurs = arr_lignes[i].split(';');
-				for (var j = 0; j < arr_valeurs.length; j++) {
-					sql += arr_valeurs[j];
-					if (j < (arr_valeurs.length - 1)) {
-						sql += ',';
+						arr_valeurs = arr_lignes[i].split(';');
+					for (var j = 0; j < arr_valeurs.length; j++) {
+						sql += arr_valeurs[j];
+						if (j < (arr_valeurs.length - 1)) {
+							sql += ',';
+						}
 					}
-				}
-				arr_sql.push('INSERT INTO parcours '
-					+ '(id, nom, latitude_centre, longitude_centre, fichier_carte, photos, description, ce_critere) '
-					+ 'VALUES ('+sql+')');
+					arr_sql.push('INSERT INTO parcours '
+						+ '(id, nom, latitude_centre, longitude_centre, fichier_carte, photos, description, ce_critere) '
+						+ 'VALUES ('+sql+')');
 				}
 				//console.log(arr_sql);
 				directory.db.transaction(function (tx) {
@@ -278,8 +277,8 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
-				//console.log('Dropping ESPECE table');
-				//tx.executeSql('DROP TABLE IF EXISTS espece');
+				console.log('Dropping ESPECE table');
+				tx.executeSql('DROP TABLE IF EXISTS espece');
 				var sql =
 					'CREATE TABLE IF NOT EXISTS espece (' +
 						'num_nom INT NOT NULL ,' +
@@ -298,49 +297,48 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 				//alert('Transaction error ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
-			function(tx) {
-				console.log('Inserting espece');
-				$.ajax( {
-					type: 'GET',
-					url: './espece.csv',
-					dataType: 'text',
-					success: function(fichier) { 
-						var arr_lignes = fichier.split(/\r\n|\r|\n/),
-							arr_sql = new Array(),
-							max = arr_lignes.length - 1;
-						for (var i = 1; i < max; i++) {
-							var sql = '',
-								arr_valeurs = arr_lignes[i].split(';');
-							for (var j = 0; j < arr_valeurs.length; j++) {
-								sql += arr_valeurs[j];
-								if (j < (arr_valeurs.length - 1)) {
-									sql += ',';
-								}
-							}
-							arr_sql.push('INSERT INTO espece '
-									+ '(nom_sci, num_nom, famille, num_taxon, nom_vernaculaire, description, photos, referentiel) '
-									+ 'VALUES ('+sql+')');
-						}
-						//console.log(arr_sql);
-						directory.db.transaction(function (tx) {
-							for (var c = 0; c < arr_sql.length; c++) {
-								tx.executeSql(arr_sql[c]);
-							}
-						}, 
-						function(error) {
-							//alert('Transaction error ' + error);
-							console.log('DB | Error processing SQL: ' + error.code, error);
-						},
-						function(tx) {
-							//callback();
-						});
-					},
-					error : function(jqXHR, textStatus, errorThrown) {
-						console.log(textStatus);
-					}
-				});
-			}
+			function(tx) {	}
 		);
+		console.log('Inserting espece');
+		$.ajax({
+			type: 'GET',
+			url: './espece.csv',
+			dataType: 'text',
+			success: function(fichier) { 
+				var arr_lignes = fichier.split(/\r\n|\r|\n/),
+					arr_sql = new Array(),
+					max = arr_lignes.length - 1;
+				for (var i = 1; i < max; i++) {
+					var sql = '',
+						arr_valeurs = arr_lignes[i].split(';');
+					for (var j = 0; j < arr_valeurs.length; j++) {
+						sql += arr_valeurs[j];
+						if (j < (arr_valeurs.length - 1)) {
+							sql += ',';
+						}
+					}
+					arr_sql.push('INSERT INTO espece '
+						+ '(nom_sci, num_nom, famille, num_taxon, nom_vernaculaire, description, photos, referentiel) '
+						+ 'VALUES ('+sql+')');
+				}
+				//console.log(arr_sql);
+				directory.db.transaction(function (tx) {
+					for (var c = 0; c < arr_sql.length; c++) {
+						tx.executeSql(arr_sql[c]);
+					}
+				}, 
+				function(error) {
+					//alert('Transaction error ' + error);
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				},
+				function(tx) {
+					//callback();
+				});
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				console.log(textStatus);
+			}
+		});
 	}
 });
 _.extend(directory.dao.EspeceDAO.prototype, directory.dao.baseDAOBD);
@@ -410,47 +408,46 @@ _.extend(directory.dao.CritereDAO.prototype, {
 				//alert('Transaction error ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
-			function(tx) {
-				console.log('Inserting critere');
-				$.ajax( {
-					type: 'GET',
-					url: './critere.csv',
-					dataType: 'text',
-					success: function(fichier) { 
-						var arr_lignes = fichier.split(/\r\n|\r|\n/),
-							arr_sql = new Array(),
-							max = arr_lignes.length - 1;
-						for (var i = 1; i < max; i++) {
-							var sql = '',
-								arr_valeurs = arr_lignes[i].split(';');
-							for (var j = 0; j < arr_valeurs.length; j++) {
-								sql += arr_valeurs[j];
-								if (j < (arr_valeurs.length - 1)) {
-									sql += ',';
-								}
-							}
-							arr_sql.push(sql);
-						}
-						//console.log(arr_sql);
-						directory.db.transaction(function (tx) {
-							for (var c = 0; c < arr_sql.length; c++) {
-								tx.executeSql("INSERT INTO critere (id_critere, intitule, url_img, ce_parent) VALUES ("+arr_sql[c]+")");
-							}
-						}, 
-						function(error) {
-							//alert('Transaction error ' + error);
-							console.log('DB | Error processing SQL: ' + error.code, error);
-						},
-						function(tx) {
-							//callback();
-						});
-					},
-					error : function(jqXHR, textStatus, errorThrown) {
-						console.log(textStatus);
-					}
-				});
-			}
+			function(tx) {	}
 		);
+		console.log('Inserting critere');
+		$.ajax({
+			type: 'GET',
+			url: './critere.csv',
+			dataType: 'text',
+			success: function(fichier) { 
+				var arr_lignes = fichier.split(/\r\n|\r|\n/),
+					arr_sql = new Array(),
+					max = arr_lignes.length - 1;
+				for (var i = 1; i < max; i++) {
+					var sql = '',
+						arr_valeurs = arr_lignes[i].split(';');
+					for (var j = 0; j < arr_valeurs.length; j++) {
+						sql += arr_valeurs[j];
+						if (j < (arr_valeurs.length - 1)) {
+							sql += ',';
+						}
+					}
+					arr_sql.push(sql);
+				}
+				//console.log(arr_sql);
+				directory.db.transaction(function (tx) {
+					for (var c = 0; c < arr_sql.length; c++) {
+						tx.executeSql("INSERT INTO critere (id_critere, intitule, url_img, ce_parent) VALUES ("+arr_sql[c]+")");
+					}
+				}, 
+				function(error) {
+					//alert('Transaction error ' + error);
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				},
+				function(tx) {
+					//callback();
+				});
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				console.log(textStatus);
+			}
+		});
 	}
 });
 _.extend(directory.dao.CritereDAO.prototype, directory.dao.baseDAOBD);
@@ -491,49 +488,48 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 				//alert('Transaction error ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
-			function(tx) {
-				console.log('Inserting avoir_critere');
-				$.ajax( {
-					type: 'GET',
-					url: './avoir_critere.csv',
-					dataType: 'text',
-					success: function(fichier) { 
-						var arr_lignes = fichier.split(/\r\n|\r|\n/),
-							arr_sql = new Array(),
-							max = arr_lignes.length - 1;
-						for (var i = 1; i < max; i++) {
-							var sql = '',
-								arr_valeurs = arr_lignes[i].split(';');
-							if (arr_valeurs[1] != 'null') {
-								for (var j = 0; j < arr_valeurs.length; j++) {
-									sql += arr_valeurs[j];
-									if (j < (arr_valeurs.length - 2)) {
-										sql += ',';
-									}
-								}
-								arr_sql.push(sql);
+			function(tx) {	}
+		);
+		console.log('Inserting avoir_critere');
+		$.ajax( {
+			type: 'GET',
+			url: './avoir_critere.csv',
+			dataType: 'text',
+			success: function(fichier) { 
+				var arr_lignes = fichier.split(/\r\n|\r|\n/),
+					arr_sql = new Array(),
+					max = arr_lignes.length - 1;
+				for (var i = 1; i < max; i++) {
+					var sql = '',
+						arr_valeurs = arr_lignes[i].split(';');
+					if (arr_valeurs[1] != 'null') {
+						for (var j = 0; j < arr_valeurs.length; j++) {
+							sql += arr_valeurs[j];
+							if (j < (arr_valeurs.length - 2)) {
+								sql += ',';
 							}
 						}
-						//console.log(arr_sql);
-						directory.db.transaction(function (tx) {
-							for (var c = 0; c < arr_sql.length; c++) {
-								tx.executeSql("INSERT INTO avoir_critere (id_espece, id_critere) VALUES ("+arr_sql[c]+")");
-							}
-						}, 
-						function(error) {
-							//alert('Transaction error ' + error);
-							console.log('DB | Error processing SQL: ' + error.code, error);
-						},
-						function(tx) {
-							//callback();
-						});
-					},
-					error : function(jqXHR, textStatus, errorThrown) {
-						console.log(textStatus);
+						arr_sql.push(sql);
 					}
+				}
+				//console.log(arr_sql);
+				directory.db.transaction(function (tx) {
+					for (var c = 0; c < arr_sql.length; c++) {
+						tx.executeSql("INSERT INTO avoir_critere (id_espece, id_critere) VALUES ("+arr_sql[c]+")");
+					}
+				}, 
+				function(error) {
+					//alert('Transaction error ' + error);
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				},
+				function(tx) {
+					//callback();
 				});
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				console.log(textStatus);
 			}
-		);
+		});
 	}
 });
 _.extend(directory.dao.AvoirCritereDAO.prototype, directory.dao.baseDAOBD);
@@ -836,7 +832,7 @@ directory.models.ObsCollection = Backbone.Collection.extend({
 		var obs = new directory.dao.ObsDAO(directory.db),
 			self = this;
 		obs.findById(key, function(data) {
-			//console.log("ObsCollection " + data);
+			//console.log("ObsCollection ", data);
 			self.reset(data);
 		});
 	},
@@ -845,7 +841,7 @@ directory.models.ObsCollection = Backbone.Collection.extend({
 		var obs = new directory.dao.ObsDAO(directory.db),
 			self = this;
 		obs.findAll(function(data) {
-			//console.log("ObsCollection " + data);
+			//console.log("ObsCollection ", data);
 			self.reset(data);
 		});
 	}
@@ -867,7 +863,7 @@ directory.models.PhotoCollection = Backbone.Collection.extend({
 		var photo = new directory.dao.PhotoDAO(directory.db),
 			self = this;
 		photo.findByObs(key, function(data) {
-			//console.log("EmployeeCollection " + data);
+			//console.log("PhotoCollection | findByObs", data);
 			self.reset(data);
 		});
 	}
@@ -924,8 +920,12 @@ directory.views.EmployeeListItemView = Backbone.View.extend({
 });
 
 directory.views.ParcoursPage = Backbone.View.extend({
-
 	initialize: function() {
+		directory.liste = new Array();
+		directory.criteria = new Array();
+		directory.nbre_criteres = new Array();
+		directory.nbre_especes = null;
+		
 		this.template = _.template(directory.utils.templateLoader.get('parcours-page'));
 	},
 
@@ -949,7 +949,7 @@ directory.views.ListPage = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
 	
 	initialize: function(data) {
-		//console.log(data);
+		//console.log(data);		
 		this.model = new directory.models.EspeceCollection();
 		this.model.id = data.model.attributes.id;
 		this.model.name = data.model.attributes.name;
@@ -994,8 +994,10 @@ directory.views.EspeceListView = Backbone.View.extend({
 			nbre_triees = directory.liste.length;
 			
 		if (nbre_triees != 0 && directory.liste.total != 0) {
-			//console.log(arr_temp);
-			for (var pourcentage = directory.liste.total; pourcentage >= 0; pourcentage--) {
+			console.log(arr_temp);
+			console.log(directory.liste);
+			console.log(directory.nbre_criteres);
+			for (var pourcentage = directory.liste.total; pourcentage > 0; pourcentage--) {
 				for (var i = 0; i < arr_temp.length; i++) {
 					if (directory.nbre_criteres[arr_temp[i].attributes.num_nom] == pourcentage) {
 						arr_temp[i].attributes.pourcentage = pourcentage + '/' + directory.liste.total;
@@ -1198,8 +1200,6 @@ directory.views.Accueil = Backbone.View.extend({
 
 directory.views.saisieObs = Backbone.View.extend({
 	initialize: function() {
-		geolocaliser();
-	
 		var date = new Date(),
 			jour = date.getDate(),
 			mois = date.getMonth() + 1,
@@ -1215,8 +1215,8 @@ directory.views.saisieObs = Backbone.View.extend({
 	render: function(eventName) {
 		this.model.attributes.position = this.position;
 		//console.log(this.model);
-		
 		$(this.el).html(this.template(this.model.toJSON()));
+		geolocaliser();
 		return this;
 	}
 });
@@ -1308,7 +1308,6 @@ directory.Router = Backbone.Router.extend({
 			var sql = 
 				"SELECT id_critere, intitule FROM critere  " +
 				"WHERE intitule LIKE '%feuillaison%' ";
-
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre = results.rows.length,
 					i = 0;
@@ -1514,12 +1513,19 @@ directory.Router = Backbone.Router.extend({
 				}
 			}
 			if (arr_ids.length != 0) {
-				sql_select = ", count(num_nom) AS count ";
-				sql_and = (sql_where == "") ? "WHERE" : "AND";
-				sql_and += 
-				" id_critere IN (" +
-					sql_conditions + 
-				") ";
+				if (id_parcours != 0 && arr_ids.length == 1) {
+					sql_select = ", COALESCE(NULL, 0) AS count ";
+				} else {
+					sql_select = ", count(num_nom) AS count ";
+				}
+				
+				if (id_parcours != 0 && arr_ids.length > 1 || id_parcours == 0) {
+					sql_and = (sql_where == "") ? "WHERE" : "AND";
+					sql_and += 
+					" id_critere IN (" +
+						sql_conditions + 
+					") ";
+				}
 				sql_order_by = "count DESC, ";
 			}
 			
@@ -1527,6 +1533,9 @@ directory.Router = Backbone.Router.extend({
 			var i = 0,
 				criteres = [];
 			directory.nbre_especes = 0;
+			for (var index in directory.nbre_criteres) {
+				directory.nbre_criteres[index] = 0;
+			}
 			directory.db.transaction(
 				function(ta) {
 					var sql =
@@ -1537,15 +1546,19 @@ directory.Router = Backbone.Router.extend({
 						sql_and + 
 						"GROUP BY num_nom " +
 						"ORDER BY " + sql_order_by + "nom_vernaculaire ASC " ;
-					//console.log(sql);
+					console.log(sql, arr_ids);
 					ta.executeSql(sql, arr_ids, function(tx, results) {
 						var nbre = results.rows.length,
 							arr_pheno = directory.pheno.liste;
 						//console.log('Total rows : ' + nbre);
+						if (nbre == 0) {
+							$('#resultats-recherche').html(' ' + nbre + ' ');
+						}
 						for (i = 0; i < nbre; i = i + 1) {	
 							criteres[i] = results.rows.item(i).num_nom;
+							console.log(results.rows.item(i));
 							if (results.rows.item(i).count !== undefined) {
-								directory.nbre_criteres[criteres[i]] = results.rows.item(i).count;		
+								directory.nbre_criteres[criteres[i]] = results.rows.item(i).count;
 							} else {
 								directory.nbre_criteres[criteres[i]] = 0;
 							}
@@ -1553,62 +1566,84 @@ directory.Router = Backbone.Router.extend({
 							if (directory.nbre_criteres[criteres[i]] == nbre_choix) {
 								directory.nbre_especes++;
 							}
+							directory.liste = criteres;
+							directory.liste.total = nbre_choix;
+							console.log(directory.liste);
+							console.log(directory.nbre_criteres, nbre_choix);
 							$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
-							
-							
-							var j = 0;
-							for (; j < arr_pheno.length; j++) {
-								var parametres = new Array(),
-									sql = 
-										"SELECT id_espece, intitule, ce_parent, " + 
-										"COALESCE(NULL, NULL, ?) AS valeur_index, COALESCE(NULL, NULL, ?) AS tour_boucle " +
-										"FROM critere c " +
-										"JOIN avoir_critere ac ON c.id_critere = ac.id_critere " +
-										"WHERE id_espece = " + criteres[i] + "  " +
-										"AND ce_parent IN ( ?, ? )";
-								
-								parametres.push(i);
-								parametres.push(j);
-								parametres.push(directory.pheno[arr_pheno[j]]["debut"]); 
-								parametres.push(directory.pheno[arr_pheno[j]]["fin"]);
-								//console.log(sql, parametres);
-								ta.executeSql(sql, parametres, function(tx, results) {
-									var debut = -1,
-										fin = -1,
-										tour = -1,
-										mois_actuel = new Date().getMonth() + 1,
-										nbre = results.rows.length,
-										k = 0;
-									for (; k < nbre; k = k + 1) {
-										tour++;
-										var num_nom = results.rows.item(k).id_espece;
-										for (var m = 0; m < directory.pheno.liste.length; m++) {
-											if (results.rows.item(k).ce_parent == directory.pheno[directory.pheno.liste[m]]["debut"]) {
-												debut = results.rows.item(k).intitule;
-											} 
-											if (results.rows.item(k).ce_parent == directory.pheno[directory.pheno.liste[m]]["fin"]) {
-												fin = results.rows.item(k).intitule;
-											}
+
+						}
+						
+						
+						var j = 0;
+						for (; j < arr_pheno.length; j++) {
+							var sql_where_pheno = 
+								"WHERE id_espece IN ( " +
+									"SELECT num_nom " +
+									"FROM espece e " +  
+									"JOIN avoir_critere a ON a.id_espece = e.num_nom " +
+									"WHERE id_critere = " + id_parcours + 
+								" ) ",
+								sql_parent = (sql_where == '') ? "WHERE " : sql_where_pheno+"AND ",
+								parametres = new Array(),
+								sql = 
+									"SELECT id_espece, intitule, ce_parent, " + 
+									"COALESCE(NULL, NULL, ?) AS tour_boucle " +
+									"FROM critere c " +
+									"JOIN avoir_critere ac ON c.id_critere = ac.id_critere " +
+									sql_parent + " ce_parent IN ( ?, ? )";
+							parametres.push(j);
+							parametres.push(directory.pheno[arr_pheno[j]]["debut"]); 
+							parametres.push(directory.pheno[arr_pheno[j]]["fin"]);
+							//console.log(sql, parametres);
+							ta.executeSql(sql, parametres, function(tx, results) {
+								var debut = -1,
+									fin = -1,
+									tour = -1,
+									nbre = results.rows.length,
+									k = 0;
+								for (; k < nbre; k = k + 1) {
+									tour += 1;
+									//console.log(results.rows.item(k));
+									var num_nom = results.rows.item(k).id_espece;
+									for (var m = 0; m < directory.pheno.liste.length; m++) {
+										if (results.rows.item(k).ce_parent == directory.pheno[directory.pheno.liste[m]]["debut"]) {
+											debut = results.rows.item(k).intitule;
+										} 
+										if (results.rows.item(k).ce_parent == directory.pheno[directory.pheno.liste[m]]["fin"]) {
+											fin = results.rows.item(k).intitule;
 										}
-										if (moisPhenoEstCouvert(mois_actuel, debut, fin) && tour == 1) {
-											tour = -1;
-											directory.nbre_criteres[num_nom]++;
-										}	
 									}
 									
-									if (results.rows.item(k-1).valeur_index == criteres.length-1
-									 && results.rows.item(k-1).tour_boucle == arr_pheno.length-1) {
-										for (var l = 0; l < criteres.length; l++) {
-											var index = criteres[l];
-											if (directory.nbre_criteres[index] == nbre_choix) {
-												directory.nbre_especes++;
+									if (tour == 1) {
+										tour = -1;
+										if (moisPhenoEstCouvert(debut, fin)) {
+											if ($.inArray(num_nom, directory.liste) == -1) {
+												directory.liste.push(num_nom);
 											}
+											if (directory.nbre_criteres[num_nom] === undefined) {
+												directory.nbre_criteres[num_nom] = 0;
+											}
+											directory.nbre_criteres[num_nom]++;
 										}
-										$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
+									}	
+								}
+								
+								if (results.rows.item(k-1).tour_boucle == arr_pheno.length-1) {
+									for (var l = 0; l < criteres.length; l++) {
+										var index = criteres[l];
+										if (directory.nbre_criteres[index] == nbre_choix) {
+											directory.nbre_especes++;
+										}
 									}
-									//console.log(directory.nbre_criteres);
-								});
-							}
+									$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
+								}
+								directory.liste = criteres;
+								directory.liste.total = nbre_choix;
+								console.log(directory.liste);
+								console.log(directory.nbre_criteres, nbre_choix);
+								//console.log(directory.nbre_criteres, nbre_choix);
+							});
 						}
 					});
 				},
@@ -1617,17 +1652,8 @@ directory.Router = Backbone.Router.extend({
 				}
 			);		
 			
-			directory.liste = criteres;
-			directory.liste.total = nbre_choix;
-			this.model =  new directory.models.EspeceCollection();
-			this.model.findByParcours(id_parcours);
-			var nbre = this.model.length,
-				especes = [],
-				i = 0;
-			for (; i < nbre; i = i + 1) {
-				especes[i] = this.model.models[i].attributes;
-			}
 		});
+		
 		
 		$('#content').on('click', '#criteres-reset', function(event) {			
 			var parent = document.getElementById('criteres-liste'),
@@ -1642,7 +1668,6 @@ directory.Router = Backbone.Router.extend({
 			directory.nbre_especes = null;
 			$('#resultats-recherche').html('');
 		});
-		
 		
 		
 		$('#content').on('click', '#geolocaliser', geolocaliser);
@@ -1919,18 +1944,19 @@ $().ready(function() {
 });
 
 
-function moisPhenoEstCouvert(mois_actuel, debut, fin) {
+function moisPhenoEstCouvert( debut, fin) {
+	var mois_actuel = new Date().getMonth() + 1,
+		flag = false;
 	//console.log(mois_actuel, debut, fin);
-	var flag = false;
 	
 	if (debut != -1 && fin != -1) {
-		if (debut < fin) {
+		if (debut <= fin) {
 			flag = (mois_actuel >= debut && mois_actuel <= fin);
 		}
 		if (debut == fin) {
 			flag = (mois_actuel == debut);
 		}
-		if (debut > fin) {
+		if (debut >= fin) {
 			flag = (mois_actuel >= debut && mois_actuel <= 12 || mois_actuel >= 1 && mois_actuel <= fin);
 		}
 	}
@@ -2019,7 +2045,7 @@ function requeterIdentite() {
 			url : urlAnnuaire,
 			type : 'GET', 
 			success : function(data, textStatus, jqXHR) {
-				$('#utilisateur-infos').html(data);
+				$('#utilisateur-infos').html(data[courriel]);
 				console.log('Annuaire SUCCESS : ' + textStatus);
 				if (data != undefined && data[courriel] != undefined) {
 					var infos = data[courriel];
