@@ -1232,7 +1232,7 @@ directory.views.ObsPage = Backbone.View.extend({
 	},
 
 	render: function(eventName) { 	
-		console.log(this.model);
+		//console.log(this.model);
 		$(this.el).html(this.template(this.data));
 		return this;
 	}
@@ -1967,8 +1967,10 @@ function moisPhenoEstCouvert(mois_actuel, debut, fin) {
 
 function geolocaliser() {
 	if (navigator.geolocation) {
+		$('#geo-infos').html('Calcul en cours...');
 		navigator.geolocation.getCurrentPosition(surSuccesGeoloc, surErreurGeoloc);
 	} else {
+		$('#geo-infos').html('Calcul impossible.');
 		var erreur = { code: '0', message: 'Géolocalisation non supportée par le navigateur'};
 		surErreurGeoloc(erreur);
 	}
@@ -1976,12 +1978,12 @@ function geolocaliser() {
 function surSuccesGeoloc(position) {
 	var TEXTE_HORS_LIGNE = 'Aucune connexion.',
 		SERVICE_NOM_COMMUNE_URL = 'http://www.tela-botanica.org/service:eflore:0.1/osm/nom-commune?lon={lon}&lat={lat}';
+	
 	if (position) {
 		var lat = position.coords.latitude;
 		var lng = position.coords.longitude;
 		$('#lat').html(lat);
 		$('#lng').html(lng);
-		$('#geo-infos').html('Calcul en cours...');
 
 		console.log('Geolocation SUCCESS');
 		var url_service = SERVICE_NOM_COMMUNE_URL;
@@ -1990,9 +1992,9 @@ function surSuccesGeoloc(position) {
 			console.log('NOM_COMMUNE found.');
 			$('#location').html(data['nom']);
 			$('#code_insee').val(data['codeINSEE']);
-			$('#geo-infos').html('');
 		})
 		.complete(function() { 
+			$('#geo-infos').html('');
 			//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
 			//$('#location').html(texte);
 		})
@@ -2000,6 +2002,7 @@ function surSuccesGeoloc(position) {
 	}
 }
 function surErreurGeoloc(error){
+	$('#geo-infos').html('Calcul impossible.');
 	console.log('Echec de la géolocalisation, code: ' + error.code + ' message: '+ error.message);
 }
 
@@ -2029,6 +2032,7 @@ function requeterIdentite() {
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
+				$('#utilisateur-infos').html('Vérification impossible.');
 				console.log('Annuaire ERREUR : ' + textStatus);
 				surErreurCompletionCourriel();
 			},

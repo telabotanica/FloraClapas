@@ -2,6 +2,11 @@
 	width: 100%;
 	background: #2b3891;
 }
+
+.navbar {
+	margin-top: 40px;
+}
+
 .navbar .nav > li > a, .navbar .nav > li > a:hover, .navbar .nav > li > a:focus {
 	color: #FFF;
 	background: #2b3891;
@@ -16,7 +21,9 @@
 .description-parcours {
 	padding: 10px;
 	background: #FFF;
+	margin-bottom: 40px;
 }
+
 .description-parcours .photos:after {
 	clear: both;
 }
