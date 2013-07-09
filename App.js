@@ -1966,8 +1966,8 @@ function moisPhenoEstCouvert(mois_actuel, debut, fin) {
 
 
 function geolocaliser() {
+	$('#geo-infos').html('Calcul en cours...');
 	if (navigator.geolocation) {
-		$('#geo-infos').html('Calcul en cours...');
 		navigator.geolocation.getCurrentPosition(surSuccesGeoloc, surErreurGeoloc);
 	} else {
 		$('#geo-infos').html('Calcul impossible.');
@@ -2012,6 +2012,7 @@ function requeterIdentite() {
 	var SERVICE_ANNUAIRE = "http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/";
 	var courriel = $('#courriel').val();
 	if (courriel != '') {
+		$('#utilisateur-infos').html('Vérification en cours...');
 		//miseAJourCourriel();
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
 		$.ajax({

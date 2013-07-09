@@ -1,9 +1,8 @@
 <div class="header">
-    <a href="#" class="header-button header-button-left header-back-button">
-        <button>Retour</button>
-    </a>
-    
-	<h4 class="text-center">Observation n°<%= id_obs %></h4>
+	<a href="#" class="header-button header-button-left header-back-button">
+		<button>Retour</button>
+	</a>
+	<h1>Observation n°<%= id_obs %></h1>
 </div>
 
 <div class="tableview" style="top:44px;">
@@ -23,10 +22,11 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-
+/*
     var pictureSource=navigator.camera.PictureSourceType,
         destinationType=navigator.camera.DestinationType;
-
+*/
+alert(navigator.camera);
     // Called when a photo is successfully retrieved
     //
     function onPhotoDataSuccess(imageData) {
