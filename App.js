@@ -636,7 +636,13 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 					'WHERE ce_obs = :id_obs';
 
 				tx.executeSql(sql, [id], function(tx, results) {
-					callback(results.rows.length === 1 ? results.rows.item(0) : null);
+					 var nbre = results.rows.length,
+						photos = [],
+						i = 0;
+					for (; i < nbre; i = i + 1) {
+						photos[i] = results.rows.item(i);
+					}
+					callback(photos);
 				});
 			},
 			function(error) {
@@ -649,7 +655,7 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 		directory.db.transaction(
 			function(tx) {
 				//console.log('Dropping PHOTO table');
-				//tx.executeSql('DROP TABLE IF EXISTS photo');
+				tx.executeSql('DROP TABLE IF EXISTS photo');
 				var sql =
 					'CREATE TABLE IF NOT EXISTS photo (' +
 						'id_photo INT NOT NULL ,' +
@@ -688,9 +694,15 @@ Backbone.sync = function(method, model, options) {
 				options.success(data);
 			});
 		} else {
-			dao.findAll(function(data) {
-				options.success(data);
-			});
+			if (model.id_obs) {
+				dao.findByObs(model.id_obs, function(data) {
+					options.success(data);
+				});
+			} else {
+				dao.findAll(function(data) {
+					options.success(data);
+				});
+			}
 		}
 	}
 
@@ -1227,14 +1239,23 @@ directory.views.ObsPage = Backbone.View.extend({
 		//console.log(data);
 		this.data = data.model.attributes;
 		this.model = new directory.models.PhotoCollection();
-		this.model.findByObs(data.model.attributes.id);
+		this.model.findByObs(data.model.attributes.id_obs);
 		this.model.bind('reset', this.render, this);
 		this.template = _.template(directory.utils.templateLoader.get('obs-page'));
 	},
 
 	render: function(eventName) { 	
-		//console.log(this.model);
-		$(this.el).html(this.template(this.data));
+		console.log(this.model);
+		var photos = new Array();
+		for (var i = 0; i < this.model.models.length; i++) {
+			photos.push(this.model.models[i].attributes);
+		}
+		
+		var json = {
+			'obs' : this.data,
+			'photos' : photos
+		}
+		$(this.el).html(this.template(json));
 		return this;
 	}
 });
@@ -1249,8 +1270,8 @@ directory.views.transmissionObs = Backbone.View.extend({
 
 	render: function(eventName) { 
 		var json = {
-			"taille" : this.model.models.length,
-			"obs" : this.model.models
+			'taille' : this.model.models.length,
+			'obs' : this.model.models
 		}
 		
 		$(this.el).html(this.template(json));
@@ -1304,6 +1325,14 @@ directory.Router = Backbone.Router.extend({
 	initialize: function() {
 		var self = this;
 
+
+		directory.db.transaction(function (tx) {
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
+		});
 		
 		directory.db.transaction(function (tx) {
 			var sql = 
@@ -1651,8 +1680,7 @@ directory.Router = Backbone.Router.extend({
 				function(error) {
 					console.log('DB | Error processing SQL: ' + error.code, error);
 				}
-			);		
-			
+			);	
 		});
 		
 		
@@ -1683,9 +1711,9 @@ directory.Router = Backbone.Router.extend({
 						var obs = new Array(),
 							id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_obs+1;
 							sql =
-							'INSERT INTO obs ' +
-							'(id_obs, date, latitude, longitude, commune, code_insee, mise_a_jour, ce_espece) VALUES ' + 
-							'(?, ?, ?, ?, ?, ?, ?, ?) ';
+								'INSERT INTO obs ' +
+								'(id_obs, date, latitude, longitude, commune, code_insee, mise_a_jour, ce_espece) VALUES ' + 
+								'(?, ?, ?, ?, ?, ?, ?, ?) ';
 							
 						obs.push(id);
 						obs.push($('#date').html());
@@ -1706,37 +1734,22 @@ directory.Router = Backbone.Router.extend({
 			);
 			//console.log(obs);
 		});
-		$('#content').on('click', '#ajouter-photos', function(event) {
-			alert('ee');
-			pictureSource=navigator.camera.PictureSourceType;
-			destinationType=navigator.camera.DestinationType;
-
-			navigator.camera.getPicture(function(imageData){
-				$('#obs-photos-info').append(imageData);
-			}, 
+		
+		
+		$('#content').on('click', '.ajouter-photos', function(event) {
+			var options = null;
+			if (this.id = "chercher-photos") {
+				options = { sourceType: pictureSource.PHOTOLIBRARY };
+			}
+			navigator.camera.getPicture(
+			onPhotoSuccess, 
 			function(message){
-				alert('Failed because: ' + message);
-			}, 
-			{ 
-				quality: 50, 
-				destinationType: destinationType.FILE_URI
-			});
-			/*
-			$.each($('#ajouter-photos').get(0).files, function(index, valeur) {
-				for (var attribut in valeur) {
-					$('#obs-photos-info').append(attribut + ' : ' + valeur[attribut] + '<br />');
-				}
-				
-				var reader = new FileReader(),
-					binary, base64;
-				reader.addEventListener('loadend', function () {
-					binary = reader.result; // binary data (stored as string), unsafe for most actions
-					base64 = btoa(binary); 	// base64 data, safer but takes up more memory
-				}, false);
-			reader.readAsBinaryString(valeur);
-			});
-//*/
+				alert('Erreur camera: ' + message);
+				console.log('CAMERA failed because: ' + message);
+			},
+			options);
 		});
+		
 		
 		$('#content').on('blur', '#courriel', requeterIdentite);
 		$('#content').on('keypress', '#courriel', function(event) {
@@ -1964,6 +1977,40 @@ function moisPhenoEstCouvert( debut, fin) {
 	
 	return(flag);
 }
+
+
+function onPhotoSuccess(imageData){
+	$('#obs-photos-info').append(imageData);			
+	directory.db.transaction(
+		function(tx) {
+			var hash = window.location.hash,
+				sql =
+					'SELECT id_photo ' +
+					'FROM photo ' + 
+					'ORDER BY id_obs DESC';
+			tx.executeSql(sql, [], function(tx, results) {
+				var photo = new Array(),
+					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
+					sql =
+						'INSERT INTO photo ' +
+						'(id_photo, chemin, ce_obs) VALUES ' + 
+						'(?, ?, ?) ';
+					
+				photo.push(id);
+				photo.push(imageData);
+				photo.push(hash[hash.length - 1]);
+				
+				tx.executeSql(sql, photo);
+				//self.transmissionObs();
+			});
+		},
+		function(error) {
+			alert('DB | Error processing SQL: ' + error.code, error);
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		}
+	);
+}
+
 
 
 /*

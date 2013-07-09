@@ -2,144 +2,37 @@
 	<a href="#" class="header-button header-button-left header-back-button">
 		<button>Retour</button>
 	</a>
-	<h1>Observation n°<%= id_obs %></h1>
+	<h1>Observation n°<%= obs.id_obs %></h1>
 </div>
 
 <div class="tableview" style="top:44px;">
 	<div class="row-fluid">
-		<%= nom_vernaculaire %> <i>(<%= nom_sci %>)</i>
+		<%= obs.nom_vernaculaire %> <i>(<%= obs.nom_sci %>)</i>
 		<br />
-		Vue le <%= date %> 
-		<% if (commune != "") { %>
-			à <%= commune %>
+		Vue le <%= obs.date %> 
+		<% if (obs.commune != "") { %>
+			à <%= obs.commune %>
 		<% } %>
 		
-		<button id="ajouter-photos" class="btn-block btn-large btn btn-success">
-			Ajouter une photo
+		<hr />
+		<button class="ajouter-photos btn-block btn btn-info" id="prendre-photos">
+			Prendre une photo
 		</button>
+		<button class="ajouter-photos btn-block btn btn-inverse" id="chercher-photos">
+			Depuis la librairie...
+		</button>
+		
+		<hr />
+		<% _.each(photos, function(photo) { 
+		%>
+			<div class="pull-left miniature">
+				<img src="<%= photo.chemin %>" />
+			</div>
+		<% }); %>
 	</div>
 	<div class="row-fluid" id="obs-photos-info"></div>
 </div>
 
-<script type="text/javascript" charset="utf-8">
-/*
-    var pictureSource=navigator.camera.PictureSourceType,
-        destinationType=navigator.camera.DestinationType;
-*/
-alert(navigator.camera);
-    // Called when a photo is successfully retrieved
-    //
-    function onPhotoDataSuccess(imageData) {
-      // Uncomment to view the base64 encoded image data
-      // console.log(imageData);
-
-      // Get image handle
-      //
-      var smallImage = document.getElementById('smallImage');
-
-      // Unhide image elements
-      //
-      smallImage.style.display = 'block';
-
-      // Show the captured photo
-      // The inline CSS rules are used to resize the image
-      //
-      smallImage.src = "data:image/jpeg;base64," + imageData;
-    }
-
-    // Called when a photo is successfully retrieved
-    //
-    function onPhotoURISuccess(imageURI) {
-      // Uncomment to view the image file URI 
-      // console.log(imageURI);
-
-      // Get image handle
-      //
-      var largeImage = document.getElementById('largeImage');
-
-      // Unhide image elements
-      //
-      largeImage.style.display = 'block';
-
-      // Show the captured photo
-      // The inline CSS rules are used to resize the image
-      //
-      largeImage.src = imageURI;
-    }
-
-    // A button will call this function
-    //
-    function capturePhoto() {
-      // Take picture using device camera and retrieve image as base64-encoded string
-      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
-        destinationType: destinationType.DATA_URL });
-    }
-
-    // A button will call this function
-    //
-    function capturePhotoEdit() {
-      // Take picture using device camera, allow edit, and retrieve image as base64-encoded string  
-      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
-        destinationType: destinationType.DATA_URL });
-    }
-
-    // A button will call this function
-    //
-    function getPhoto(source) {
-      // Retrieve image file location from specified source
-      navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50, 
-        destinationType: destinationType.FILE_URI,
-        sourceType: source });
-    }
-
-    // Called if something bad happens.
-    // 
-    function onFail(message) {
-      alert('Failed because: ' + message);
-    }
-
-    </script>
-    
-    <button onclick="capturePhoto();">Capture Photo</button> <br>
-    <button onclick="capturePhotoEdit();">Capture Editable Photo</button> <br>
-    <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button><br>
-    <button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button><br>
-    <img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
-    <img style="display:none;" id="largeImage" src="" />
-
-
-
-
-  <script type="text/javascript" charset="utf-8">
-
-    // Called when capture operation is finished
-    //
-    function captureSuccess(mediaFiles) {
-        var i, len;
-        for (i = 0, len = mediaFiles.length; i < len; i += 1) {
-            $('#test').append(mediaFiles[i]);
-        }       
-    }
-
-    // Called if something bad happens.
-    // 
-    function captureError(error) {
-        var msg = 'An error occurred during capture: ' + error.code;
-        navigator.notification.alert(msg, null, 'Uh oh!');
-    }
-
-    // A button will call this function
-    //
-    function captureImage() {
-        // Launch device camera application, 
-        // allowing user to capture up to 2 images
-        navigator.device.capture.captureImage(captureSuccess, captureError, {limit: 2});
-    }
-
-
-</script>
-    <button onclick="captureImage();">Capture Image</button> <br>
-    <div id="test"></div> <br>
 
 
 
