@@ -1245,7 +1245,7 @@ directory.views.ObsPage = Backbone.View.extend({
 	},
 
 	render: function(eventName) { 	
-		console.log(this.model);
+		//console.log(this.model);
 		var photos = new Array();
 		for (var i = 0; i < this.model.models.length; i++) {
 			photos.push(this.model.models[i].attributes);
@@ -1332,6 +1332,13 @@ directory.Router = Backbone.Router.extend({
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
+		});
+
+		directory.db.transaction(function (tx) {
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (6, 'content://media/external/images/media/354', 1)");
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
 		});
 		
 		directory.db.transaction(function (tx) {
@@ -1738,7 +1745,7 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			var options = null;
-			if (this.id = "chercher-photos") {
+			if (this.id == 'chercher-photos') {
 				options = { sourceType: pictureSource.PHOTOLIBRARY };
 			}
 			navigator.camera.getPicture(
@@ -1997,9 +2004,10 @@ function onPhotoSuccess(imageData){
 						'(?, ?, ?) ';
 					
 				photo.push(id);
-				photo.push(imageData);
+				photo.push("'"+imageData+"'");
 				photo.push(hash[hash.length - 1]);
 				
+				alert(sql);
 				tx.executeSql(sql, photo);
 				//self.transmissionObs();
 			});
