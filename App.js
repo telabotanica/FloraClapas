@@ -2018,25 +2018,10 @@ function onPhotoSuccess(imageData){
 		reader.addEventListener('loadend', function (evt) {
 			binary = reader.result; // binary data (stored as string), unsafe for most actions
 			base64 = btoa(binary); 	// base64 data, safer but takes up more memory
-			
-			var photo = {
-				num:TEXTE_PHOTO, 
-				nom: '',
-				parent:'',
-				base64:0
-			};
-			photo.num += index_photos++;
-			photo.nom = valeur.name;
-			photo.parent = id_obs;
-			photo.base64 = base64;
-			
-			var cle = photo.num;
-			sauvegarderObs(cle, photo);
-			bdd.setItem('index_photos', index_photos);
-			afficherPhotos(id_obs);
+
+			$('#obs-photos-info').append('<br /><br />' + binary + '<br /><br />' + base64 +);
 		}, false);
 		reader.readAsBinaryString(imageData);
-		$('#obs-photos-info').append('<br />' + imageData);	
 	});
 	directory.db.transaction(
 		function(tx) {
