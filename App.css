@@ -3,8 +3,8 @@
 	background: #2b3891;
 }
 
-.navbar {
-	margin-top: 40px;
+.margin-navbar {
+	margin-bottom: 40px;
 }
 
 .navbar .nav > li > a, .navbar .nav > li > a:hover, .navbar .nav > li > a:focus {
@@ -22,7 +22,7 @@
 	width: 60px;
 }
 .miniature {
-	margin: 0px 2px;
+	margin: 0px 2px 4px;
 }
 
 .description-parcours {
@@ -37,6 +37,17 @@
 
 .description-espece {
 	padding: 10px;
+}
+
+#obs-photos {
+	width: 94%;
+	height: 100%;
+	margin: auto;
+}
+.supprimer-photos {
+	top: -16px;
+	left: -10px;
+	position: relative;
 }
 
 .modal-body {
@@ -87,6 +98,14 @@ input[type="radio"].criterium  {
 
 .infos {
 	font-style: italic;
+}
+
+.fine {
+	margin: 10px 0px;
+}
+
+.fine-ultra {
+	margin: 2px 0px;
 }
 
 .div-critere {

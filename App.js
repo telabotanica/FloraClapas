@@ -1739,7 +1739,6 @@ directory.Router = Backbone.Router.extend({
 			);
 			//console.log(obs);
 		});
-
 		$('#content').on('click', '.suppression-obs', function() {
 			var id = this.id;
 			directory.db.transaction(
@@ -1765,10 +1764,11 @@ directory.Router = Backbone.Router.extend({
 			);
 		});
 		
+		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			var options = { destinationType: destinationType.DATA_URL };
 			if (this.id == 'chercher-photos') {
-				options.sourceType = pictureSource.PHOTOLIBRARY };
+				options.sourceType = pictureSource.PHOTOLIBRARY;
 			}
 			navigator.camera.getPicture(
 				onPhotoSuccess, 
@@ -1779,7 +1779,31 @@ directory.Router = Backbone.Router.extend({
 				options
 			);
 		});
-
+		$('#content').on('click', '.supprimer-photos', function() {
+			var id = this.id;
+			directory.db.transaction(
+				function(tx) {
+					tx.executeSql('DELETE FROM photo WHERE id_photo = ' + id);
+/*					
+					var txt = 'Photo n° ' + id + ' supprimée.';
+					$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
+						.fadeIn(0)
+						.delay(1600)
+						.fadeOut('slow');
+*/		
+					$('#elt_'+id).remove();
+					$('#nbre-photos').html($('#nbre-photos').html()-1);
+				},
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+					var txt = 'Erreur de suppression.';
+					$('#obs-photos-info').html('<p class="text-center alert alert-error alert-block">'+txt+'</p>')
+						.fadeIn(0)
+						.delay(1600)
+						.fadeOut('slow');	
+				}
+			);
+		});
 		
 		$('#content').on('blur', '#courriel', requeterIdentite);
 		$('#content').on('keypress', '#courriel', function(event) {
@@ -2015,14 +2039,13 @@ function onPhotoSuccess(imageData){
 	$('#obs-photos-info').append(imageData);	
 	var reader = new FileReader(),
 		binary, base64;
-		reader.addEventListener('loadend', function (evt) {
-			binary = reader.result; // binary data (stored as string), unsafe for most actions
-			base64 = btoa(binary); 	// base64 data, safer but takes up more memory
+	reader.addEventListener('loadend', function(evt) {
+		binary = reader.result; // binary data (stored as string), unsafe for most actions
+		base64 = btoa(binary); 	// base64 data, safer but takes up more memory
 
-			$('#obs-photos-info').append('<br /><br />' + binary + '<br /><br />' + base64 +);
-		}, false);
-		reader.readAsBinaryString(imageData);
-	});
+		$('#obs-photos-info').append('<br /><br />' + binary + '<br /><br />' + base64);
+	}, false);
+	reader.readAsBinaryString(imageData);
 	directory.db.transaction(
 		function(tx) {
 			var hash = window.location.hash,
@@ -2050,7 +2073,7 @@ function onPhotoSuccess(imageData){
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		}
 	);
-}
+};
 
 
 
@@ -2143,12 +2166,12 @@ function requeterIdentite() {
 		$('#utilisateur-infos').html('Vérification en cours...');
 		//miseAJourCourriel();
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
-		$('#utilisateur-infos').append(urlAnnuaire + '<br />');
+		$('#utilisateur-infos').append('<br />' + urlAnnuaire + '<br />');
 		$.ajax({
 			url : urlAnnuaire,
 			type : 'GET', 
 			success : function(data, textStatus, jqXHR) {
-				$('#utilisateur-infos').append(data[courriel] + '<br />');
+				$('#utilisateur-infos').append(data + '<br />');
 				console.log('Annuaire SUCCESS : ' + textStatus);
 				if (data != undefined && data[courriel] != undefined) {
 					var infos = data[courriel];
@@ -2162,7 +2185,7 @@ function requeterIdentite() {
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
-				$('#utilisateur-infos').append('Vérification impossible.<br />');
+				$('#utilisateur-infos').append('Vérification impossible. (' + errorThrown + ')<br />');
 				console.log('Annuaire ERREUR : ' + textStatus);
 				surErreurCompletionCourriel();
 			},

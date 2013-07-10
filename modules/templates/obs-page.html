@@ -5,8 +5,9 @@
 	<h1>Observation n°<%= obs.id_obs %></h1>
 </div>
 
-<div class="tableview" style="top:44px;">
-	<div class="row-fluid">
+<div class="tableview tableview-links" style="top:44px;">
+	<div class="row-fluid" id="obs-photos-info"></div>
+	<div class="row-fluid margin-navbar">
 		<%= obs.nom_vernaculaire %> <i>(<%= obs.nom_sci %>)</i>
 		<br />
 		Vue le <%= obs.date %> 
@@ -14,23 +15,26 @@
 			à <%= obs.commune %>
 		<% } %>
 		
-		<hr />
+		<hr class="fine"/>
 		<button class="ajouter-photos btn-block btn btn-info btn-large" id="prendre-photos">
 			Prendre une photo
 		</button>
 		<button class="ajouter-photos btn-block btn btn-inverse" id="chercher-photos">
 			Depuis la librairie...
 		</button>
+		<div class="text-center"> Nombre de photos : <span id="nbre-photos"><%= photos.length %></span>.</div>
 		
-		<hr />
+		<hr class="fine"/>
+		<div id="obs-photos">
 		<% _.each(photos, function(photo) { %>
-			<div class="pull-left miniature">
-				<img src="<%= photo.chemin %>" />
+			<div class="pull-left miniature" id="elt_<%= photo.id_photo %>">
+				<img src="<%= photo.chemin %>" alt="<%= photo.id_photo %>" />
+				<a href="#observation/<%= obs.id_obs %>" id="<%= photo.id_photo %>" class="suppression-element supprimer-photos"><span></span></a>
 			</div>
 		<% }); %>
+		</div>
 		<div class="clearfix"></div>
 	</div>
-	<div class="row-fluid" id="obs-photos-info"></div>
 </div>
 
 

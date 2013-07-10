@@ -9,33 +9,31 @@
 
 <div id="obs-suppression-infos" class="text-center alert alert-success alert-block hide"></div>
 
-<div class="scroll striped">
-	<div class="row-fluid">
-		<ul class="tableview tableview-links">
-			<% if (taille == 0) { %>
-				Aucune observation enregistrée.
-			<% } else { 
-				_.each(obs, function(observation) {
-					var attributs = observation.attributes;
-			%>
-				<li style="margin:0px;" id="li_<%= attributs.id_obs %>">
-					<a href="#transmission" id="<%= attributs.id_obs %>" class="suppression-element suppression-obs"><span></span></a>
-					
-					<a href='#observation/<%= attributs.id_obs %>'>
-						<%= attributs.nom_vernaculaire %> <i>(<%= attributs.nom_sci %>)</i> 
-						<br />
-						Vue le <%= attributs.date %> 
-						<% if (attributs.commune != '') { %>
-							à <%= attributs.commune %>
-						<% } %>
-					</a>
-					
-					<a href="#observation/<%= attributs.id_obs %>" class="detail-disclosure"><span></span></a>
-				</li>
-			<%	}, this);
-			} %>
-		</ul>
-	</div>
+<div class="row-fluid">
+	<ul class="tableview tableview-links margin-navbar">
+		<% if (taille == 0) { %>
+			Aucune observation enregistrée.
+		<% } else { 
+			_.each(obs, function(observation) {
+				var attributs = observation.attributes;
+		%>
+			<li style="margin:0px;" id="li_<%= attributs.id_obs %>">
+				<a href="#transmission" id="<%= attributs.id_obs %>" class="suppression-element suppression-obs"><span></span></a>
+				
+				<a href='#observation/<%= attributs.id_obs %>'>
+					<%= attributs.nom_vernaculaire %> <i>(<%= attributs.nom_sci %>)</i> 
+					<br />
+					Vue le <%= attributs.date %> 
+					<% if (attributs.commune != '') { %>
+						à <%= attributs.commune %>
+					<% } %>
+				</a>
+				
+				<a href="#observation/<%= attributs.id_obs %>" class="detail-disclosure"><span></span></a>
+			</li>
+		<%	}, this);
+		} %>
+	</ul>
 </div>
 
 
