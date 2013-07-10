@@ -2023,7 +2023,7 @@ function onPhotoSuccess(imageData){
 						'(?, ?, ?) ';
 					
 				photo.push(id);
-				photo.push("'"+imageData+"'");
+				photo.push('"'+imageData+'"');
 				photo.push(hash[hash.length - 1]);
 				
 				tx.executeSql(sql, photo);
@@ -2102,7 +2102,7 @@ function surSuccesGeoloc(position) {
 				$('#geo-infos').html('Impossible de trouver la commmune.'); 
 			},
 			complete : function(jqXHR, textStatus) {
-				$('#geo-infos').html(''); 
+				//$('#geo-infos').html(''); 
 				//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
 				//$('#location').html(texte);
 			}
