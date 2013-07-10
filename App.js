@@ -1484,7 +1484,13 @@ directory.Router = Backbone.Router.extend({
 			$('#vue-modal').modal('show');
 			window.history.back();
 		});
-		
+
+		$('#content').on('click', '.img_criterium', function(event) {
+			var id = this.alt,
+				value = ($('#'+id).attr('checked') == undefined) ? false : $('#'+id).attr('checked');
+			alert($('#'+id).attr('checked'));
+			$('#'+id).attr('checked', !value);
+		});
 		$('#content').on('click', '.criterium', function(event) {
 			var sql_select = '',
 				sql_and = '',
@@ -1720,7 +1726,7 @@ directory.Router = Backbone.Router.extend({
 						obs.push($('#lng').html());
 						obs.push($('#location').html());
 						obs.push($('#code_insee').val());
-						obs.push(($('#code_insee').val() == 0) ? 0 : 1);
+						obs.push(($('#code_insee').val() > 0) ? 1 : 0);
 						obs.push($('#num_nom_select').val());
 						
 						tx.executeSql(sql, obs);
@@ -1760,9 +1766,9 @@ directory.Router = Backbone.Router.extend({
 		});
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
-			var options = null;
+			var options = { destinationType: destinationType.DATA_URL };
 			if (this.id == 'chercher-photos') {
-				options = { sourceType: pictureSource.PHOTOLIBRARY };
+				options.sourceType = pictureSource.PHOTOLIBRARY };
 			}
 			navigator.camera.getPicture(
 				onPhotoSuccess, 
@@ -2006,7 +2012,32 @@ function moisPhenoEstCouvert( debut, fin) {
 function onPhotoSuccess(imageData){
 	//imageData = imageData.replace("file:///",'');
 	//imageData = imageData.replace("content://",'');
-	$('#obs-photos-info').append(imageData);			
+	$('#obs-photos-info').append(imageData);	
+	var reader = new FileReader(),
+		binary, base64;
+		reader.addEventListener('loadend', function (evt) {
+			binary = reader.result; // binary data (stored as string), unsafe for most actions
+			base64 = btoa(binary); 	// base64 data, safer but takes up more memory
+			
+			var photo = {
+				num:TEXTE_PHOTO, 
+				nom: '',
+				parent:'',
+				base64:0
+			};
+			photo.num += index_photos++;
+			photo.nom = valeur.name;
+			photo.parent = id_obs;
+			photo.base64 = base64;
+			
+			var cle = photo.num;
+			sauvegarderObs(cle, photo);
+			bdd.setItem('index_photos', index_photos);
+			afficherPhotos(id_obs);
+		}, false);
+		reader.readAsBinaryString(imageData);
+		$('#obs-photos-info').append('<br />' + imageData);	
+	});
 	directory.db.transaction(
 		function(tx) {
 			var hash = window.location.hash,
@@ -2069,6 +2100,8 @@ function geolocaliser() {
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(surSuccesGeoloc, surErreurGeoloc);
 	} else {
+		$('#geo-infos').addClass('text-error');
+		$('#geo-infos').removeClass('text-info');
 		$('#geo-infos').html('Calcul impossible.');
 		var erreur = { code: '0', message: 'Géolocalisation non supportée par le navigateur'};
 		surErreurGeoloc(erreur);
@@ -2095,11 +2128,13 @@ function surSuccesGeoloc(position) {
 				console.log('NOM_COMMUNE found.');
 				$('#location').html(data['nom']);
 				$('#code_insee').val(data['codeINSEE']);
+				$('#geo-infos').html(''); 
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				$('#geo-infos').addClass('text-error');
 				$('#geo-infos').removeClass('text-info');
 				$('#geo-infos').html('Impossible de trouver la commmune.'); 
+				$('#geo-infos').append(textStatus + '(' + errorThrown + ')'); 
 			},
 			complete : function(jqXHR, textStatus) {
 				//$('#geo-infos').html(''); 

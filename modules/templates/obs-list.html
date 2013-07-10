@@ -18,11 +18,11 @@
 				_.each(obs, function(observation) {
 					var attributs = observation.attributes;
 			%>
-				<li style="margin:6px 0px;" id="li_<%= attributs.id_obs %>">
+				<li style="margin:0px;" id="li_<%= attributs.id_obs %>">
 					<a href="#transmission" id="<%= attributs.id_obs %>" class="suppression-element suppression-obs"><span></span></a>
 					
-					<a href='#observation/<%= attributs.id_obs %>' class="pad-right">
-						<%= attributs.nom_vernaculaire %> <i>(<%= attributs.nom_sci %>)</i>
+					<a href='#observation/<%= attributs.id_obs %>'>
+						<%= attributs.nom_vernaculaire %> <i>(<%= attributs.nom_sci %>)</i> 
 						<br />
 						Vue le <%= attributs.date %> 
 						<% if (attributs.commune != '') { %>
@@ -43,6 +43,6 @@
 	<ul class="nav parc-nav">
 		<li class="active"><a href="#transmission">Mes obs.</a></li>
 		<li><a href="#compte">Mon compte</a></li>
-		<li><a href="#" class="header-back-button">Retour...</a></li>
+		<li><a href="#liste/0/Parcours libre/0" >Liste...</a></li>
 	</ul>
 </div>

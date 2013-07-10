@@ -1,15 +1,18 @@
 <h4><%= titre %></h4>
 <% _.each(valeurs, function (critere, i) { 
 		var check_text = '',
+			check_class = '',
 			arr_critere = critere.split(';');
 		if (checked[i] == true) {
 			check_text = ' checked="true"';
+			check_class = 'selection-critere';
 		}
 	%>
 	<div class="pull-left div-critere">
 		<input type="radio" name="<%= titre %>" id="<%= arr_critere[0] %>" value="<%= critere %>" class="criterium" <%= check_text %> > 
 		<% if (arr_critere.length > 2) { %>
-			<img src="css/images/<%= arr_critere[2] %>" id="img_<%= arr_critere[0] %>" />
+			<img src="css/images/<%= arr_critere[2] %>" alt="<%= arr_critere[0] %>"
+				id="img_<%= arr_critere[0] %>" class="img_criterium <%= check_class %>" />
 		<% } %>
 		<%= arr_critere[1] %> 
 	</div>

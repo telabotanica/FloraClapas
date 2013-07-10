@@ -75,9 +75,8 @@ input[type="radio"].criterium  {
 }
 
 #resultats-recherche {
-	top: -20px;
+	top: -16px;
 	position: relative;
-	border-radius: 2px;
 	/*
 	background: #F00;
 	color: #FFF;
@@ -91,7 +90,7 @@ input[type="radio"].criterium  {
 }
 
 .div-critere {
-	margin: -50px 2px 0px;
+	margin: -20px 2px 0px;
 	width: 60px;
 }
 
