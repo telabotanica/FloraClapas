@@ -655,7 +655,7 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 		directory.db.transaction(
 			function(tx) {
 				//console.log('Dropping PHOTO table');
-				tx.executeSql('DROP TABLE IF EXISTS photo');
+				//tx.executeSql('DROP TABLE IF EXISTS photo');
 				var sql =
 					'CREATE TABLE IF NOT EXISTS photo (' +
 						'id_photo INT NOT NULL ,' +
@@ -1601,7 +1601,6 @@ directory.Router = Backbone.Router.extend({
 							console.log(directory.liste);
 							console.log(directory.nbre_criteres, nbre_choix);
 							$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
-
 						}
 						
 						
@@ -1725,7 +1724,7 @@ directory.Router = Backbone.Router.extend({
 						obs.push($('#num_nom_select').val());
 						
 						tx.executeSql(sql, obs);
-						self.transmissionObs();
+						window.location = '#transmission';
 					});
 				},
 				function(error) {
@@ -1734,7 +1733,31 @@ directory.Router = Backbone.Router.extend({
 			);
 			//console.log(obs);
 		});
-		
+
+		$('#content').on('click', '.suppression-obs', function() {
+			var id = this.id;
+			directory.db.transaction(
+				function(tx) {
+					tx.executeSql('DELETE FROM photo WHERE ce_obs = ' + id);
+					tx.executeSql('DELETE FROM obs WHERE id_obs = ' + id);
+					
+					var txt = 'Observation n° ' + id + ' supprimée.';
+					$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
+						.fadeIn(0)
+						.delay(1600)
+						.fadeOut('slow');		
+					$('#li_'+id).remove();
+				},
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+					var txt = 'Erreur de suppression.';
+					$('#obs-suppression-infos').html('<p class="text-center alert alert-error alert-block">'+txt+'</p>')
+						.fadeIn(0)
+						.delay(1600)
+						.fadeOut('slow');	
+				}
+			);
+		});
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			var options = null;
@@ -1750,7 +1773,7 @@ directory.Router = Backbone.Router.extend({
 				options
 			);
 		});
-		
+
 		
 		$('#content').on('blur', '#courriel', requeterIdentite);
 		$('#content').on('keypress', '#courriel', function(event) {
@@ -1759,7 +1782,7 @@ directory.Router = Backbone.Router.extend({
 			}
 		});
 		$('#content').on('click', '#valider_courriel', requeterIdentite);
-		
+
 		
 		// Check of browser supports touch events...
 		if (document.documentElement.hasOwnProperty('ontouchstart')) {
@@ -1795,7 +1818,7 @@ directory.Router = Backbone.Router.extend({
 	selectItem: function(event) {
 		$(event.target).addClass('tappable-active');
 	},
-
+	
 	deselectItem: function(event) {
 		$(event.target).removeClass('tappable-active');
 	},
@@ -1981,8 +2004,8 @@ function moisPhenoEstCouvert( debut, fin) {
 
 
 function onPhotoSuccess(imageData){
-	imageData = imageData.replace("file:///",'');
-	imageData = imageData.replace("content://",'');
+	//imageData = imageData.replace("file:///",'');
+	//imageData = imageData.replace("content://",'');
 	$('#obs-photos-info').append(imageData);			
 	directory.db.transaction(
 		function(tx) {
@@ -2002,14 +2025,12 @@ function onPhotoSuccess(imageData){
 				photo.push(id);
 				photo.push("'"+imageData+"'");
 				photo.push(hash[hash.length - 1]);
-
-				alert(sql);
+				
 				tx.executeSql(sql, photo);
 				//self.transmissionObs();
 			});
 		},
 		function(error) {
-			alert('DB | Error processing SQL: ' + error.code + '\n' + error);
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		}
 	);
@@ -2066,17 +2087,26 @@ function surSuccesGeoloc(position) {
 		console.log('Geolocation SUCCESS');
 		var url_service = SERVICE_NOM_COMMUNE_URL;
 		var urlNomCommuneFormatee = url_service.replace('{lat}', lat).replace('{lon}', lng);
-		var jqxhr = $.getJSON(urlNomCommuneFormatee, function(data) {
-			console.log('NOM_COMMUNE found.');
-			$('#location').html(data['nom']);
-			$('#code_insee').val(data['codeINSEE']);
-		})
-		.complete(function() { 
-			$('#geo-infos').html('');
-			//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
-			//$('#location').html(texte);
-		})
-		;
+		$.ajax({
+			url : urlNomCommuneFormatee,
+			type : 'GET', 
+			dataType : 'jsonp',
+			success : function(data, textStatus, jqXHR) {
+				console.log('NOM_COMMUNE found.');
+				$('#location').html(data['nom']);
+				$('#code_insee').val(data['codeINSEE']);
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				$('#geo-infos').addClass('text-error');
+				$('#geo-infos').removeClass('text-info');
+				$('#geo-infos').html('Impossible de trouver la commmune.'); 
+			},
+			complete : function(jqXHR, textStatus) {
+				$('#geo-infos').html(''); 
+				//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
+				//$('#location').html(texte);
+			}
+		});
 	}
 }
 function surErreurGeoloc(error){
@@ -2087,17 +2117,18 @@ function surErreurGeoloc(error){
 
 
 function requeterIdentite() {
-	var SERVICE_ANNUAIRE = "http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/";
+	var SERVICE_ANNUAIRE = 'http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/';
 	var courriel = $('#courriel').val();
 	if (courriel != '') {
 		$('#utilisateur-infos').html('Vérification en cours...');
 		//miseAJourCourriel();
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
+		$('#utilisateur-infos').append(urlAnnuaire + '<br />');
 		$.ajax({
 			url : urlAnnuaire,
 			type : 'GET', 
 			success : function(data, textStatus, jqXHR) {
-				$('#utilisateur-infos').html(data[courriel]);
+				$('#utilisateur-infos').append(data[courriel] + '<br />');
 				console.log('Annuaire SUCCESS : ' + textStatus);
 				if (data != undefined && data[courriel] != undefined) {
 					var infos = data[courriel];
@@ -2111,12 +2142,13 @@ function requeterIdentite() {
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
-				$('#utilisateur-infos').html('Vérification impossible.');
+				$('#utilisateur-infos').append('Vérification impossible.<br />');
 				console.log('Annuaire ERREUR : ' + textStatus);
 				surErreurCompletionCourriel();
 			},
 			complete : function(jqXHR, textStatus) {
 				console.log('Annuaire COMPLETE : ' + textStatus);
+				$('#utilisateur-infos').append(textStatus + '<br />');
 				$('#zone_prenom_nom').removeClass('hide');
 				$('#zone_courriel_confirmation').removeClass('hide');
 			}

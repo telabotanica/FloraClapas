@@ -149,7 +149,7 @@ body{
 }
 
 .tableview{
-	margin: 0;
+	margin: 2px;
 	padding: 0;
 	list-style: none;
 	background-color: #fff;
@@ -235,11 +235,10 @@ body{
 .tableview-links li>a.tappable-active *{
 	color: #fff;
 }
-.tableview-links li>a.detail-disclosure{
+.tableview-links li>a.detail-disclosure, .tableview-links li>a.suppression-element{
 	-webkit-touch-callout: none;
 	padding: 0;
 	width: 44px;
-	margin: 0 0 0 -44px;
 	-webkit-box-align: center;
 	-moz-box-align: center;
 	box-align: center;
@@ -250,13 +249,15 @@ body{
 	-moz-box-flex: 0;
 	box-flex: 0;
 }
-.tableview-links li>a.detail-disclosure.tappable-active{
+.tableview-links li>a.detail-disclosure.tappable-active, .tableview-links li>a.suppression-element.tappable-active{
 	background: transparent none;
 }
-.tableview-links li>a.detail-disclosure span{
+.tableview-links li>a.detail-disclosure span, .tableview-links li>a.suppression-element span{
 	display: inline-block;
 	width: 29px;
 	height: 31px;
+}
+.tableview-links li>a.detail-disclosure span {
 	background: transparent url(images/detail-disclosure-button.png);
 	-webkit-background-size: 58px 31px;
 	-moz-background-size: 58px 31px;
@@ -264,7 +265,15 @@ body{
 	-o-background-size: 58px 31px;
 	background-size: 58px 31px;
 }
-.tableview-links li>a.detail-disclosure.tappable-active span{
+.tableview-links li>a.suppression-element span {
+	background: transparent url(images/detail-suppression-button.png);
+	-webkit-background-size: 58px 31px;
+	-moz-background-size: 58px 31px;
+	-ms-background-size: 58px 31px;
+	-o-background-size: 58px 31px;
+	background-size: 58px 31px;
+}
+.tableview-links li>a.detail-disclosure.tappable-active span, .tableview-links li>a.suppression-element.tappable-active span{
 	background-position: top right;
 }
 

@@ -78,10 +78,16 @@ input[type="radio"].criterium  {
 	top: -20px;
 	position: relative;
 	border-radius: 2px;
+	/*
 	background: #F00;
 	color: #FFF;
 	font-weight: bold;
 	padding: 0px 2px;
+	*/
+}
+
+.infos {
+	font-style: italic;
 }
 
 .div-critere {
