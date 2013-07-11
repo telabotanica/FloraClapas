@@ -26,17 +26,22 @@
 		
 		<hr class="fine"/>
 		<div id="obs-photos">
-		<% _.each(photos, function(photo) { %>
-			<div class="pull-left miniature" id="elt_<%= photo.id_photo %>">
-				<img src='<%= photo.chemin %>' alt="<%= photo.id_photo %>" />
-				<a href="#observation/<%= obs.id_obs %>" id="<%= photo.id_photo %>" class="suppression-element supprimer-photos"><span></span></a>
-			</div>
-		<% }); %>
+			<ul id="galerie_images" class="gallery">
+			<% _.each(photos, function(photo) { %>
+				<li class="pull-left miniature" id="elt_<%= photo.id_photo %>">
+					<a href='<%= photo.chemin %>' rel="external">
+						<img src='<%= photo.chemin %>' alt="<%= photo.id_photo %>" />
+					</a>
+					<a href="#observation/<%= obs.id_obs %>" id="<%= photo.id_photo %>" class="suppression-element supprimer-photos"><span></span></a>
+					<br /> Supprimer
+				</li>
+					<a href="#observation/<%= obs.id_obs %>" id="<%= photo.id_photo %>" class="suppression-element supprimer-photos"><span></span></a>
+			<% }); %>
+			</ul>
 		</div>
 		<div class="clearfix"></div>
 	</div>
 </div>
-
 
 <div class="navbar navbar-fixed-bottom">
 	<ul class="nav parc-nav">
@@ -45,3 +50,14 @@
 		<li><a href="#liste/0/Parcours libre/0" >Liste...</a></li>
 	</ul>
 </div>
+
+
+<script>
+var psi = $('#galerie_images a').photoSwipe({ 
+	allowUserZoom: true,
+	enableMouseWheel: false, 
+	enableKeyboard: false,
+	preventSlideshow: true,
+	captionAndToolbarAutoHideDelay: 0
+});
+</script>

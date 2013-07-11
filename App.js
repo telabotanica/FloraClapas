@@ -1487,9 +1487,10 @@ directory.Router = Backbone.Router.extend({
 
 		$('#content').on('click', '.img_criterium', function(event) {
 			var id = this.alt,
-				value = ($('#'+id).attr('checked') == undefined) ? false : $('#'+id).attr('checked');
-			alert($('#'+id).attr('checked'));
-			$('#'+id).attr('checked', !value);
+				value = ($('#'+id).attr('checked') == undefined) ? 'checked' : false;
+			//alert($('#'+id).attr('checked') + ' ' + value);
+			$('#'+id).attr('checked', value);
+			//alert($('#'+id).attr('checked'));
 		});
 		$('#content').on('click', '.criterium', function(event) {
 			var sql_select = '',
@@ -1766,7 +1767,7 @@ directory.Router = Backbone.Router.extend({
 		
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
-			var options = { destinationType: destinationType.DATA_URL };
+			var options = { destinationType: destinationType.FILE_URI };
 			if (this.id == 'chercher-photos') {
 				options.sourceType = pictureSource.PHOTOLIBRARY;
 			}
@@ -2199,6 +2200,8 @@ function requeterIdentite() {
 }
 
 function surErreurCompletionCourriel() {
+	$('#utilisateur-infos').addClass('text-error');
+	$('#utilisateur-infos').removeClass('text-info');
 	$('#utilisateur-infos').html('Vérification impossible.');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').val('');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').removeAttr('disabled');
