@@ -2022,9 +2022,7 @@ function moisPhenoEstCouvert( debut, fin) {
 
 
 
-var contenu = null;
 function onPhotoSuccess(imageData){
-	contenu = imageData;
 	fileSystem.root.getDirectory("FlorasClapas", { create: true, exclusive: false }, function(dossier) {
 		var fichier = new FileEntry();
 		fichier.fullPath = imageData;
@@ -2061,8 +2059,8 @@ function surCopiePhoto(entry) {
 					'<img src="' + chemin + '" alt="' + id + '" />' +
 					'<a href="#observation/' + ce_obs + '" id="' + id + '" class="suppression-element supprimer-photos"><span></span></a>' + 
 				'</div>';
-				$('#obs-photo').append(elt);
-				$('#nbre-photos').html($('#nbre-photos').html()+1);
+				$('#obs-photos').append(elt);
+				$('#nbre-photos').html(($('#nbre-photos').html()+1));
 			});
 		},
 		surErreurPhoto
