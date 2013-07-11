@@ -64,6 +64,7 @@
 		<script type="text/javascript" charset="utf-8">
 			var pictureSource;   // picture source
 			var destinationType; // sets the format of returned value 
+			var fileSystem;
 			
 			document.addEventListener("deviceready", onDeviceReady, false);
 			function onDeviceReady() {
@@ -72,12 +73,11 @@
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, onFail);
 			}
 			
-			function onSuccess(fileSystem) {
-			    $('#test').append(fileSystem.name + '<br />');
-			    $('#test').append(fileSystem.root.name);
+			function onSuccess(object) {
+				fileSystem = object;
 			}
 			function onFail(error) {
-			    $('#test').append(error);
+			    alert(error);
 			}
 		</script>
 	</body>

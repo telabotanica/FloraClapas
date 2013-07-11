@@ -2026,23 +2026,16 @@ function moisPhenoEstCouvert( debut, fin) {
 	return(flag);
 }
 
-
+var contenu = null,
+	chemin = null;
 function onPhotoSuccess(imageData){
+	contenu = imageData;
 	//imageData = imageData.replace("file:///",'');
 	//imageData = imageData.replace("content://",'');
 	//$('#obs-photos-info').append(imageData);	
 
-	var entry = new FileEntry();
-	entry.createWriter(function(writer) {
-	    writer.onwrite = function(evt) {
-	        console.log("write success");
-	        alert("write success");
-	    };
-	    writer.write(imageData);
-	    $('#obs-photos-info').append(writer.fileName + ' ' + writer.length);	
-	}, function(evt) {
-		$('#obs-photos-info').append(error.code);
-	});
+    fileSystem.root.getFile("test.jpg", {create: true, exclusive: false}, gotFileEntry, fail);
+	alert('file system');
 /*
 	var reader = new FileReader(),
 		binary, base64;
@@ -2083,6 +2076,23 @@ function onPhotoSuccess(imageData){
 		}
 	);
 };
+
+function gotFileEntry(fileEntry) {
+	alert('file writer');
+    fileEntry.createWriter(gotFileWriter, fail);
+}
+
+function gotFileWriter(writer) {
+	alert('writting...');
+    writer.write(contenu);
+	for(var index in writer) {
+		$('#obs-photos-info').append(writer[index]);	
+	}
+}
+
+function fail(error) {
+    alert(error.code);
+}
 
 
 
