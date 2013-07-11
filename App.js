@@ -2078,7 +2078,6 @@ function onPhotoSuccess(imageData){
 };
 
 function gotFileEntry(dossier) {
-	alert(imageData);
 	alert(dossier.fullPath);
 	var fichier = new FileEntry();
 	fichier.fullPath = contenu;
