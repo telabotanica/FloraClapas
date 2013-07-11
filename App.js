@@ -2040,34 +2040,7 @@ function onPhotoSuccess(imageData){
 	}, false);
 	reader.readAsBinaryString(imageData);
 */
-	directory.db.transaction(
-		function(tx) {
-			var hash = window.location.hash,
-				sql =
-					"SELECT id_photo " +
-					"FROM photo " + 
-					"ORDER BY id_photo DESC";
-			tx.executeSql(sql, [], function(tx, results) {
-				var photo = new Array(),
-					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
-					sql =
-						"INSERT INTO photo " +
-						"(id_photo, chemin, ce_obs) VALUES " + 
-						"(?, ?, ?) ";
-					
-				photo.push(id);
-				photo.push(imageData);
-				photo.push(hash[hash.length - 1]);
-				
-				tx.executeSql(sql, photo);
-				//self.transmissionObs();
-			});
-		},
-		function(error) {
-			alert('DB | Error processing SQL: ' + error.code + '\n' + error);
-			console.log('DB | Error processing SQL: ' + error.code, error);
-		}
-	);
+	
 };
 
 function gotFileEntry(dossier) {
@@ -2079,6 +2052,34 @@ function gotFileEntry(dossier) {
 
 function success(entry) {
     alert("New Path: " + entry.fullPath);
+    directory.db.transaction(
+    		function(tx) {
+    			var hash = window.location.hash,
+    				sql =
+    					"SELECT id_photo " +
+    					"FROM photo " + 
+    					"ORDER BY id_photo DESC";
+    			tx.executeSql(sql, [], function(tx, results) {
+    				var photo = new Array(),
+    					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
+    					sql =
+    						"INSERT INTO photo " +
+    						"(id_photo, chemin, ce_obs) VALUES " + 
+    						"(?, ?, ?) ";
+    					
+    				photo.push(id);
+    				photo.push(entry.fullPath);
+    				photo.push(hash[hash.length - 1]);
+    				
+    				tx.executeSql(sql, photo);
+    				//self.transmissionObs();
+    			});
+    		},
+    		function(error) {
+    			alert('DB | Error processing SQL: ' + error.code + '\n' + error);
+    			console.log('DB | Error processing SQL: ' + error.code, error);
+    		}
+    	);
 }
 
 
