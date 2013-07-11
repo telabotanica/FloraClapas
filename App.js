@@ -45,10 +45,10 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT id, nom, latitude_centre, longitude_centre, fichier_carte ' +
-					'FROM parcours ' +
-					'WHERE nom LIKE ? ' +
-					'ORDER BY nom';
+					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte " +
+					"FROM parcours " +
+					"WHERE nom LIKE ? " +
+					"ORDER BY nom";
 
 				tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
 					var len = results.rows.length,
@@ -70,9 +70,9 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos, ce_critere, est_commence ' +
-					'FROM parcours ' +
-					'WHERE id=:id_parcours';
+					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos, ce_critere, est_commence " +
+					"FROM parcours " +
+					"WHERE id = :id_parcours";
 
 				tx.executeSql(sql, [id], function(tx, results) {
 					callback(results.rows.length === 1 ? results.rows.item(0) : null);
@@ -89,8 +89,8 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos ' +
-					'FROM parcours';
+					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos " +
+					"FROM parcours";
 
 				tx.executeSql(sql, [], function(tx, results) {
 					callback(results.rows.item);
@@ -109,23 +109,23 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 				console.log('Dropping PARCOURS table');
 				tx.executeSql('DROP TABLE IF EXISTS parcours');
 				var sql =
-					'CREATE TABLE IF NOT EXISTS parcours (' +
-						'id INT NOT NULL ,' +
-						'nom VARCHAR(255) NOT NULL ,' +
-						'latitude_centre DECIMAL NULL ,' +
-						'longitude_centre DECIMAL NULL ,' +
-						'fichier_carte VARCHAR(255) NULL ,' +
-						'photos VARCHAR(255) NULL ,' +
-						'description TEXT NULL ,' +
-						'est_commence BOOLEAN NULL , ' +
-						'ce_critere INT NULL ,' +
-					'PRIMARY KEY (id),' +
-					'CONSTRAINT ce_critere ' +
-						'FOREIGN KEY (ce_critere)' +
-						'REFERENCES critere (id_critere)' + 
-						'ON DELETE NO ACTION ' + 
-						'ON UPDATE NO ACTION ' + 
-					')';
+					"CREATE TABLE IF NOT EXISTS parcours (" +
+						"id INT NOT NULL ," +
+						"nom VARCHAR(255) NOT NULL ," +
+						"latitude_centre DECIMAL NULL ," +
+						"longitude_centre DECIMAL NULL ," +
+						"fichier_carte VARCHAR(255) NULL ," +
+						"photos VARCHAR(255) NULL ," +
+						"description TEXT NULL ," +
+						"est_commence BOOLEAN NULL , " +
+						"ce_critere INT NULL ," +
+					"PRIMARY KEY (id)," +
+					"CONSTRAINT ce_critere " +
+						"FOREIGN KEY (ce_critere)" +
+						"REFERENCES critere (id_critere)" + 
+						"ON DELETE NO ACTION " + 
+						"ON UPDATE NO ACTION " + 
+					")";
 				console.log('Creating PARCOURS table');
 				tx.executeSql(sql);
 			},
@@ -153,9 +153,11 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 							sql += ',';
 						}
 					}
-					arr_sql.push('INSERT INTO parcours '
-						+ '(id, nom, latitude_centre, longitude_centre, fichier_carte, photos, description, ce_critere) '
-						+ 'VALUES ('+sql+')');
+					arr_sql.push(
+						"INSERT INTO parcours "
+						+ "(id, nom, latitude_centre, longitude_centre, fichier_carte, photos, description, ce_critere) "
+						+ "VALUES (" + sql + ")"
+					);
 				}
 				//console.log(arr_sql);
 				directory.db.transaction(function (tx) {
@@ -183,10 +185,10 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT num_nom, nom_sci, famille, nom_vernaculaire,  photos ' +
-					'FROM espece ' + 
+					"SELECT num_nom, nom_sci, famille, nom_vernaculaire,  photos " +
+					"FROM espece " + 
 					"WHERE nom_sci || ' ' || nom_vernaculaire || ' ' || famille LIKE ? " +
-					'ORDER BY nom_vernaculaire';
+					"ORDER BY nom_vernaculaire";
 
 				tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
 					var len = results.rows.length,
@@ -208,9 +210,9 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT num_nom, nom_sci, famille, nom_vernaculaire, description, photos, referentiel, famille, num_taxon ' +
-					'FROM espece ' +
-					'WHERE num_nom = :id_espece';
+					"SELECT num_nom, nom_sci, famille, nom_vernaculaire, description, photos, referentiel, famille, num_taxon " +
+					"FROM espece " +
+					"WHERE num_nom = :id_espece";
 
 				tx.executeSql(sql, [id], function(tx, results) {
 					callback(results.rows.length === 1 ? results.rows.item(0) : null);
@@ -226,11 +228,11 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT e.num_nom, e.nom_sci, e.famille, e.nom_vernaculaire, e.photos, c.vue ' +
-					'FROM espece e ' +
-					'JOIN avoir_critere c ON e.num_nom = c.id_espece ' +
-					'WHERE c.id_critere = :id_parcours ' + 
-					'ORDER BY nom_vernaculaire';
+					"SELECT e.num_nom, e.nom_sci, e.famille, e.nom_vernaculaire, e.photos, c.vue " +
+					"FROM espece e " +
+					"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
+					"WHERE c.id_critere = :id_parcours " + 
+					"ORDER BY nom_vernaculaire";
 				//console.log(sql);
 				tx.executeSql(sql, [id], function(tx, results) {
 					 var nbre = results.rows.length,
@@ -253,9 +255,9 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 			function(tx) {
 
 				var sql = 
-					'SELECT num_nom, nom_sci, famille, nom_vernaculaire, photos ' +
-					'FROM espece ' +
-					'ORDER BY nom_vernaculaire';
+					"SELECT num_nom, nom_sci, famille, nom_vernaculaire, photos " +
+					"FROM espece " +
+					"ORDER BY nom_vernaculaire";
 
 				tx.executeSql(sql, [], function(tx, results) {
 					 var nbre = results.rows.length,
@@ -280,16 +282,16 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 				console.log('Dropping ESPECE table');
 				tx.executeSql('DROP TABLE IF EXISTS espece');
 				var sql =
-					'CREATE TABLE IF NOT EXISTS espece (' +
-						'num_nom INT NOT NULL ,' +
-						'nom_sci VARCHAR(255) NOT NULL ,' +
-						'famille VARCHAR(255) NULL ,' +
-						'num_taxon INT NULL ,' +
-						'referentiel VARCHAR(45) NOT NULL DEFAULT "bdtfx" ,' +
-						'nom_vernaculaire VARCHAR(255) NULL ,' +
-						'description TEXT NULL ,' +
-						'photos VARCHAR(255) NULL ,' +
-					'PRIMARY KEY (num_nom) )';
+					"CREATE TABLE IF NOT EXISTS espece (" +
+						"num_nom INT NOT NULL ," +
+						"nom_sci VARCHAR(255) NOT NULL ," +
+						"famille VARCHAR(255) NULL ," +
+						"num_taxon INT NULL ," +
+						"referentiel VARCHAR(45) NOT NULL DEFAULT 'bdtfx' ," +
+						"nom_vernaculaire VARCHAR(255) NULL ," +
+						"description TEXT NULL ," +
+						"photos VARCHAR(255) NULL ," +
+					"PRIMARY KEY (num_nom) )";
 				console.log('Creating ESPECE table');
 				tx.executeSql(sql);
 			},
@@ -317,9 +319,11 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 							sql += ',';
 						}
 					}
-					arr_sql.push('INSERT INTO espece '
-						+ '(nom_sci, num_nom, famille, num_taxon, nom_vernaculaire, description, photos, referentiel) '
-						+ 'VALUES ('+sql+')');
+					arr_sql.push(
+						"INSERT INTO espece "
+						+ "(nom_sci, num_nom, famille, num_taxon, nom_vernaculaire, description, photos, referentiel) "
+						+ "VALUES (" + sql + ")"
+					);
 				}
 				//console.log(arr_sql);
 				directory.db.transaction(function (tx) {
@@ -389,18 +393,18 @@ _.extend(directory.dao.CritereDAO.prototype, {
 				console.log('Dropping CRITERE table');
 				tx.executeSql('DROP TABLE IF EXISTS critere');
 				var sql =
-					'CREATE TABLE IF NOT EXISTS critere (' +
-						'id_critere INT NOT NULL ,' +
-						'intitule VARCHAR(45) NOT NULL ,' +
-						'url_img VARCHAR(45) NULL ,' +
-						'ce_parent INT NULL ,' +
-						'PRIMARY KEY (id_critere) ,' +
-						'CONSTRAINT ce_parent ' +
-							'FOREIGN KEY (ce_parent)' +
-							'REFERENCES critere (id_critere)' + 
-							'ON DELETE NO ACTION ' + 
-							'ON UPDATE NO ACTION ' + 
-					')';
+					"CREATE TABLE IF NOT EXISTS critere (" +
+						"id_critere INT NOT NULL ," +
+						"intitule VARCHAR(45) NOT NULL ," +
+						"url_img VARCHAR(45) NULL ," +
+						"ce_parent INT NULL ," +
+						"PRIMARY KEY (id_critere) ," +
+						"CONSTRAINT ce_parent " +
+							"FOREIGN KEY (ce_parent)" +
+							"REFERENCES critere (id_critere)" + 
+							"ON DELETE NO ACTION " + 
+							"ON UPDATE NO ACTION " + 
+					")";
 				console.log('Creating CRITERE table');
 				tx.executeSql(sql);
 			},
@@ -433,7 +437,10 @@ _.extend(directory.dao.CritereDAO.prototype, {
 				//console.log(arr_sql);
 				directory.db.transaction(function (tx) {
 					for (var c = 0; c < arr_sql.length; c++) {
-						tx.executeSql("INSERT INTO critere (id_critere, intitule, url_img, ce_parent) VALUES ("+arr_sql[c]+")");
+						tx.executeSql(
+							"INSERT INTO critere " +
+							"(id_critere, intitule, url_img, ce_parent) VALUES (" + arr_sql[c] + ")"
+						);
 					}
 				}, 
 				function(error) {
@@ -465,22 +472,22 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 				console.log('Dropping AVOIR_CRITERE table');
 				tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
 				var sql =
-					'CREATE TABLE IF NOT EXISTS avoir_critere (' +
-						'id_espece INT NOT NULL ,' +
-						'id_critere INT NOT NULL ,' +
-						'vue BOOLEAN NULL ,' +
-						'PRIMARY KEY (id_espece, id_critere) , ' +
-						'CONSTRAINT id_critere ' + 
-							'FOREIGN KEY (id_critere)' +
-							'REFERENCES critere (id_critere) ' +
-							'ON DELETE NO ACTION ' +
-							'ON UPDATE NO ACTION,' +
-						'CONSTRAINT id_espece ' +
-							'FOREIGN KEY (id_espece)' +
-							'REFERENCES espece (num_nom)' +
-							'ON DELETE NO ACTION ' + 
-							'ON UPDATE NO ACTION ' + 
-					')';
+					"CREATE TABLE IF NOT EXISTS avoir_critere (" +
+						"id_espece INT NOT NULL ," +
+						"id_critere INT NOT NULL ," +
+						"vue BOOLEAN NULL ," +
+						"PRIMARY KEY (id_espece, id_critere) , " +
+						"CONSTRAINT id_critere " + 
+							"FOREIGN KEY (id_critere)" +
+							"REFERENCES critere (id_critere) " +
+							"ON DELETE NO ACTION " +
+							"ON UPDATE NO ACTION," +
+						"CONSTRAINT id_espece " +
+							"FOREIGN KEY (id_espece)" +
+							"REFERENCES espece (num_nom)" +
+							"ON DELETE NO ACTION " + 
+							"ON UPDATE NO ACTION " + 
+					")";
 				console.log('Creating AVOIR_CRITERE table');
 				tx.executeSql(sql);
 			},
@@ -515,7 +522,10 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 				//console.log(arr_sql);
 				directory.db.transaction(function (tx) {
 					for (var c = 0; c < arr_sql.length; c++) {
-						tx.executeSql("INSERT INTO avoir_critere (id_espece, id_critere) VALUES ("+arr_sql[c]+")");
+						tx.executeSql(
+							"INSERT INTO avoir_critere " +
+							"(id_espece, id_critere) VALUES (" + arr_sql[c] + ")"
+						);
 					}
 				}, 
 				function(error) {
@@ -545,10 +555,10 @@ _.extend(directory.dao.ObsDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee ' +
-					'FROM espece e ' +
-					'JOIN obs o ON e.num_nom = o.ce_espece ' +
-					'WHERE id_obs = :id_obs';
+					"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee " +
+					"FROM espece e " +
+					"JOIN obs o ON e.num_nom = o.ce_espece " +
+					"WHERE id_obs = :id_obs";
 				//console.log(sql, id);
 				tx.executeSql(sql, [id], function(tx, results) {
 					callback(results.rows.length === 1 ? results.rows.item(0) : null);
@@ -564,10 +574,10 @@ _.extend(directory.dao.ObsDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee ' +
-					'FROM espece ' +
-					'JOIN obs ON num_nom = ce_espece ' +
-					'ORDER BY id_obs DESC';
+					"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee " +
+					"FROM espece " +
+					"JOIN obs ON num_nom = ce_espece " +
+					"ORDER BY id_obs DESC";
 
 				tx.executeSql(sql, [], function(tx, results) {
 					 var nbre = results.rows.length,
@@ -591,22 +601,22 @@ _.extend(directory.dao.ObsDAO.prototype, {
 				//console.log('Dropping OBS table');
 				//tx.executeSql('DROP TABLE IF EXISTS obs');
 				var sql =
-					'CREATE TABLE IF NOT EXISTS obs (' +
-						'id_obs INT NOT NULL ,'+
-						'date DATE NOT NULL ,' +
-						'latitude DECIMAL NULL ,' +
-						'longitude DECIMAL NULL ,' +
-						'commune VARCHAR(255) NULL ,' +
-						'code_insee INT NULL ,' +
-						'mise_a_jour TINYINT(1) NOT NULL DEFAULT 0 ,' +
-						'ce_espece INT NOT NULL,' +
-						'PRIMARY KEY (id_obs),' +
-						'CONSTRAINT ce_espece ' +
-							'FOREIGN KEY (ce_espece)' +
-							'REFERENCES espece (num_nom)' +
-							'ON DELETE NO ACTION ' +
-							'ON UPDATE NO ACTION ' +
-					')';
+					"CREATE TABLE IF NOT EXISTS obs (" +
+						"id_obs INT NOT NULL ,"+
+						"date DATE NOT NULL ," +
+						"latitude DECIMAL NULL ," +
+						"longitude DECIMAL NULL ," +
+						"commune VARCHAR(255) NULL ," +
+						"code_insee INT NULL ," +
+						"mise_a_jour TINYINT(1) NOT NULL DEFAULT 0 ," +
+						"ce_espece INT NOT NULL," +
+						"PRIMARY KEY (id_obs)," +
+						"CONSTRAINT ce_espece " +
+							"FOREIGN KEY (ce_espece)" +
+							"REFERENCES espece (num_nom)" +
+							"ON DELETE NO ACTION " +
+							"ON UPDATE NO ACTION " +
+					")";
 				console.log('Creating OBS table');
 				tx.executeSql(sql);
 			},
@@ -631,9 +641,9 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					'SELECT id_photo, chemin ' +
-					'FROM photo ' +
-					'WHERE ce_obs = :id_obs';
+					"SELECT id_photo, chemin " +
+					"FROM photo " +
+					"WHERE ce_obs = :id_obs";
 
 				tx.executeSql(sql, [id], function(tx, results) {
 					 var nbre = results.rows.length,
@@ -657,17 +667,17 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 				//console.log('Dropping PHOTO table');
 				//tx.executeSql('DROP TABLE IF EXISTS photo');
 				var sql =
-					'CREATE TABLE IF NOT EXISTS photo (' +
-						'id_photo INT NOT NULL ,' +
-						'chemin VARCHAR(255) NOT NULL ,' +
-						'ce_obs INT NOT NULL ,' +
-						'PRIMARY KEY (id_photo) ,' +
-						'CONSTRAINT ce_obs ' +
-							'FOREIGN KEY (ce_obs) ' +
-							'REFERENCES obs (id_obs) ' +
-							'ON DELETE NO ACTION ' + 
-							'ON UPDATE NO ACTION ' +
-					')';
+					"CREATE TABLE IF NOT EXISTS photo (" +
+						"id_photo INT NOT NULL ," +
+						"chemin VARCHAR(255) NOT NULL ," +
+						"ce_obs INT NOT NULL ," +
+						"PRIMARY KEY (id_photo) ," +
+						"CONSTRAINT ce_obs " +
+							"FOREIGN KEY (ce_obs) " +
+							"REFERENCES obs (id_obs) " +
+							"ON DELETE NO ACTION " + 
+							"ON UPDATE NO ACTION " +
+					")";
 				console.log('Creating PHOTO table');
 				tx.executeSql(sql);
 			},
@@ -688,7 +698,7 @@ _.extend(directory.dao.PhotoDAO.prototype, directory.dao.baseDAOBD);
 Backbone.sync = function(method, model, options) {
 	var dao = new model.dao(directory.db);
 	
-	if (method === "read") {
+	if (method === 'read') {
 		if (model.id) {
 			dao.findById(model.id, function(data) {
 				options.success(data);
@@ -708,38 +718,35 @@ Backbone.sync = function(method, model, options) {
 
 };
 
+
+
 // -------------------------------------------------- The Models ---------------------------------------------------- //
 
-// The Employee Model
-directory.models.Employee = Backbone.Model.extend({
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Modèle PARCOURS
+directory.models.Parcours = Backbone.Model.extend({
 	dao: directory.dao.ParcoursDAO,
-
-	initialize: function() {
-		//this.reports = new directory.models.EmployeeCollection();
-		//this.reports.managerId = this.id;
-	}
-
+	initialize: function() {	}
 });
-
-// The EmployeeCollection Model
-directory.models.EmployeeCollection = Backbone.Collection.extend({
+directory.models.ParcoursCollection = Backbone.Collection.extend({
 	dao: directory.dao.ParcoursDAO,
-	model: directory.models.Employee,
+	model: directory.models.Parcours,
 
 	findByName: function(key) {
-		var employeeDAO = new directory.dao.ParcoursDAO(directory.db),
+		var parcoursDAO = new directory.dao.ParcoursDAO(directory.db),
 			self = this;
-		employeeDAO.findByName(key, function(data) {
-			//console.log("EmployeeCollection " + data);
+		parcoursDAO.findByName(key, function(data) {
+			//console.log('ParcoursCollection | findByName ', data);
 			self.reset(data);
 		});
 	},
 	
 	findAll: function() {
-		var employeeDAO = new directory.dao.ParcoursDAO(directory.db),
+		var parcoursDAO = new directory.dao.ParcoursDAO(directory.db),
 			self = this;
-		employeeDAO.findAll(function(data) {
-			console.log("EmployeeCollection " + data);
+		parcoursDAO.findAll(function(data) {
+			//console.log('ParcoursCollection | findAll ', data);
 			self.reset(data);
 		});
 	}
@@ -747,18 +754,11 @@ directory.models.EmployeeCollection = Backbone.Collection.extend({
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Modèle ESPECE
 directory.models.Espece = Backbone.Model.extend({
-
 	dao: directory.dao.EspeceDAO,
-
-	initialize: function() {
-		//this.reports = new directory.models.EmployeeCollection();
-		//this.reports.managerId = this.id;
-	}
-
+	initialize: function() {	}
 });
-
-
 directory.models.EspeceCollection = Backbone.Collection.extend({
 	dao: directory.dao.EspeceDAO,
 	model: directory.models.Espece,
@@ -767,7 +767,7 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
 		var especeDAO = new directory.dao.EspeceDAO(directory.db),
 			self = this;
 		especeDAO.findByName(key, function(data) {
-			console.log("EspeceCollection | findByName", data);
+			//console.log('EspeceCollection | findByName ', data);
 			self.reset(data);
 		});
 	}, 
@@ -776,7 +776,7 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
 		var especeDAO = new directory.dao.EspeceDAO(directory.db),
 			self = this;
 		especeDAO.findById(key, function(data) {
-			console.log("EspeceCollection | findById", data);
+			//console.log('EspeceCollection | findById ', data);
 			self.reset(data);
 		});
 	}, 
@@ -786,7 +786,7 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
 			self = this;
 		especeDAO.findByParcours(key, function(data) {
 			self.reset(data);
-			//console.log("EspeceCollection | findByParcours ", data);
+			//console.log('EspeceCollection | findByParcours ', data);
 		});
 	},
 	
@@ -795,24 +795,18 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
 			self = this;
 		especeDAO.findAll(function(data) {
 			self.reset(data);
-			//console.log("EspeceCollection | findAll ", data);
+			//console.log('EspeceCollection | findAll ', data);
 		});
 	}
 
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Modèle CRITERE
 directory.models.Critere = Backbone.Model.extend({
 	dao: directory.dao.ParcoursDAO,
-
-	initialize: function() {
-		//this.reports = new directory.models.EmployeeCollection();
-		//this.reports.managerId = this.id;
-	}
-
+	initialize: function() {	}
 });
-
-
 directory.models.CritereCollection = Backbone.Collection.extend({
 	dao: directory.dao.CritereDAO,
 	model: directory.models.Critere,
@@ -828,54 +822,49 @@ directory.models.CritereCollection = Backbone.Collection.extend({
 });
 
 
-
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Modèle OBSERVATION
 directory.models.Obs = Backbone.Model.extend({
 	dao: directory.dao.ObsDAO,
-
 	initialize: function() {	}
 });
-
 directory.models.ObsCollection = Backbone.Collection.extend({
 	dao: directory.dao.ObsDAO,
 	model: directory.models.Obs,
 
 	findById: function(key) {
-		var obs = new directory.dao.ObsDAO(directory.db),
+		var obsDAO = new directory.dao.ObsDAO(directory.db),
 			self = this;
-		obs.findById(key, function(data) {
-			//console.log("ObsCollection ", data);
+		obsDAO.findById(key, function(data) {
+			//console.log('ObsCollection | findById ', data);
 			self.reset(data);
 		});
 	},
 	
 	findAll: function() {
-		var obs = new directory.dao.ObsDAO(directory.db),
+		var obsDAO = new directory.dao.ObsDAO(directory.db),
 			self = this;
-		obs.findAll(function(data) {
-			//console.log("ObsCollection ", data);
+		obsDAO.findAll(function(data) {
+			//console.log('ObsCollection | findAll ', data);
 			self.reset(data);
 		});
 	}
-
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Modèle PHOTO
 directory.models.Photo = Backbone.Model.extend({
 	dao: directory.dao.PhotoDAO,
-
 	initialize: function() {	}
 });
-
 directory.models.PhotoCollection = Backbone.Collection.extend({
 	dao: directory.dao.PhotoDAO,
 	model: directory.models.Photo,
 
 	findByObs: function(key) {
-		var photo = new directory.dao.PhotoDAO(directory.db),
+		var photoDAO = new directory.dao.PhotoDAO(directory.db),
 			self = this;
-		photo.findByObs(key, function(data) {
-			//console.log("PhotoCollection | findByObs", data);
+		photoDAO.findByObs(key, function(data) {
+			//console.log('PhotoCollection | findByObs ', data);
 			self.reset(data);
 		});
 	}
@@ -885,9 +874,11 @@ directory.models.PhotoCollection = Backbone.Collection.extend({
 
 // -------------------------------------------------- The Views ---------------------------------------------------- //
 
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Liste PARCOURS
 directory.views.SearchPage = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
-	EmployeeListView: directory.views.EmployeeListView,
 
 	initialize: function() {
 		this.template = _.template(this.templateLoader.get('search-page'));
@@ -896,13 +887,12 @@ directory.views.SearchPage = Backbone.View.extend({
 
 	render: function(eventName) {
 		$(this.el).html(this.template(this.model.toJSON()));
-		this.listView = new directory.views.EmployeeListView({el: $('ul', this.el), model: this.model});
+		this.listView = new directory.views.ParcoursListView({el: $('ul', this.el), model: this.model});
 		this.listView.render();
 		return this;
 	}
 });
-
-directory.views.EmployeeListView = Backbone.View.extend({
+directory.views.ParcoursListView = Backbone.View.extend({
 	initialize: function() {
 		this.model.bind('reset', this.render, this);
 	},
@@ -910,14 +900,12 @@ directory.views.EmployeeListView = Backbone.View.extend({
 	render: function(eventName) {
 		$(this.el).empty();
 		_.each(this.model.models, function(employee) {
-			$(this.el).append(new directory.views.EmployeeListItemView({model: employee}).render().el);
+			$(this.el).append(new directory.views.ParcoursListItemView({model: employee}).render().el);
 		}, this);
 		return this;
 	}
-
 });
-
-directory.views.EmployeeListItemView = Backbone.View.extend({
+directory.views.ParcoursListItemView = Backbone.View.extend({
 	tagName: 'li',
 
 	initialize: function(data) {
@@ -931,6 +919,8 @@ directory.views.EmployeeListItemView = Backbone.View.extend({
 
 });
 
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Détails PARCOURS
 directory.views.ParcoursPage = Backbone.View.extend({
 	initialize: function() {
 		directory.liste = new Array();
@@ -957,6 +947,7 @@ directory.views.ParcoursPage = Backbone.View.extend({
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Liste ESPECE par Parcours
 directory.views.ListPage = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
 	
@@ -977,10 +968,10 @@ directory.views.ListPage = Backbone.View.extend({
 	render: function(eventName) {
 		var lien = (this.model.id == 0) ? '' : '/'+this.model.id,
 			json = {
-			"nom_parcours" : this.model.name,
-			"id_parcours" : this.model.id,
-			"id_critere" : this.model.id_critere,
-			"lien_parcours" : 'parcours'+lien
+			'nom_parcours' : this.model.name,
+			'id_parcours' : this.model.id,
+			'id_critere' : this.model.id_critere,
+			'lien_parcours' : 'parcours'+lien
 		};
 		
 		$(this.el).html(this.template(json));
@@ -989,10 +980,7 @@ directory.views.ListPage = Backbone.View.extend({
 		return this;
 	}
 });
-
-
 directory.views.EspeceListView = Backbone.View.extend({
-
 	initialize: function(data) {
 		//console.log(data);
 		this.ce_critere = data.model.id_critere;
@@ -1040,7 +1028,6 @@ directory.views.EspeceListView = Backbone.View.extend({
 	}
 
 });
-
 directory.views.EspeceListItemView = Backbone.View.extend({
 	tagName: 'li',
 
@@ -1057,10 +1044,10 @@ directory.views.EspeceListItemView = Backbone.View.extend({
 		$(this.el).html(this.template(this.model.toJSON()));
 		return this;
 	}
-
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Détails ESPECE
 directory.views.EspecePage = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
 	
@@ -1085,10 +1072,10 @@ directory.views.EspecePage = Backbone.View.extend({
 		directory.db.transaction(
 			function(tx) {
 				var sql =
-					'SELECT vue ' +
-					'FROM avoir_critere ' +
-					'WHERE id_espece = :num_nom ' +
-					'AND id_critere = :ce_critere ';
+					"SELECT vue " +
+					"FROM avoir_critere " +
+					"WHERE id_espece = :num_nom " +
+					"AND id_critere = :ce_critere ";
 				tx.executeSql(sql, [num_nom, ce_critere], function(tx, results) {
 					if (results.rows.length != 0) {
 						if (results.rows.item(0).vue == 1) {
@@ -1102,12 +1089,12 @@ directory.views.EspecePage = Backbone.View.extend({
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			}
 		);
-		
 		return this;
 	}
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Page CRITERE (Clef)
 directory.views.CriterePage = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
 	
@@ -1141,25 +1128,25 @@ directory.views.CriterePage = Backbone.View.extend({
 			arr_feuillaison = new Array(),
 			arr_fructification = new Array();
 			
-		arr_floraison.push("La plante est-elle en fleur ?");
-		arr_floraison.push("floraison;La plante est en fleur.;reports.png");
+		arr_floraison.push('La plante est-elle en fleur ?');
+		arr_floraison.push('floraison;La plante est en fleur.;reports.png');
 		
-		arr_feuillaison.push("L'espèce est-elle en feuille ?");
-		arr_feuillaison.push("feuillaison;L'espèce est en feuille.;reports.png");
+		arr_feuillaison.push('L\'espèce est-elle en feuille ?');
+		arr_feuillaison.push('feuillaison;L\'espèce est en feuille.;reports.png');
 		
-		arr_fructification.push("Des fruits sont-ils présents ?");
-		arr_fructification.push("fructification;Il y a des fruits.;reports.png");
+		arr_fructification.push('Des fruits sont-ils présents ?');
+		arr_fructification.push('fructification;Il y a des fruits.;reports.png');
 		
 		arr_criteres.push(arr_floraison);
 		arr_criteres.push(arr_feuillaison);
 		arr_criteres.push(arr_fructification);
 		
 		var json = {
-			"id" : this.model.id,
-			"nom" : this.model.nom,
-			"ce_critere" : this.model.ce_critere,
-			"criteres" : arr_criteres,
-			"total": directory.nbre_especes
+			'id' : this.model.id,
+			'nom' : this.model.nom,
+			'ce_critere' : this.model.ce_critere,
+			'criteres' : arr_criteres,
+			'total': directory.nbre_especes
 		};
 		
 		$(this.el).empty();
@@ -1170,7 +1157,6 @@ directory.views.CriterePage = Backbone.View.extend({
 		return this;
 	}
 });
-
 directory.views.CritereListItemView = Backbone.View.extend({
 	initialize: function(data) {
 		//console.log(data);
@@ -1196,6 +1182,7 @@ directory.views.CritereListItemView = Backbone.View.extend({
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Page Accueil
 directory.views.Accueil = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
 	
@@ -1211,6 +1198,7 @@ directory.views.Accueil = Backbone.View.extend({
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Page Saisie OBS
 directory.views.saisieObs = Backbone.View.extend({
 	initialize: function() {
 		geolocaliser();
@@ -1234,6 +1222,7 @@ directory.views.saisieObs = Backbone.View.extend({
 	}
 });
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Détails OBS
 directory.views.ObsPage = Backbone.View.extend({
 	initialize: function(data) {
 		//console.log(data);
@@ -1260,6 +1249,8 @@ directory.views.ObsPage = Backbone.View.extend({
 	}
 });
 
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Liste OBS
 directory.views.transmissionObs = Backbone.View.extend({
 	initialize: function(data) {
 		this.model = new directory.models.ObsCollection();
@@ -1280,6 +1271,7 @@ directory.views.transmissionObs = Backbone.View.extend({
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Page Compte
 directory.views.comptePage = Backbone.View.extend({
 	initialize: function() {
 		this.template = _.template(directory.utils.templateLoader.get('compte'));
@@ -1298,9 +1290,9 @@ directory.views.comptePage = Backbone.View.extend({
 directory.liste = new Array();
 directory.criteria = new Array();
 directory.pheno = new Object();
-directory.pheno["floraison"] = new Array();
-directory.pheno["feuillaison"] = new Array();
-directory.pheno["fructification"] = new Array();
+directory.pheno['floraison'] = new Array();
+directory.pheno['feuillaison'] = new Array();
+directory.pheno['fructification'] = new Array();
 directory.pheno.liste = new Array();
 directory.nbre_criteres = new Array();
 directory.nbre_especes = null;
@@ -1310,16 +1302,16 @@ directory.nbre_especes = null;
 
 directory.Router = Backbone.Router.extend({
 	routes: {
-		"" : "accueil",
-		"parcours" : "list",
-		"parcours/:id_parcours" : "employeeDetails",
-		"liste/:id_parcours/:nom_parcours/:id_critere" : "listeEspeces",
-		"espece/:id_espece/:ce_parcours" : "especeDetails",
-		"clef/:id_parcours/:nom_parcours/:ce_parcours" : "clefByParcours", 
-		"obs/:id_espece/:nom_sci" : "nouvelleObs",
-		"observation/:id_obs" : "detailsObs",
-		"transmission" : "transmissionObs",
-		"compte" : "compteUtilisateur"
+		'' : 'accueil',
+		'parcours' : 'list',
+		'parcours/:id_parcours' : 'employeeDetails',
+		'liste/:id_parcours/:nom_parcours/:id_critere' : 'listeEspeces',
+		'espece/:id_espece/:ce_parcours' : 'especeDetails',
+		'clef/:id_parcours/:nom_parcours/:ce_parcours' : 'clefByParcours', 
+		'obs/:id_espece/:nom_sci' : 'nouvelleObs',
+		'observation/:id_obs' : 'detailsObs',
+		'transmission' : 'transmissionObs',
+		'compte' : 'compteUtilisateur'
 	},
 
 	initialize: function() {
@@ -1343,10 +1335,10 @@ directory.Router = Backbone.Router.extend({
 					i = 0;
 				for (; i < nbre; i = i + 1) {
 					var critere = results.rows.item(i);
-					if (critere.intitule.indexOf("debut") != -1) {
-						directory.pheno["feuillaison"]["debut"] = critere.id_critere;
+					if (critere.intitule.indexOf('debut') != -1) {
+						directory.pheno['feuillaison']['debut'] = critere.id_critere;
 					} else {
-						directory.pheno["feuillaison"]["fin"] = critere.id_critere;
+						directory.pheno['feuillaison']['fin'] = critere.id_critere;
 					}
 				}
 			});
@@ -1361,10 +1353,10 @@ directory.Router = Backbone.Router.extend({
 					i = 0;
 				for (; i < nbre; i = i + 1) {
 					var critere = results.rows.item(i);
-					if (critere.intitule.indexOf("debut") != -1) {
-						directory.pheno["floraison"]["debut"] = critere.id_critere;
+					if (critere.intitule.indexOf('debut') != -1) {
+						directory.pheno['floraison']['debut'] = critere.id_critere;
 					} else {
-						directory.pheno["floraison"]["fin"] = critere.id_critere;
+						directory.pheno['floraison']['fin'] = critere.id_critere;
 					}
 				}
 			});
@@ -1379,10 +1371,10 @@ directory.Router = Backbone.Router.extend({
 					i = 0;
 				for (; i < nbre; i = i + 1) {
 					var critere = results.rows.item(i);
-					if (critere.intitule.indexOf("debut") != -1) {
-						directory.pheno["fructification"]["debut"] = critere.id_critere;
+					if (critere.intitule.indexOf('debut') != -1) {
+						directory.pheno['fructification']['debut'] = critere.id_critere;
 					} else {
-						directory.pheno["fructification"]["fin"] = critere.id_critere;
+						directory.pheno['fructification']['fin'] = critere.id_critere;
 					}
 				}
 			});
@@ -1408,18 +1400,18 @@ directory.Router = Backbone.Router.extend({
 			directory.db.transaction(
 				function(tx) {
 					var sql =
-						'UPDATE parcours ' +
-						'SET est_commence = 0 ' +
-						'WHERE id = :id_parcours';
+						"UPDATE parcours " +
+						"SET est_commence = 0 " +
+						"WHERE id = :id_parcours";
 					tx.executeSql(sql, [id]);
 					
 					sql =
-						'UPDATE avoir_critere ' +
-						'SET vue = 0 ' +
-						'WHERE id_critere = ' +
-							'(SELECT ce_critere ' +
-							'FROM parcours ' +
-							'WHERE id = :id_parcours)';
+						"UPDATE avoir_critere " +
+						"SET vue = 0 " +
+						"WHERE id_critere = " +
+							"(SELECT ce_critere " +
+							"FROM parcours " +
+							"WHERE id = :id_parcours)";
 					tx.executeSql(sql, [id]);
 				},
 				function(error) {
@@ -1434,9 +1426,9 @@ directory.Router = Backbone.Router.extend({
 			directory.db.transaction(
 				function(tx) {
 					var sql =
-						'SELECT est_commence ' +
-						'FROM parcours ' +
-						'WHERE id = :id_parcours';
+						"SELECT est_commence " +
+						"FROM parcours " +
+						"WHERE id = :id_parcours";
 					tx.executeSql(sql, [id], function(tx, results) {
 						if (results.rows.item(0).est_commence == 1) {
 							$('#myModal').modal('show');	
@@ -1450,9 +1442,9 @@ directory.Router = Backbone.Router.extend({
 			directory.db.transaction(
 				function(tx) {
 					var sql =
-						'UPDATE parcours ' +
-						'SET est_commence = 1 ' +
-						'WHERE id = :id_parcours';
+						"UPDATE parcours " +
+						"SET est_commence = 1 " +
+						"WHERE id = :id_parcours";
 					tx.executeSql(sql, [id]);
 				},
 				function(error) {
@@ -1470,10 +1462,10 @@ directory.Router = Backbone.Router.extend({
 			directory.db.transaction(
 				function(tx) {
 					var sql =
-						'UPDATE avoir_critere ' +
-							'SET vue = 1 ' +
-							'WHERE id_espece = :num_nom ' +
-							'AND id_critere = :ce_critere';
+						"UPDATE avoir_critere " +
+							"SET vue = 1 " +
+							"WHERE id_espece = :num_nom " +
+							"AND id_critere = :ce_critere";
 					tx.executeSql(sql, [num_nom, ce_critere]);
 				},
 				function(error) {
@@ -1530,7 +1522,7 @@ directory.Router = Backbone.Router.extend({
 						directory.criteria[inputs[i].name] = inputs[i].value;
 						nbre_choix++;
 						var id = inputs[i].value.split(';')[0];
-						if (id % 1 === 0) {		//id est un nombre ?
+						if (id % 1 === 0) {		//id est-il un nombre ?
 							arr_ids.push(id);
 						} else {
 							directory.pheno.liste.push(id);
@@ -1717,9 +1709,9 @@ directory.Router = Backbone.Router.extend({
 						var obs = new Array(),
 							id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_obs+1;
 							sql =
-								'INSERT INTO obs ' +
-								'(id_obs, date, latitude, longitude, commune, code_insee, mise_a_jour, ce_espece) VALUES ' + 
-								'(?, ?, ?, ?, ?, ?, ?, ?) ';
+								"INSERT INTO obs " +
+								"(id_obs, date, latitude, longitude, commune, code_insee, mise_a_jour, ce_espece) VALUES " + 
+								"(?, ?, ?, ?, ?, ?, ?, ?) ";
 							
 						obs.push(id);
 						obs.push($('#date').html());
@@ -1744,8 +1736,8 @@ directory.Router = Backbone.Router.extend({
 			var id = this.id;
 			directory.db.transaction(
 				function(tx) {
-					tx.executeSql('DELETE FROM photo WHERE ce_obs = ' + id);
-					tx.executeSql('DELETE FROM obs WHERE id_obs = ' + id);
+					tx.executeSql("DELETE FROM photo WHERE ce_obs = " + id);
+					tx.executeSql("DELETE FROM obs WHERE id_obs = " + id);
 					
 					var txt = 'Observation n° ' + id + ' supprimée.';
 					$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
@@ -1767,7 +1759,10 @@ directory.Router = Backbone.Router.extend({
 		
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
-			var options = { destinationType: destinationType.FILE_URI };
+			var options = { 
+				destinationType: destinationType.NATIVE_URI,
+				encodingType: Camera.EncodingType.JPEG
+			};
 			if (this.id == 'chercher-photos') {
 				options.sourceType = pictureSource.PHOTOLIBRARY;
 			}
@@ -1784,7 +1779,7 @@ directory.Router = Backbone.Router.extend({
 			var id = this.id;
 			directory.db.transaction(
 				function(tx) {
-					tx.executeSql('DELETE FROM photo WHERE id_photo = ' + id);
+					tx.executeSql("DELETE FROM photo WHERE id_photo = " + id);
 /*					
 					var txt = 'Photo n° ' + id + ' supprimée.';
 					$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
@@ -1835,7 +1830,7 @@ directory.Router = Backbone.Router.extend({
 		}
 
 		// We keep a single instance of the SearchPage and its associated Employee collection throughout the app
-		this.searchResults = new directory.models.EmployeeCollection();
+		this.searchResults = new directory.models.ParcoursCollection();
 		this.searchPage = new directory.views.SearchPage({model: this.searchResults});
 		this.searchPage.render();
 		$(this.searchPage.el).attr('id', 'searchPage');
@@ -1860,7 +1855,7 @@ directory.Router = Backbone.Router.extend({
 	},
 
 	employeeDetails: function(id) {
-		var employee = new directory.models.Employee({id: id}),
+		var employee = new directory.models.Parcours({id: id}),
 			self = this;
 		employee.fetch({
 			success: function(data) {
@@ -1988,15 +1983,13 @@ directory.Router = Backbone.Router.extend({
 });
 
 // Bootstrap the application
-directory.db = window.openDatabase("ParcoursDAO", "1.0", "Employee Demo DB", 200000);
-var employeeDAO = new directory.dao.ParcoursDAO(directory.db);
+directory.db = window.openDatabase('FloraClapasApp', '1.0', 'Data Base Flora Clapas', 200000);
+var parcoursDAO = new directory.dao.ParcoursDAO(directory.db);
 var especeDAO = new directory.dao.EspeceDAO(directory.db);
-var critereDAO = new directory.dao.CritereDAO(directory.db);
-var avr_critereDAO = new directory.dao.AvoirCritereDAO(directory.db);
 especeDAO.populate();
-employeeDAO.populate();
-critereDAO.populate();
-avr_critereDAO.populate();
+parcoursDAO.populate();
+(new directory.dao.CritereDAO(directory.db)).populate();
+(new directory.dao.AvoirCritereDAO(directory.db)).populate();
 (new directory.dao.ObsDAO(directory.db)).populate();
 (new directory.dao.PhotoDAO(directory.db)).populate();
 //(new directory.dao.UtilisateurDAO(directory.db)).populate();
@@ -2053,16 +2046,16 @@ function onPhotoSuccess(imageData){
 		function(tx) {
 			var hash = window.location.hash,
 				sql =
-					'SELECT id_photo ' +
-					'FROM photo ' + 
-					'ORDER BY id_photo DESC';
+					"SELECT id_photo " +
+					"FROM photo " + 
+					"ORDER BY id_photo DESC";
 			tx.executeSql(sql, [], function(tx, results) {
 				var photo = new Array(),
 					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
 					sql =
-						'INSERT INTO photo ' +
-						'(id_photo, chemin, ce_obs) VALUES ' + 
-						'(?, ?, ?) ';
+						"INSERT INTO photo " +
+						"(id_photo, chemin, ce_obs) VALUES " + 
+						"(?, ?, ?) ";
 					
 				photo.push(id);
 				photo.push('\"'+imageData+'\"');
