@@ -2083,10 +2083,10 @@ function gotFileEntry(fileEntry) {
 }
 
 function gotFileWriter(writer) {
-	alert('writting...');
+	alert('writting... ' + contenu);
     writer.write(contenu);
 	for(var index in writer) {
-		$('#obs-photos-info').append(writer[index]);	
+		$('#obs-photos-info').append(index + ': ' + writer[index] + '<br />');	
 	}
 }
 
