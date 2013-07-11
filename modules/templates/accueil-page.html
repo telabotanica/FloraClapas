@@ -18,3 +18,17 @@
 		</a>
 	</div>
 </div>
+
+<div id="test"></div>
+
+
+<script>
+function onSuccess(fileSystem) {
+    $('#test').append(fileSystem.name);
+    $('#test').append(fileSystem.root.name);
+}
+
+// request the persistent file system
+window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, null);
+
+</script>

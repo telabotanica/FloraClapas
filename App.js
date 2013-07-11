@@ -2068,7 +2068,7 @@ function onPhotoSuccess(imageData){
 				        console.log("write success");
 				    };
 				    writer.write(imageData);
-				    $('#obs-photos-info').append(writer.fileName);	
+				    $('#obs-photos-info').append(writer.fileName + ' ' + writer.length);	
 				}, function(evt) {
 				    console.log(error.code);
 				});
