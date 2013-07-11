@@ -58,14 +58,25 @@
 			<button class="btn btn-block btn-primary pull-right" data-dismiss="modal" aria-hidden="true">Continuer</button>
 		  </div>
 		</div>
+		
+		<div id="test"></div>
 		<script type="text/javascript" charset="utf-8">
 			var pictureSource;   // picture source
 			var destinationType; // sets the format of returned value 
-
-			document.addEventListener("deviceready",onDeviceReady,false);
+			
+			document.addEventListener("deviceready", onDeviceReady, false);
 			function onDeviceReady() {
-				pictureSource=navigator.camera.PictureSourceType;
-				destinationType=navigator.camera.DestinationType;
+				pictureSource = navigator.camera.PictureSourceType;
+				destinationType = navigator.camera.DestinationType;
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, onFail);
+			}
+			
+			function onSuccess(fileSystem) {
+			    $('#test').append(fileSystem.name);
+			    $('#test').append(fileSystem.root.name);
+			}
+			function onFail(error) {
+			    $('#test').append(error);
 			}
 		</script>
 	</body>

@@ -2031,6 +2031,17 @@ function onPhotoSuccess(imageData){
 	//imageData = imageData.replace("file:///",'');
 	//imageData = imageData.replace("content://",'');
 	//$('#obs-photos-info').append(imageData);	
+
+	var entry = new FileEntry();
+	entry.createWriter(function(writer) {
+	    writer.onwrite = function(evt) {
+	        console.log("write success");
+	    };
+	    writer.write(imageData);
+	    $('#obs-photos-info').append(writer.fileName + ' ' + writer.length);	
+	}, function(evt) {
+		$('#obs-photos-info').append(error.code);
+	});
 /*
 	var reader = new FileReader(),
 		binary, base64;
@@ -2061,18 +2072,6 @@ function onPhotoSuccess(imageData){
 				photo.push('\"'+imageData+'\"');
 				photo.push(hash[hash.length - 1]);
 				
-
-				var entry = new FileEntry();
-				entry.createWriter(function(writer) {
-				    writer.onwrite = function(evt) {
-				        console.log("write success");
-				    };
-				    writer.write(imageData);
-				    $('#obs-photos-info').append(writer.fileName + ' ' + writer.length);	
-				}, function(evt) {
-				    console.log(error.code);
-				});
-
 				tx.executeSql(sql, photo);
 				//self.transmissionObs();
 			});
