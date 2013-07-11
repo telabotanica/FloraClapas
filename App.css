@@ -18,11 +18,12 @@
 	background: #FFF;
 }
 
-.miniature img {
-	width: 60px;
+.miniature, .miniature img {
+	width: 65px;
 }
 .miniature {
-	margin: 0px 2px 4px;
+	margin: 0px 2px 10px;
+	border: solid 2px #CCC;
 }
 
 .description-parcours {
