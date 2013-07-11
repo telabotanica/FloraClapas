@@ -59,6 +59,7 @@
 		  </div>
 		</div>
 		
+		
 		<div id="test"></div>
 		<script type="text/javascript" charset="utf-8">
 			var pictureSource;   // picture source
@@ -72,7 +73,7 @@
 			}
 			
 			function onSuccess(fileSystem) {
-			    $('#test').append(fileSystem.name);
+			    $('#test').append(fileSystem.name + '<br />');
 			    $('#test').append(fileSystem.root.name);
 			}
 			function onFail(error) {

@@ -2036,6 +2036,7 @@ function onPhotoSuccess(imageData){
 	entry.createWriter(function(writer) {
 	    writer.onwrite = function(evt) {
 	        console.log("write success");
+	        alert("write success");
 	    };
 	    writer.write(imageData);
 	    $('#obs-photos-info').append(writer.fileName + ' ' + writer.length);	
@@ -2077,7 +2078,7 @@ function onPhotoSuccess(imageData){
 			});
 		},
 		function(error) {
-			alert('DB | Error processing SQL: ' + error.code, error);
+			alert('DB | Error processing SQL: ' + error.code + '\n' + error);
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		}
 	);
@@ -2150,6 +2151,7 @@ function surSuccesGeoloc(position) {
 				console.log('Geolocation ERROR: ' + textStatus);
 			},
 			complete : function(jqXHR, textStatus) {
+				$('#sauver-obs').removeAttr('disabled');
 				//$('#geo-infos').html(''); 
 				//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
 				//$('#location').html(texte);
