@@ -1760,7 +1760,7 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			var options = { 
-				destinationType: destinationType.DATA_URL,
+				destinationType: destinationType.FILE_URL,
 				encodingType: Camera.EncodingType.JPEG
 			};
 			if (this.id == 'chercher-photos') {
@@ -2034,7 +2034,7 @@ function onPhotoSuccess(imageData){
 	//imageData = imageData.replace("content://",'');
 	//$('#obs-photos-info').append(imageData);	
 
-    fileSystem.root.getFile("test.jpg", {create: true, exclusive: false}, gotFileEntry, fail);
+    fileSystem.root.getDirectory("FlorasClapas", {create: true, exclusive: false}, gotFileEntry, fail);
 	alert('file system');
 /*
 	var reader = new FileReader(),
@@ -2077,18 +2077,18 @@ function onPhotoSuccess(imageData){
 	);
 };
 
-function gotFileEntry(fileEntry) {
-	alert('file writer');
-    fileEntry.createWriter(gotFileWriter, fail);
+function gotFileEntry(dossier) {
+	alert(imageData);
+	alert(dossier.fullPath);
+	var fichier = new FileEntry();
+	fichier.fullPath = contenu;
+	fichier.copyTo(dossier, "test.jpg", success, fail);
 }
 
-function gotFileWriter(writer) {
-	alert('writting... ' + contenu);
-    writer.write(contenu);
-	for(var index in writer) {
-		$('#obs-photos-info').append(index + ': ' + writer[index] + '<br />');	
-	}
+function success(entry) {
+    alert("New Path: " + entry.fullPath);
 }
+
 
 function fail(error) {
     alert(error.code);
