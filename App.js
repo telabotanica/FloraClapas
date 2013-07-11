@@ -1760,7 +1760,7 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			var options = { 
-				destinationType: destinationType.DATA_URL,
+				destinationType: destinationType.FILE_URI,
 				encodingType: Camera.EncodingType.JPEG
 			};
 			if (this.id == 'chercher-photos') {
