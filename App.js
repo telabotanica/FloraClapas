@@ -1773,7 +1773,7 @@ directory.Router = Backbone.Router.extend({
 			navigator.camera.getPicture(
 				onPhotoSuccess, 
 				function(message){
-					alert('Erreur camera: ' + message);
+					//alert('Erreur camera: ' + message);
 					console.log('CAMERA failed because: ' + message);
 				},
 				options
@@ -1955,18 +1955,18 @@ directory.Router = Backbone.Router.extend({
 
 		if (page === this.searchPage) {
 			// Always apply a Back (slide from left) transition when we go back to the search page
-			slideFrom = "left";
+			slideFrom = 'left';
 			$(page.el).attr('class', 'page stage-left');
 			// Reinitialize page history
 			this.pageHistory = [window.location.hash];
 		} else if (this.pageHistory.length > 1 && window.location.hash === this.pageHistory[this.pageHistory.length - 2]) {
 			// The new page is the same as the previous page -> Back transition
-			slideFrom = "left";
+			slideFrom = 'left';
 			$(page.el).attr('class', 'page stage-left');
 			this.pageHistory.pop();
 		} else {
 			// Forward transition (slide from right)
-			slideFrom = "right";
+			slideFrom = 'right';
 			$(page.el).attr('class', 'page stage-right');
 			this.pageHistory.push(window.location.hash);
 		}
@@ -2037,15 +2037,17 @@ function onPhotoSuccess(imageData){
 	//imageData = imageData.replace("file:///",'');
 	//imageData = imageData.replace("content://",'');
 	$('#obs-photos-info').append(imageData);	
+/*
 	var reader = new FileReader(),
 		binary, base64;
 	reader.addEventListener('loadend', function(evt) {
 		binary = reader.result; // binary data (stored as string), unsafe for most actions
 		base64 = btoa(binary); 	// base64 data, safer but takes up more memory
 
-		$('#obs-photos-info').append('<br /><br />' + binary + '<br /><br />' + base64);
+		$('#obs-photos-info').append(binary);
 	}, false);
 	reader.readAsBinaryString(imageData);
+*/
 	directory.db.transaction(
 		function(tx) {
 			var hash = window.location.hash,
@@ -2062,7 +2064,7 @@ function onPhotoSuccess(imageData){
 						'(?, ?, ?) ';
 					
 				photo.push(id);
-				photo.push('"'+imageData+'"');
+				photo.push('\"'+imageData+'\"');
 				photo.push(hash[hash.length - 1]);
 				
 				tx.executeSql(sql, photo);
@@ -2070,6 +2072,7 @@ function onPhotoSuccess(imageData){
 			});
 		},
 		function(error) {
+			alert('DB | Error processing SQL: ' + error.code, error);
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		}
 	);
@@ -2108,10 +2111,7 @@ function geolocaliser() {
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(surSuccesGeoloc, surErreurGeoloc);
 	} else {
-		$('#geo-infos').addClass('text-error');
-		$('#geo-infos').removeClass('text-info');
-		$('#geo-infos').html('Calcul impossible.');
-		var erreur = { code: '0', message: 'Géolocalisation non supportée par le navigateur'};
+		var erreur = { code: '0', message: 'Géolocalisation non supportée par le navigateur.'};
 		surErreurGeoloc(erreur);
 	}
 }
@@ -2142,7 +2142,7 @@ function surSuccesGeoloc(position) {
 				$('#geo-infos').addClass('text-error');
 				$('#geo-infos').removeClass('text-info');
 				$('#geo-infos').html('Impossible de trouver la commmune.'); 
-				$('#geo-infos').append(textStatus + '(' + errorThrown + ')'); 
+				console.log('Geolocation ERROR: ' + textStatus);
 			},
 			complete : function(jqXHR, textStatus) {
 				//$('#geo-infos').html(''); 
@@ -2153,6 +2153,8 @@ function surSuccesGeoloc(position) {
 	}
 }
 function surErreurGeoloc(error){
+	$('#geo-infos').addClass('text-error');
+	$('#geo-infos').removeClass('text-info');
 	$('#geo-infos').html('Calcul impossible.');
 	console.log('Echec de la géolocalisation, code: ' + error.code + ' message: '+ error.message);
 }
@@ -2166,13 +2168,12 @@ function requeterIdentite() {
 		$('#utilisateur-infos').html('Vérification en cours...');
 		//miseAJourCourriel();
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
-		$('#utilisateur-infos').append('<br />' + urlAnnuaire + '<br />');
 		$.ajax({
 			url : urlAnnuaire,
 			type : 'GET', 
 			success : function(data, textStatus, jqXHR) {
-				$('#utilisateur-infos').append(data + '<br />');
-				console.log('Annuaire SUCCESS : ' + textStatus);
+				console.log('Annuaire SUCCESS: ' + textStatus);
+				$('#utilisateur-infos').html('');
 				if (data != undefined && data[courriel] != undefined) {
 					var infos = data[courriel];
 					$('#id_utilisateur').val(infos.id);
@@ -2185,13 +2186,11 @@ function requeterIdentite() {
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
-				$('#utilisateur-infos').append('Vérification impossible. (' + errorThrown + ')<br />');
-				console.log('Annuaire ERREUR : ' + textStatus);
+				console.log('Annuaire ERROR: ' + textStatus);
 				surErreurCompletionCourriel();
 			},
 			complete : function(jqXHR, textStatus) {
-				console.log('Annuaire COMPLETE : ' + textStatus);
-				$('#utilisateur-infos').append(textStatus + '<br />');
+				console.log('Annuaire COMPLETE: ' + textStatus);
 				$('#zone_prenom_nom').removeClass('hide');
 				$('#zone_courriel_confirmation').removeClass('hide');
 			}
@@ -2200,6 +2199,7 @@ function requeterIdentite() {
 }
 
 function surErreurCompletionCourriel() {
+	$('#utilisateur-infos').html('Vérification impossible.');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').val('');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').removeAttr('disabled');
 }
