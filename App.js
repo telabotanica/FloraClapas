@@ -1760,7 +1760,7 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			var options = { 
-				destinationType: destinationType.NATIVE_URI,
+				destinationType: destinationType.DATA_URL,
 				encodingType: Camera.EncodingType.JPEG
 			};
 			if (this.id == 'chercher-photos') {
@@ -2030,7 +2030,7 @@ function moisPhenoEstCouvert( debut, fin) {
 function onPhotoSuccess(imageData){
 	//imageData = imageData.replace("file:///",'');
 	//imageData = imageData.replace("content://",'');
-	$('#obs-photos-info').append(imageData);	
+	//$('#obs-photos-info').append(imageData);	
 /*
 	var reader = new FileReader(),
 		binary, base64;
@@ -2061,6 +2061,18 @@ function onPhotoSuccess(imageData){
 				photo.push('\"'+imageData+'\"');
 				photo.push(hash[hash.length - 1]);
 				
+
+				var entry = new FileEntry();
+				entry.createWriter(function(writer) {
+				    writer.onwrite = function(evt) {
+				        console.log("write success");
+				    };
+				    writer.write(imageData);
+				    $('#obs-photos-info').append(writer.fileName);	
+				}, function(evt) {
+				    console.log(error.code);
+				});
+
 				tx.executeSql(sql, photo);
 				//self.transmissionObs();
 			});
@@ -2199,3 +2211,5 @@ function surErreurCompletionCourriel() {
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').val('');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').removeAttr('disabled');
 }
+
+
