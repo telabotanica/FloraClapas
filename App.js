@@ -1999,6 +1999,7 @@ $().ready(function() {
 });
 
 
+
 function moisPhenoEstCouvert( debut, fin) {
 	var mois_actuel = new Date().getMonth() + 1,
 		flag = false;
@@ -2019,72 +2020,59 @@ function moisPhenoEstCouvert( debut, fin) {
 	return(flag);
 }
 
-var contenu = null,
-	chemin = null;
+
+
+var contenu = null;
 function onPhotoSuccess(imageData){
 	contenu = imageData;
-	//imageData = imageData.replace("file:///",'');
-	//imageData = imageData.replace("content://",'');
-	//$('#obs-photos-info').append(imageData);	
-
-    fileSystem.root.getDirectory("FlorasClapas", {create: true, exclusive: false}, gotFileEntry, fail);
-	alert('file system');
-/*
-	var reader = new FileReader(),
-		binary, base64;
-	reader.addEventListener('loadend', function(evt) {
-		binary = reader.result; // binary data (stored as string), unsafe for most actions
-		base64 = btoa(binary); 	// base64 data, safer but takes up more memory
-
-		$('#obs-photos-info').append(binary);
-	}, false);
-	reader.readAsBinaryString(imageData);
-*/
-	
+	fileSystem.root.getDirectory("FlorasClapas", { create: true, exclusive: false }, function(dossier) {
+		var fichier = new FileEntry();
+		fichier.fullPath = imageData;
+		fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', surCopiePhoto, surErreurPhoto);
+	}, surErreurPhoto);
 };
-
-function gotFileEntry(dossier) {
-	alert(dossier.fullPath);
-	var fichier = new FileEntry();
-	fichier.fullPath = contenu;
-	fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', success, fail);
+function surCopiePhoto(entry) {
+	directory.db.transaction(
+		function(tx) {
+			var hash = window.location.hash,
+				ce_obs = hash[hash.length - 1],
+				chemin = entry.fullPath,
+				sql =
+					"SELECT id_photo " +
+					"FROM photo " + 
+					"ORDER BY id_photo DESC";
+			tx.executeSql(sql, [], function(tx, results) {
+				var photo = new Array(),
+					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
+					sql =
+						"INSERT INTO photo " +
+						"(id_photo, chemin, ce_obs) VALUES " + 
+						"(?, ?, ?) ";
+					
+				photo.push(id);
+				photo.push(chemin);
+				photo.push(ce_obs);
+				
+				tx.executeSql(sql, photo);
+				//self.transmissionObs();
+				
+				var elt = 
+				'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
+					'<img src="' + chemin + '" alt="' + id + '" />' +
+					'<a href="#observation/' + ce_obs + '" id="' + id + '" class="suppression-element supprimer-photos"><span></span></a>' + 
+				'</div>';
+				$('#obs-photo').append(elt);
+				$('#nbre-photos').html($('#nbre-photos').html()+1);
+			});
+		},
+		surErreurPhoto
+	);
 }
-
-function success(entry) {
-    alert("New Path: " + entry.fullPath);
-    directory.db.transaction(
-    		function(tx) {
-    			var hash = window.location.hash,
-    				sql =
-    					"SELECT id_photo " +
-    					"FROM photo " + 
-    					"ORDER BY id_photo DESC";
-    			tx.executeSql(sql, [], function(tx, results) {
-    				var photo = new Array(),
-    					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
-    					sql =
-    						"INSERT INTO photo " +
-    						"(id_photo, chemin, ce_obs) VALUES " + 
-    						"(?, ?, ?) ";
-    					
-    				photo.push(id);
-    				photo.push(entry.fullPath);
-    				photo.push(hash[hash.length - 1]);
-    				
-    				tx.executeSql(sql, photo);
-    				//self.transmissionObs();
-    			});
-    		},
-    		function(error) {
-    			alert('DB | Error processing SQL: ' + error.code + '\n' + error);
-    			console.log('DB | Error processing SQL: ' + error.code, error);
-    		}
-    	);
-}
-
-
-function fail(error) {
-    alert('Erreur lors de la récupération de l\'image. \n Code:' + error.code);
+function surErreurPhoto(error) {
+	$('#obs-photos-info').addClass('text-error');
+	$('#obs-photos-info').removeClass('text-info');
+	$('#obs-photos-info').html('Erreur de traitement. Ajout impossible.');
+	console.log('PHOTO | Error: ' + error.code, error);
 }
 
 
@@ -2113,6 +2101,7 @@ function fail(error) {
 			}
 		});
 */
+
 
 
 function geolocaliser() {
@@ -2207,7 +2196,6 @@ function requeterIdentite() {
 		});
 	}
 }
-
 function surErreurCompletionCourriel() {
 	$('#utilisateur-infos').addClass('text-error');
 	$('#utilisateur-infos').removeClass('text-info');
@@ -2215,5 +2203,3 @@ function surErreurCompletionCourriel() {
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').val('');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').removeAttr('disabled');
 }
-
-
