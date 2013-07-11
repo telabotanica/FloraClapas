@@ -669,7 +669,7 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 				var sql =
 					"CREATE TABLE IF NOT EXISTS photo (" +
 						"id_photo INT NOT NULL ," +
-						"chemin VARCHAR(255) NOT NULL ," +
+						"chemin TEXT NOT NULL ," +
 						"ce_obs INT NOT NULL ," +
 						"PRIMARY KEY (id_photo) ," +
 						"CONSTRAINT ce_obs " +
@@ -1760,7 +1760,7 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			var options = { 
-				destinationType: destinationType.FILE_URL,
+				destinationType: destinationType.FILE_URI,
 				encodingType: Camera.EncodingType.JPEG
 			};
 			if (this.id == 'chercher-photos') {
@@ -1780,20 +1780,13 @@ directory.Router = Backbone.Router.extend({
 			directory.db.transaction(
 				function(tx) {
 					tx.executeSql("DELETE FROM photo WHERE id_photo = " + id);
-/*					
-					var txt = 'Photo n° ' + id + ' supprimée.';
-					$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
-						.fadeIn(0)
-						.delay(1600)
-						.fadeOut('slow');
-*/		
+					
 					$('#elt_'+id).remove();
 					$('#nbre-photos').html($('#nbre-photos').html()-1);
 				},
 				function(error) {
 					console.log('DB | Error processing SQL: ' + error.code, error);
-					var txt = 'Erreur de suppression.';
-					$('#obs-photos-info').html('<p class="text-center alert alert-error alert-block">'+txt+'</p>')
+					$('#obs-photos-info').html('<p class="text-center alert alert-error alert-block">Erreur de suppression.</p>')
 						.fadeIn(0)
 						.delay(1600)
 						.fadeOut('slow');	
@@ -2063,7 +2056,7 @@ function onPhotoSuccess(imageData){
 						"(?, ?, ?) ";
 					
 				photo.push(id);
-				photo.push('\"'+imageData+'\"');
+				photo.push(imageData);
 				photo.push(hash[hash.length - 1]);
 				
 				tx.executeSql(sql, photo);
@@ -2081,7 +2074,7 @@ function gotFileEntry(dossier) {
 	alert(dossier.fullPath);
 	var fichier = new FileEntry();
 	fichier.fullPath = contenu;
-	fichier.copyTo(dossier, "test.jpg", success, fail);
+	fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', success, fail);
 }
 
 function success(entry) {
@@ -2090,7 +2083,7 @@ function success(entry) {
 
 
 function fail(error) {
-    alert(error.code);
+    alert('Erreur lors de la récupération de l\'image. \n Code:' + error.code);
 }
 
 
