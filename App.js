@@ -2274,13 +2274,13 @@ function miseAJourCourriel(courriel) {
 						"(?, ?, ?) ";
 					parametres.push(id);
 					parametres.push(courriel);
-					parametres.push(0);
+					parametres.push($('#courriel_confirmation').val() == courriel);
 				} else {
 					if (utilisateurs[index].compte_verifie == 0) {
 						sql = 
 							"UPDATE utilisateur " +
 							"SET nom = ?, prenom = ?, compte_verifie = ? " +
-							"WHERE id_users = ?";
+							"WHERE id_user = ?";
 						parametres.push($('#nom_utilisateur').val());
 						parametres.push($('#prenom_utilisateur').val());
 						parametres.push($('#courriel_confirmation').val() == courriel);
