@@ -4,7 +4,14 @@
 	</a>
 	
 	<h1>Mes observations</h1>
-	<button class="btn btn-warning btn-block">Transmettre au CEL</button>
+	<div id="compte-infos">
+		<%  var disabled = 'disabled';
+		if (user != null) { 
+			disabled = ''; %>
+			<%= user %>
+		<% } %>
+	</div>
+	<button class="btn btn-warning btn-block <%= disabled %>">Transmettre au CEL</button>
 </div>
 
 <div id="obs-suppression-infos" class="text-center alert alert-success alert-block hide"></div>

@@ -13,34 +13,32 @@ var directory = {
 // The Template Loader. Used to asynchronously load templates located in separate .html files
 directory.utils.templateLoader = {
 	templates: {},
-
+	
 	load: function(names, callback) {
 		var deferreds = [],
 			self = this;
-
+		
 		$.each(names, function(index, name) {
 			deferreds.push($.get('modules/templates/' + name + '.html', function(data) {
 				self.templates[name] = data;
 			}));
 		});
-
+		
 		$.when.apply(null, deferreds).done(callback);
 	},
-
-	// Get template by name from hash of preloaded templates
+	
 	get: function(name) {
 		return this.templates[name];
 	}
-
 };
 
-// The Employee Data Access Object (DAO). Encapsulates logic (in this case SQL statements) to access employee data.
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAO PARCOURS
 directory.dao.ParcoursDAO = function(db) {
 	this.db = db;
 };
-
 _.extend(directory.dao.ParcoursDAO.prototype, {
-
 	findByName: function(key, callback) {
 		this.db.transaction(
 			function(tx) {
@@ -49,15 +47,14 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 					"FROM parcours " +
 					"WHERE nom LIKE ? " +
 					"ORDER BY nom";
-
 				tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
 					var len = results.rows.length,
-						employees = [],
+						parcours = [],
 						i = 0;
 					for (; i < len; i = i + 1) {
-						employees[i] = results.rows.item(i);
+						parcours[i] = results.rows.item(i);
 					}
-					callback(employees);
+					callback(parcours);
 				});
 			},
 			function(tx, error) {
@@ -65,7 +62,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 			}
 		);
 	},
-
+	
 	findById: function(id, callback) {
 		this.db.transaction(
 			function(tx) {
@@ -73,7 +70,6 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos, ce_critere, est_commence " +
 					"FROM parcours " +
 					"WHERE id = :id_parcours";
-
 				tx.executeSql(sql, [id], function(tx, results) {
 					callback(results.rows.length === 1 ? results.rows.item(0) : null);
 				});
@@ -84,14 +80,13 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 			}
 		);
 	},
-
+	
 	findAll: function(callback) {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
 					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos " +
 					"FROM parcours";
-
 				tx.executeSql(sql, [], function(tx, results) {
 					callback(results.rows.item);
 				});
@@ -101,8 +96,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 			}
 		);
 	},
-
-	// Populate Employee table with sample data
+	
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
@@ -174,13 +168,12 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 });
 _.extend(directory.dao.ParcoursDAO.prototype, directory.dao.baseDAOBD);
 
-// The Employee Data Access Object (DAO). Encapsulates logic (in this case SQL statements) to access employee data.
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAO ESPECE
 directory.dao.EspeceDAO = function(db) {
 	this.db = db;
 };
-
 _.extend(directory.dao.EspeceDAO.prototype, {
-
 	findByName: function(key, callback) {
 		this.db.transaction(
 			function(tx) {
@@ -189,15 +182,14 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 					"FROM espece " + 
 					"WHERE nom_sci || ' ' || nom_vernaculaire || ' ' || famille LIKE ? " +
 					"ORDER BY nom_vernaculaire";
-
 				tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
 					var len = results.rows.length,
-						employees = [],
+						especes = [],
 						i = 0;
 					for (; i < len; i = i + 1) {
-						employees[i] = results.rows.item(i);
+						especes[i] = results.rows.item(i);
 					}
-					callback(employees);
+					callback(especes);
 				});
 			},
 			function(tx, error) {
@@ -205,7 +197,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 			}
 		);
 	},
-
+	
 	findById: function(id, callback) {
 		this.db.transaction(
 			function(tx) {
@@ -213,7 +205,6 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 					"SELECT num_nom, nom_sci, famille, nom_vernaculaire, description, photos, referentiel, famille, num_taxon " +
 					"FROM espece " +
 					"WHERE num_nom = :id_espece";
-
 				tx.executeSql(sql, [id], function(tx, results) {
 					callback(results.rows.length === 1 ? results.rows.item(0) : null);
 				});
@@ -223,7 +214,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 			}
 		);
 	},
-
+	
 	findByParcours: function(id, callback) {
 		this.db.transaction(
 			function(tx) {
@@ -233,7 +224,6 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 					"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
 					"WHERE c.id_critere = :id_parcours " + 
 					"ORDER BY nom_vernaculaire";
-				//console.log(sql);
 				tx.executeSql(sql, [id], function(tx, results) {
 					 var nbre = results.rows.length,
 						especes = [],
@@ -249,16 +239,14 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 			}
 		);
 	},
-
+	
 	findAll: function(callback) {
 		this.db.transaction(
 			function(tx) {
-
 				var sql = 
 					"SELECT num_nom, nom_sci, famille, nom_vernaculaire, photos " +
 					"FROM espece " +
 					"ORDER BY nom_vernaculaire";
-
 				tx.executeSql(sql, [], function(tx, results) {
 					 var nbre = results.rows.length,
 						especes = [],
@@ -274,8 +262,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 			}
 		);
 	},
-
-	// Populate Employee table with sample data
+	
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
@@ -296,7 +283,6 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 				tx.executeSql(sql);
 			},
 			function(error) {
-				//alert('Transaction error ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
 			function(tx) {	}
@@ -326,18 +312,17 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 					);
 				}
 				//console.log(arr_sql);
-				directory.db.transaction(function (tx) {
-					for (var c = 0; c < arr_sql.length; c++) {
-						tx.executeSql(arr_sql[c]);
-					}
-				}, 
-				function(error) {
-					//alert('Transaction error ' + error);
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				},
-				function(tx) {
-					//callback();
-				});
+				directory.db.transaction(
+					function (tx) {
+						for (var c = 0; c < arr_sql.length; c++) {
+							tx.executeSql(arr_sql[c]);
+						}
+					}, 
+					function(error) {
+						console.log('DB | Error processing SQL: ' + error.code, error);
+					},
+					function(tx) {	}
+				);
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				console.log(textStatus);
@@ -348,7 +333,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 _.extend(directory.dao.EspeceDAO.prototype, directory.dao.baseDAOBD);
 
 
-// The Employee Data Access Object (DAO). Encapsulates logic (in this case SQL statements) to access employee data.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAO CRITERE
 directory.dao.CritereDAO = function(db) {
 	this.db = db;
 };
@@ -368,7 +353,6 @@ _.extend(directory.dao.CritereDAO.prototype, {
 						") " + 
 						"AND intitule NOT LIKE '%parcours%' " +
 						"AND intitule NOT LIKE '%pheno%' ";
-
 				tx.executeSql(sql, [], function(tx, results) {
 					var nbre = results.rows.length,
 						criteres = [],
@@ -380,13 +364,11 @@ _.extend(directory.dao.CritereDAO.prototype, {
 				});
 			},
 			function(error) {
-				//alert('Transaction Error: ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			}
 		);
 	},
 	
-	// Populate Employee table with sample data
 	populate: function(callback) {
 		this.db.transaction(
 			function(tx) {
@@ -409,7 +391,6 @@ _.extend(directory.dao.CritereDAO.prototype, {
 				tx.executeSql(sql);
 			},
 			function(error) {
-				//alert('Transaction error ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
 			function(tx) {	}
@@ -435,21 +416,20 @@ _.extend(directory.dao.CritereDAO.prototype, {
 					arr_sql.push(sql);
 				}
 				//console.log(arr_sql);
-				directory.db.transaction(function (tx) {
-					for (var c = 0; c < arr_sql.length; c++) {
-						tx.executeSql(
-							"INSERT INTO critere " +
-							"(id_critere, intitule, url_img, ce_parent) VALUES (" + arr_sql[c] + ")"
-						);
-					}
-				}, 
-				function(error) {
-					//alert('Transaction error ' + error);
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				},
-				function(tx) {
-					//callback();
-				});
+				directory.db.transaction(
+					function (tx) {
+						for (var c = 0; c < arr_sql.length; c++) {
+							tx.executeSql(
+								"INSERT INTO critere " +
+								"(id_critere, intitule, url_img, ce_parent) VALUES (" + arr_sql[c] + ")"
+							);
+						}
+					}, 
+					function(error) {
+						console.log('DB | Error processing SQL: ' + error.code, error);
+					},
+					function(tx) {	}
+				);
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				console.log(textStatus);
@@ -460,12 +440,11 @@ _.extend(directory.dao.CritereDAO.prototype, {
 _.extend(directory.dao.CritereDAO.prototype, directory.dao.baseDAOBD);
 
 
-// The Employee Data Access Object (DAO). Encapsulates logic (in this case SQL statements) to access employee data.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAO AVOIR_CRITERE
 directory.dao.AvoirCritereDAO = function(db) {
 	this.db = db;
 };
 _.extend(directory.dao.AvoirCritereDAO.prototype, {
-	// Populate Employee table with sample data
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
@@ -492,7 +471,6 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 				tx.executeSql(sql);
 			},
 			function(error) {
-				//alert('Transaction error ' + error);
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
 			function(tx) {	}
@@ -520,21 +498,20 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 					}
 				}
 				//console.log(arr_sql);
-				directory.db.transaction(function (tx) {
-					for (var c = 0; c < arr_sql.length; c++) {
-						tx.executeSql(
-							"INSERT INTO avoir_critere " +
-							"(id_espece, id_critere) VALUES (" + arr_sql[c] + ")"
-						);
-					}
-				}, 
-				function(error) {
-					//alert('Transaction error ' + error);
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				},
-				function(tx) {
-					//callback();
-				});
+				directory.db.transaction(
+					function (tx) {
+						for (var c = 0; c < arr_sql.length; c++) {
+							tx.executeSql(
+								"INSERT INTO avoir_critere " +
+								"(id_espece, id_critere) VALUES (" + arr_sql[c] + ")"
+							);
+						}
+					}, 
+					function(error) {
+						console.log('DB | Error processing SQL: ' + error.code, error);
+					},
+					function(tx) {	}
+				);
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				console.log(textStatus);
@@ -545,11 +522,10 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 _.extend(directory.dao.AvoirCritereDAO.prototype, directory.dao.baseDAOBD);
 
 
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAO OBSERVATION
 directory.dao.ObsDAO = function(db) {
 	this.db = db;
 };
-
 _.extend(directory.dao.ObsDAO.prototype, {
 	findById: function(id, callback) {
 		this.db.transaction(
@@ -559,7 +535,6 @@ _.extend(directory.dao.ObsDAO.prototype, {
 					"FROM espece e " +
 					"JOIN obs o ON e.num_nom = o.ce_espece " +
 					"WHERE id_obs = :id_obs";
-				//console.log(sql, id);
 				tx.executeSql(sql, [id], function(tx, results) {
 					callback(results.rows.length === 1 ? results.rows.item(0) : null);
 				});
@@ -578,7 +553,6 @@ _.extend(directory.dao.ObsDAO.prototype, {
 					"FROM espece " +
 					"JOIN obs ON num_nom = ce_espece " +
 					"ORDER BY id_obs DESC";
-
 				tx.executeSql(sql, [], function(tx, results) {
 					 var nbre = results.rows.length,
 						especes = [],
@@ -623,19 +597,17 @@ _.extend(directory.dao.ObsDAO.prototype, {
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
-			function(tx) {
-				//callback();
-			}
+			function(tx) {	}
 		);
 	}
 });
 _.extend(directory.dao.ObsDAO.prototype, directory.dao.baseDAOBD);
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAO PHOTO
 directory.dao.PhotoDAO = function(db) {
 	this.db = db;
 };
-
 _.extend(directory.dao.PhotoDAO.prototype, {
 	findByObs: function(id, callback) {
 		this.db.transaction(
@@ -684,20 +656,68 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			},
-			function(tx) {
-				//callback();
-			}
+			function(tx) {	}
 		);
 	}
 });
 _.extend(directory.dao.PhotoDAO.prototype, directory.dao.baseDAOBD);
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAO UTILISATEUR
+directory.dao.UtilisateurDAO = function(db) {
+	this.db = db;
+};
+_.extend(directory.dao.UtilisateurDAO.prototype, {
+	findOne: function(callback) {
+		this.db.transaction(
+			function(tx) {
+				var sql = 
+					"SELECT id_user, nom, prenom, email, compte_verifie " +
+					"FROM utilisateur " +
+					"WHERE compte_verifie = 1";
+				tx.executeSql(sql, [], function(tx, results) {
+					callback(results.rows.length === 1 ? results.rows.item(0) : null);
+				});
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			}
+		);
+	},
+
+	populate: function(callback) {
+		directory.db.transaction(
+			function(tx) {
+				console.log('Dropping UTILISATEUR table');
+				tx.executeSql('DROP TABLE IF EXISTS utilisateur');
+				var sql =
+					"CREATE TABLE IF NOT EXISTS utilisateur (" +
+						"id_user INT NOT NULL ," +
+						"nom VARCHAR(255) NULL ," +
+						"prenom VARCHAR(255) NULL," +
+						"email VARCHAR(255) NOT NULL," +
+						"compte_verifie BOOLEAN NOT NULL," +
+						"PRIMARY KEY (id_user) " +
+					")";
+				console.log('Creating UTILISATEUR table');
+				tx.executeSql(sql);
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			},
+			function(tx) {	}
+		);
+	}
+});
+_.extend(directory.dao.UtilisateurDAO.prototype, directory.dao.baseDAOBD);
+
+
+
 // Overriding Backbone's sync method. Replace the default RESTful services-based implementation
 // with a simple local database approach.
 Backbone.sync = function(method, model, options) {
 	var dao = new model.dao(directory.db);
-	
+	console.log(model);
 	if (method === 'read') {
 		if (model.id) {
 			dao.findById(model.id, function(data) {
@@ -871,6 +891,26 @@ directory.models.PhotoCollection = Backbone.Collection.extend({
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Modèle UTILISATEUR
+directory.models.Utilisateur = Backbone.Model.extend({
+	dao: directory.dao.UtilisateurDAO,
+	initialize: function() {	}
+});
+directory.models.UtilisateurCollection = Backbone.Collection.extend({
+	dao: directory.dao.UtilisateurDAO,
+	model: directory.models.Utilisateur,
+
+	findOne: function() {
+		var utilisateurDAO = new directory.dao.UtilisateurDAO(directory.db),
+			self = this;
+		utilisateurDAO.findOne(function(data) {
+			//console.log('UtilisateurCollection | findOne ', data);
+			self.reset(data);
+		});
+	}
+});
+
+
 
 // -------------------------------------------------- The Views ---------------------------------------------------- //
 
@@ -947,7 +987,7 @@ directory.views.ParcoursPage = Backbone.View.extend({
 });
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Liste ESPECE par Parcours
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Liste ESPECE
 directory.views.ListPage = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
 	
@@ -1222,6 +1262,7 @@ directory.views.saisieObs = Backbone.View.extend({
 	}
 });
 
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Détails OBS
 directory.views.ObsPage = Backbone.View.extend({
 	initialize: function(data) {
@@ -1229,7 +1270,7 @@ directory.views.ObsPage = Backbone.View.extend({
 		this.data = data.model.attributes;
 		this.model = new directory.models.PhotoCollection();
 		this.model.findByObs(data.model.attributes.id_obs);
-		this.model.bind('reset', this.render, this);
+		this.model.bind('reset', this.render, this);		
 		this.template = _.template(directory.utils.templateLoader.get('obs-page'));
 	},
 
@@ -1256,13 +1297,20 @@ directory.views.transmissionObs = Backbone.View.extend({
 		this.model = new directory.models.ObsCollection();
 		this.model.findAll();
 		this.model.bind('reset', this.render, this);
+		
+		this.utilisateur = new directory.models.UtilisateurCollection();
+		this.utilisateur.id_utilisateur = null;
+		this.utilisateur.findOne();
+		this.utilisateur.bind('reset', this.render, this);
+		
 		this.template = _.template(directory.utils.templateLoader.get('obs-list'));
 	},
 
 	render: function(eventName) { 
 		var json = {
 			'taille' : this.model.models.length,
-			'obs' : this.model.models
+			'obs' : this.model.models,
+			'user' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.email
 		}
 		
 		$(this.el).html(this.template(json));
@@ -1298,8 +1346,8 @@ directory.nbre_criteres = new Array();
 directory.nbre_especes = null;
 
 
-// ----------------------------------------------- The Application Router ------------------------------------------ //
 
+// ----------------------------------------------- The Application Router ------------------------------------------ //
 directory.Router = Backbone.Router.extend({
 	routes: {
 		'' : 'accueil',
@@ -1409,7 +1457,7 @@ directory.Router = Backbone.Router.extend({
 					console.log('DB | Error processing SQL: ' + error.code, error);
 				}
 			);
-			$('#myModal').modal('hide');
+			$('#parcours-modal').modal('hide');
 		});
 		
 		$('#content').on('click', '.choix-parcours', function(event) {
@@ -1422,7 +1470,7 @@ directory.Router = Backbone.Router.extend({
 						"WHERE id = :id_parcours";
 					tx.executeSql(sql, [id], function(tx, results) {
 						if (results.rows.item(0).est_commence == 1) {
-							$('#myModal').modal('show');	
+							$('#parcours-modal').modal('show');	
 						}
 					});
 				},
@@ -1737,14 +1785,7 @@ directory.Router = Backbone.Router.extend({
 							var fichier = new FileEntry();
 							fichier.fullPath = results.rows.item(i).chemin;
 							fichier.remove(null, null);
-							tx.executeSql("DELETE FROM photo WHERE id_photo = " + results.rows.item(i).id_photo, [],
-								function(evt) {
-									alert('Suppression okay' + evt);
-								}, 
-								function(evt) {
-									alert('Suppression nokay' + evt);
-								}
-							);
+							tx.executeSql("DELETE FROM photo WHERE id_photo = " + results.rows.item(i).id_photo);
 						}
 					});
 					tx.executeSql("DELETE FROM obs WHERE id_obs = " + id);
@@ -2001,7 +2042,7 @@ parcoursDAO.populate();
 (new directory.dao.AvoirCritereDAO(directory.db)).populate();
 (new directory.dao.ObsDAO(directory.db)).populate();
 (new directory.dao.PhotoDAO(directory.db)).populate();
-//(new directory.dao.UtilisateurDAO(directory.db)).populate();
+(new directory.dao.UtilisateurDAO(directory.db)).populate();
 
 $().ready(function() {
 	directory.utils.templateLoader.load(
@@ -2179,7 +2220,6 @@ function requeterIdentite() {
 	var courriel = $('#courriel').val();
 	if (courriel != '') {
 		$('#utilisateur-infos').html('Vérification en cours...');
-		//miseAJourCourriel();
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
 		$.ajax({
 			url : urlAnnuaire,
@@ -2194,6 +2234,7 @@ function requeterIdentite() {
 					$('#nom_utilisateur').val(infos.nom);
 					$('#courriel_confirmation').val(courriel);
 					$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').attr('disabled', 'disabled');
+					miseAJourCourriel(courriel);
 				} else {
 					surErreurCompletionCourriel();
 				}
@@ -2209,6 +2250,56 @@ function requeterIdentite() {
 			}
 		});
 	}
+}
+function miseAJourCourriel(courriel) {
+	directory.db.transaction(
+		function(tx) {
+			var sql =
+				"SELECT id_user, email " +
+				"FROM utilisateur " +
+				"ORDER BY id_user DESC";
+			tx.executeSql(sql, [], function(tx, results) {
+				var id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_user+1,
+					sql = '',
+					parametres = new Array(),
+					utilisateurs = [];
+				for (var i = 0; i < results.rows.length; i = i + 1) {
+					utilisateurs[results.rows.item(i).id_user] = results.rows.item(i).email;
+				}
+				
+				var index = $.inArray(courriel, utilisateurs);
+				if (index == -1) {
+					sql = 
+						"INSERT INTO utilisateur " +
+						"(id_user, email, compte_verifie) VALUES " + 
+						"(?, ?, ?) ";
+					parametres.push(id);
+					parametres.push(courriel);
+					parametres.push(0);
+				} else {
+					sql = 
+						"UPDATE utilisateur " +
+						"SET nom = ?, prenom = ?, compte_verifie = ? " +
+						"WHERE id_utilisateur = ?";
+					parametres.push(id);
+					parametres.push($('#nom_utilisateur').val());
+					parametres.push($('#prenom_utilisateur').val());
+					parametres.push($('#courriel_confirmation').val() == courriel);
+				}
+				
+				tx.executeSql(sql, parametres, 
+				function(error) {
+					alert('DB | OKAY processing SQL');
+				},
+				function(error) {
+					alert('DB | Error processing SQL: ' + error.code, error);
+				});
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		}
+	);
 }
 function surErreurCompletionCourriel() {
 	$('#utilisateur-infos').addClass('text-error');

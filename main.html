@@ -11,7 +11,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		
-		<title>Floras Clapas</title>
+		<title>Flora Clapas</title>
 		
 		<link rel="stylesheet" href="libs/css/bootstrap.min.css" type="text/css" />
 		<link rel="stylesheet" href="libs/css/photoswipe.css" type="text/css" />
@@ -33,9 +33,9 @@
 		<div id="content"></div>
 		
 		<!-- Modal -->
-		<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="true">
+		<div id="parcours-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="parcours-modal-label" aria-hidden="true" data-backdrop="true">
 		  <div class="modal-header">
-			<h4 id="myModalLabel">Parcours récemment visité</h4>
+			<h4 id="parcours-modal-label">Parcours récemment visité</h4>
 		  </div>
 		  <div class="modal-body">
 			<p> Compléter les observations du parcours déjà commencé ? </p>
@@ -60,24 +60,23 @@
 		</div>
 		
 		
-		<div id="test"></div>
 		<script type="text/javascript" charset="utf-8">
-			var pictureSource;   // picture source
-			var destinationType; // sets the format of returned value 
-			var fileSystem;
+			var fileSystem,
+				pictureSource,
+				destinationType; // sets the format of returned value 
 			
-			document.addEventListener("deviceready", onDeviceReady, false);
+			document.addEventListener('deviceready', onDeviceReady, false);
 			function onDeviceReady() {
 				pictureSource = navigator.camera.PictureSourceType;
 				destinationType = navigator.camera.DestinationType;
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, onFail);
-			}
-			
-			function onSuccess(object) {
-				fileSystem = object;
-			}
-			function onFail(error) {
-			    alert(error);
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
+					function(object) {
+						fileSystem = object;
+					}, 
+					function(error) {
+						alert('Le système de fichiers est inaccessible.');
+					}
+				);
 			}
 		</script>
 	</body>

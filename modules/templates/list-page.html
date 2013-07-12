@@ -2,20 +2,11 @@
 	<a href="#" class="header-button header-button-left header-back-button">
 		<button>Retour</button>
 	</a>
-
-<!-- 
-	<% if (id_parcours != 0) { %>
-		<a href="#parcours" class="header-button header-button-icon header-button-right search" id="view-home-refresh">
-			<button>Liste des parcours</button>
-		</a>
-	<% } %>
--->
-
 	<h1><i><%= nom_parcours %></i></h1>
 </div>
 
 <div class="scroll striped">
-    <ul id="myList" class="tableview tableview-links"></ul>
+	<ul class="tableview tableview-links"></ul>
 </div>
 
 <div class="modal-footer">
@@ -25,7 +16,7 @@
 			<li class="active"><a href="#liste/<%= id_parcours %>/<%= nom_parcours %>/<%= id_critere %>">Liste</a></li>
 			<li><a href="#clef/<%= id_parcours %>/<%= nom_parcours %>/<%= id_critere %>">Recherche</a></li>
 			<% if (id_parcours == 0) { %>
-			<li><a href="#transmission">-_-</a></li>
+				<li><a href="#transmission">-_-</a></li>
 			<% } %>
 		</ul>
 	</div>
