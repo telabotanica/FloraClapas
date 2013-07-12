@@ -2216,9 +2216,10 @@ function surErreurGeoloc(error){
 
 function requeterIdentite() {
 	var SERVICE_ANNUAIRE = 'http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/';
-	var courriel = $('#courriel').val();
-	if (courriel != '') {
-		$('#utilisateur-infos').html('Vérification en cours...');
+	var courriel = $('#courriel').val(),
+		flag = validerCourriel(courriel);
+	if (flag) {
+		$('#utilisateur-infos').html('Vérification en cours... Email valide : ' + flag);
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
 		$.ajax({
 			url : urlAnnuaire,
@@ -2227,7 +2228,6 @@ function requeterIdentite() {
 				console.log('Annuaire SUCCESS: ' + textStatus);
 				$('#utilisateur-infos').html('');
 				if (data != undefined && data[courriel] != undefined) {
-					miseAJourCourriel(courriel);
 					var infos = data[courriel];
 					$('#id_utilisateur').val(infos.id);
 					$('#prenom_utilisateur').val(infos.prenom);
@@ -2243,6 +2243,7 @@ function requeterIdentite() {
 				surErreurCompletionCourriel();
 			},
 			complete : function(jqXHR, textStatus) {
+				miseAJourCourriel(courriel);
 				console.log('Annuaire COMPLETE: ' + textStatus);
 				$('#zone_prenom_nom').removeClass('hide');
 				$('#zone_courriel_confirmation').removeClass('hide');
@@ -2250,6 +2251,13 @@ function requeterIdentite() {
 		});
 	}
 }
+function validerCourriel(email) { 
+	var regex = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i),
+		flag = regex.test(email);
+	
+	console.log('Valid email ? (', email, ') : ', flag);
+	return flag;
+} 
 function miseAJourCourriel(courriel) {
 	directory.db.transaction(
 		function(tx) {
@@ -2267,27 +2275,26 @@ function miseAJourCourriel(courriel) {
 				}
 				
 				var index = $.inArray(courriel, utilisateurs);
+				parametres.push($('#nom_utilisateur').val());
+				parametres.push($('#prenom_utilisateur').val());
+				parametres.push($('#courriel_confirmation').val() == courriel);
 				if (index == -1) {
 					sql = 
 						"INSERT INTO utilisateur " +
-						"(id_user, email, compte_verifie) VALUES " + 
-						"(?, ?, ?) ";
+						"(nom, prenom, compte_verifie, id_user, email) VALUES " + 
+						"(?, ?, ?, ?, ?) ";
 					parametres.push(id);
 					parametres.push(courriel);
-					parametres.push($('#courriel_confirmation').val() == courriel);
 				} else {
 					if (utilisateurs[index].compte_verifie == 0) {
 						sql = 
 							"UPDATE utilisateur " +
 							"SET nom = ?, prenom = ?, compte_verifie = ? " +
 							"WHERE id_user = ?";
-						parametres.push($('#nom_utilisateur').val());
-						parametres.push($('#prenom_utilisateur').val());
-						parametres.push($('#courriel_confirmation').val() == courriel);
 						parametres.push(id);
 					}
 				}
-				console.log(sql, parametres);
+				
 				if (sql != '') {
 					tx.executeSql(sql, parametres,
 						function(success) {		},
