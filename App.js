@@ -1694,9 +1694,9 @@ directory.Router = Backbone.Router.extend({
 			directory.db.transaction(
 				function(tx) {
 					var sql =
-						'SELECT id_obs ' +
-						'FROM obs ' + 
-						'ORDER BY id_obs DESC';
+						"SELECT id_obs " +
+						"FROM obs " + 
+						"ORDER BY id_obs DESC";
 					tx.executeSql(sql, [], function(tx, results) {
 						var obs = new Array(),
 							id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_obs+1;
@@ -1728,7 +1728,18 @@ directory.Router = Backbone.Router.extend({
 			var id = this.id;
 			directory.db.transaction(
 				function(tx) {
-					tx.executeSql("DELETE FROM photo WHERE ce_obs = " + id);
+					var sql =
+						"SELECT id_photo, chemin " +
+						"FROM photo " + 
+						"WHERE ce_obs = " + id;
+					tx.executeSql(sql, [], function(tx, results) {
+						for (var i = 0; i < results.rows.length; i = i + 1) {
+							var fichier = new FileEntry();
+							fichier.fullPath = results.rows.item(i).chemin;
+							fichier.remove(null, function(error) { alert('Erreur de suppression des photos.');});
+							tx.executeSql("DELETE FROM photo WHERE id_photo = " + results.rows.item(i).id_photo);
+						}
+					});
 					tx.executeSql("DELETE FROM obs WHERE id_obs = " + id);
 					
 					var txt = 'Observation n° ' + id + ' supprimée.';
@@ -1740,7 +1751,7 @@ directory.Router = Backbone.Router.extend({
 				},
 				function(error) {
 					console.log('DB | Error processing SQL: ' + error.code, error);
-					var txt = 'Erreur de suppression.';
+					var txt = 'Erreur de suppression dans la base de données.';
 					$('#obs-suppression-infos').html('<p class="text-center alert alert-error alert-block">' + txt + '</p>')
 						.fadeIn(0)
 						.delay(1600)
@@ -1774,17 +1785,10 @@ directory.Router = Backbone.Router.extend({
 					tx.executeSql("DELETE FROM photo WHERE id_photo = " + id);
 					
 					var fichier = new FileEntry();
+					alert($('#img_'+id).attr('src'));
 					fichier.fullPath = $('#img_'+id).attr('src');
-					fichier.remove(
-						function (succes) {
-							var texte = 'Photo n°.' + id + 'correctement supprimée.'
-							$('#obs-photos-info').html('<p class="text-center alert alert-success alert-block">' + texte +'</p>');
-						},
-						function (error) {
-							var texte = 'Erreur de traitement. Suppression impossible, code ' + error.code + '.';
-							$('#obs-photos-info').html('<p class="text-center alert alert-error alert-block">' + texte +'</p>');
-						}
-					);
+					fichier.remove(null, surPhotoErreurSuppression);
+					
 					$('#elt_'+id).remove();
 					$('#nbre-photos').html($('#nbre-photos').html()-1);
 				},
@@ -2030,10 +2034,10 @@ function onPhotoSuccess(imageData){
 	fileSystem.root.getDirectory("FlorasClapas", { create: true, exclusive: false }, function(dossier) {
 		var fichier = new FileEntry();
 		fichier.fullPath = imageData;
-		fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', surCopiePhoto, surErreurPhoto);
+		fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', surPhotoSuccesCopie, surPhotoErreurAjout);
 	}, surErreurPhoto);
 };
-function surCopiePhoto(entry) {
+function surPhotoSuccesCopie(entry) {
 	directory.db.transaction(
 		function(tx) {
 			var hash = window.location.hash,
@@ -2066,18 +2070,22 @@ function surCopiePhoto(entry) {
 				$('#nbre-photos').html(nbre_photos);
 			});
 		},
-		surErreurPhoto
+		surPhotoErreurAjout
 	);
 }
-function surErreurPhoto(error) {
+function surPhotoErreurAjout(error) {
 	$('#obs-photos-info').addClass('text-error');
 	$('#obs-photos-info').removeClass('text-info');
 	$('#obs-photos-info').html('Erreur de traitement. Ajout impossible.');
 	console.log('PHOTO | Error: ' + error.code, error);
 }
-
-
-
+function surPhotoErreurSuppression(error) {
+	var texte = 'Erreur de traitement. Le fichier n\'a pas été supprimé de la mémoire.';
+	$('#obs-photos-info').html('<p class="text-center alert alert-error alert-block">' + texte +'</p>')
+		.fadeIn(0)
+		.delay(1600)
+		.fadeOut('slow');
+}
 /*
 
 		directory.db.transaction(function (tx) {
