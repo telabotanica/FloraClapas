@@ -673,10 +673,11 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 			function(tx) {
 				var sql = 
 					"SELECT id_user, nom, prenom, email, compte_verifie " +
-					"FROM utilisateur " +
-					"WHERE compte_verifie = 1";
+					"FROM utilisateur " + 
+					"WHERE compte_verifie = 1 "
+					"ORDER BY id_user DESC";
 				tx.executeSql(sql, [], function(tx, results) {
-					callback(results.rows.length === 1 ? results.rows.item(0) : null);
+					callback(results.rows.length >= 1 ? results.rows.item(0) : null);
 				});
 			},
 			function(error) {
@@ -688,8 +689,8 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
-				console.log('Dropping UTILISATEUR table');
-				tx.executeSql('DROP TABLE IF EXISTS utilisateur');
+				//console.log('Dropping UTILISATEUR table');
+				//tx.executeSql('DROP TABLE IF EXISTS utilisateur');
 				var sql =
 					"CREATE TABLE IF NOT EXISTS utilisateur (" +
 						"id_user INT NOT NULL ," +
@@ -1299,7 +1300,6 @@ directory.views.transmissionObs = Backbone.View.extend({
 		this.model.bind('reset', this.render, this);
 		
 		this.utilisateur = new directory.models.UtilisateurCollection();
-		this.utilisateur.id_utilisateur = null;
 		this.utilisateur.findOne();
 		this.utilisateur.bind('reset', this.render, this);
 		
@@ -1709,7 +1709,6 @@ directory.Router = Backbone.Router.extend({
 								directory.liste.total = nbre_choix;
 								console.log(directory.liste);
 								console.log(directory.nbre_criteres, nbre_choix);
-								//console.log(directory.nbre_criteres, nbre_choix);
 							});
 						}
 					});
@@ -2228,6 +2227,7 @@ function requeterIdentite() {
 				console.log('Annuaire SUCCESS: ' + textStatus);
 				$('#utilisateur-infos').html('');
 				if (data != undefined && data[courriel] != undefined) {
+					miseAJourCourriel(courriel);
 					var infos = data[courriel];
 					$('#id_utilisateur').val(infos.id);
 					$('#prenom_utilisateur').val(infos.prenom);
@@ -2244,7 +2244,6 @@ function requeterIdentite() {
 			},
 			complete : function(jqXHR, textStatus) {
 				console.log('Annuaire COMPLETE: ' + textStatus);
-				miseAJourCourriel(courriel);
 				$('#zone_prenom_nom').removeClass('hide');
 				$('#zone_courriel_confirmation').removeClass('hide');
 			}
@@ -2281,18 +2280,23 @@ function miseAJourCourriel(courriel) {
 						sql = 
 							"UPDATE utilisateur " +
 							"SET nom = ?, prenom = ?, compte_verifie = ? " +
-							"WHERE id_utilisateur = ?";
+							"WHERE id_users = ?";
 						parametres.push($('#nom_utilisateur').val());
 						parametres.push($('#prenom_utilisateur').val());
 						parametres.push($('#courriel_confirmation').val() == courriel);
 						parametres.push(id);
 					}
 				}
-				
-				tx.executeSql(sql, parametres, null,
-				function(error) {
-					alert('DB | Error processing SQL: ' + error);
-				});
+				console.log(sql, parametres);
+				if (sql != '') {
+					tx.executeSql(sql, parametres,
+						function(success) {		},
+						function(error) {
+							alert('DB | Error processing SQL: ' + error);
+							console.log('DB | Error processing SQL: ' + error.code, error);
+						}
+					);
+				}
 			});
 		},
 		function(error) {

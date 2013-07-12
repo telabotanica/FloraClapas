@@ -5,17 +5,17 @@
 	
 	<h1>Mes observations</h1>
 	<div id="compte-infos">
-		<%  var disabled = 'disabled';
+		<%  var disabled = 'disabled',
+				texte = 'Aucun compte vérifié pour la transmission.';
 		if (user != null) { 
-			disabled = ''; %>
-			<%= user %>
-		<% } %>
+			disabled = '';
+			texte = 'Transmettre sur ' + user;
+		} %>
 	</div>
-	<button class="btn btn-warning btn-block <%= disabled %>">Transmettre au CEL</button>
+	<button class="btn btn-warning btn-block <%= disabled %>"><%= texte %></button>
 </div>
 
 <div id="obs-suppression-infos" class="text-center alert alert-success alert-block hide"></div>
-
 <div class="row-fluid">
 	<ul class="tableview tableview-links margin-navbar">
 		<% if (taille == 0) { %>
@@ -42,7 +42,6 @@
 		} %>
 	</ul>
 </div>
-
 
 <div class="navbar navbar-fixed-bottom">
 	<ul class="nav parc-nav">
