@@ -1316,15 +1316,6 @@ directory.Router = Backbone.Router.extend({
 
 	initialize: function() {
 		var self = this;
-
-
-		directory.db.transaction(function (tx) {
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
-		});
 		
 		directory.db.transaction(function (tx) {
 			var sql = 
@@ -1688,6 +1679,7 @@ directory.Router = Backbone.Router.extend({
 				
 			for (var i = 0; i < inputs.length; i++) {
 				inputs[i].checked = false;
+				$('#img_'+inputs[i].id).removeClass('selection-critere');
 			}
 			directory.liste = new Array();
 			directory.criteria = new Array();
@@ -1749,7 +1741,7 @@ directory.Router = Backbone.Router.extend({
 				function(error) {
 					console.log('DB | Error processing SQL: ' + error.code, error);
 					var txt = 'Erreur de suppression.';
-					$('#obs-suppression-infos').html('<p class="text-center alert alert-error alert-block">'+txt+'</p>')
+					$('#obs-suppression-infos').html('<p class="text-center alert alert-error alert-block">' + txt + '</p>')
 						.fadeIn(0)
 						.delay(1600)
 						.fadeOut('slow');	
@@ -1785,10 +1777,12 @@ directory.Router = Backbone.Router.extend({
 					fichier.fullPath = $('#img_'+id).attr('src');
 					fichier.remove(
 						function (succes) {
-							alert(succes);
+							var texte = 'Photo n°.' + id + 'correctement supprimée.'
+							$('#obs-photos-info').html('<p class="text-center alert alert-success alert-block">' + texte +'</p>');
 						},
 						function (error) {
-							alert(error);
+							var texte = 'Erreur de traitement. Suppression impossible, code ' + error.code + '.';
+							$('#obs-photos-info').html('<p class="text-center alert alert-error alert-block">' + texte +'</p>');
 						}
 					);
 					$('#elt_'+id).remove();
