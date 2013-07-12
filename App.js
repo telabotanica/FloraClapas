@@ -544,7 +544,7 @@ _.extend(directory.dao.ObsDAO.prototype, {
 			}
 		);
 	},
-
+	
 	findAll: function(callback) {
 		this.db.transaction(
 			function(tx) {
@@ -568,7 +568,7 @@ _.extend(directory.dao.ObsDAO.prototype, {
 			}
 		);
 	},
-
+	
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
@@ -632,7 +632,7 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 			}
 		);
 	},
-
+	
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
@@ -674,7 +674,7 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 				var sql = 
 					"SELECT id_user, nom, prenom, email, compte_verifie " +
 					"FROM utilisateur " + 
-					"WHERE compte_verifie = true "
+					"WHERE compte_verifie = 'true' "
 					"ORDER BY id_user DESC";
 				tx.executeSql(sql, [], function(tx, results) {
 					callback(results.rows.length >= 1 ? results.rows.item(0) : null);
@@ -685,7 +685,7 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 			}
 		);
 	},
-
+	
 	populate: function(callback) {
 		directory.db.transaction(
 			function(tx) {
@@ -736,7 +736,6 @@ Backbone.sync = function(method, model, options) {
 			}
 		}
 	}
-
 };
 
 
@@ -753,7 +752,7 @@ directory.models.Parcours = Backbone.Model.extend({
 directory.models.ParcoursCollection = Backbone.Collection.extend({
 	dao: directory.dao.ParcoursDAO,
 	model: directory.models.Parcours,
-
+	
 	findByName: function(key) {
 		var parcoursDAO = new directory.dao.ParcoursDAO(directory.db),
 			self = this;
@@ -771,7 +770,6 @@ directory.models.ParcoursCollection = Backbone.Collection.extend({
 			self.reset(data);
 		});
 	}
-
 });
 
 
@@ -783,7 +781,7 @@ directory.models.Espece = Backbone.Model.extend({
 directory.models.EspeceCollection = Backbone.Collection.extend({
 	dao: directory.dao.EspeceDAO,
 	model: directory.models.Espece,
-
+	
 	findByName: function(key) {
 		var especeDAO = new directory.dao.EspeceDAO(directory.db),
 			self = this;
@@ -819,7 +817,6 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
 			//console.log('EspeceCollection | findAll ', data);
 		});
 	}
-
 });
 
 
@@ -831,7 +828,7 @@ directory.models.Critere = Backbone.Model.extend({
 directory.models.CritereCollection = Backbone.Collection.extend({
 	dao: directory.dao.CritereDAO,
 	model: directory.models.Critere,
-
+	
 	findAll: function() {
 		var critereDAO = new directory.dao.CritereDAO(directory.db),
 			self = this;
@@ -851,7 +848,7 @@ directory.models.Obs = Backbone.Model.extend({
 directory.models.ObsCollection = Backbone.Collection.extend({
 	dao: directory.dao.ObsDAO,
 	model: directory.models.Obs,
-
+	
 	findById: function(key) {
 		var obsDAO = new directory.dao.ObsDAO(directory.db),
 			self = this;
@@ -880,7 +877,7 @@ directory.models.Photo = Backbone.Model.extend({
 directory.models.PhotoCollection = Backbone.Collection.extend({
 	dao: directory.dao.PhotoDAO,
 	model: directory.models.Photo,
-
+	
 	findByObs: function(key) {
 		var photoDAO = new directory.dao.PhotoDAO(directory.db),
 			self = this;
@@ -900,7 +897,7 @@ directory.models.Utilisateur = Backbone.Model.extend({
 directory.models.UtilisateurCollection = Backbone.Collection.extend({
 	dao: directory.dao.UtilisateurDAO,
 	model: directory.models.Utilisateur,
-
+	
 	findOne: function() {
 		var utilisateurDAO = new directory.dao.UtilisateurDAO(directory.db),
 			self = this;
@@ -925,7 +922,7 @@ directory.views.SearchPage = Backbone.View.extend({
 		this.template = _.template(this.templateLoader.get('search-page'));
 		this.model.findByName('');
 	},
-
+	
 	render: function(eventName) {
 		$(this.el).html(this.template(this.model.toJSON()));
 		this.listView = new directory.views.ParcoursListView({el: $('ul', this.el), model: this.model});
@@ -937,7 +934,7 @@ directory.views.ParcoursListView = Backbone.View.extend({
 	initialize: function() {
 		this.model.bind('reset', this.render, this);
 	},
-
+	
 	render: function(eventName) {
 		$(this.el).empty();
 		_.each(this.model.models, function(employee) {
@@ -948,16 +945,15 @@ directory.views.ParcoursListView = Backbone.View.extend({
 });
 directory.views.ParcoursListItemView = Backbone.View.extend({
 	tagName: 'li',
-
+	
 	initialize: function(data) {
 		this.template = _.template(directory.utils.templateLoader.get('parcours-list-item'));
 	},
-
+	
 	render: function(eventName) {
 		$(this.el).html(this.template(this.model.toJSON()));
 		return this;
 	}
-
 });
 
 
@@ -971,7 +967,7 @@ directory.views.ParcoursPage = Backbone.View.extend({
 		
 		this.template = _.template(directory.utils.templateLoader.get('parcours-page'));
 	},
-
+	
 	render: function(eventName) {
 		var arr_photos = new Array();
 		var temp_photos = this.model.attributes.photos.split(',');
@@ -984,7 +980,6 @@ directory.views.ParcoursPage = Backbone.View.extend({
 		$(this.el).html(this.template(this.model.toJSON()));
 		return this;
 	}
-
 });
 
 
@@ -1005,7 +1000,7 @@ directory.views.ListPage = Backbone.View.extend({
 		}
 		this.template = _.template(this.templateLoader.get('list-page'));
 	},
-
+	
 	render: function(eventName) {
 		var lien = (this.model.id == 0) ? '' : '/'+this.model.id,
 			json = {
@@ -1027,7 +1022,7 @@ directory.views.EspeceListView = Backbone.View.extend({
 		this.ce_critere = data.model.id_critere;
 		this.model.bind('reset', this.render, this);
 	},
-
+	
 	render: function(eventName) {
 		var arr_especes = new Array(),
 			arr_temp = this.model.models,
@@ -1071,12 +1066,12 @@ directory.views.EspeceListView = Backbone.View.extend({
 });
 directory.views.EspeceListItemView = Backbone.View.extend({
 	tagName: 'li',
-
+	
 	initialize: function(data) {
 		//console.log(data);
 		this.template = _.template(directory.utils.templateLoader.get('espece-list-item'));
 	},
-
+	
 	render: function(eventName) {
 		var temp_photos = this.model.attributes.photos.split(',');
 		if (temp_photos[0] != '') {
@@ -1096,7 +1091,7 @@ directory.views.EspecePage = Backbone.View.extend({
 		//console.log(data);
 		this.template = _.template(this.templateLoader.get('espece-page'));
 	},
-
+	
 	render: function(eventName) {
 		var num_nom = this.model.attributes.id,
 			ce_critere = this.model.attributes.ce_critere,
@@ -1149,7 +1144,7 @@ directory.views.CriterePage = Backbone.View.extend({
 		this.model.bind('reset', this.render, this);
 		this.template = _.template(directory.utils.templateLoader.get('critere-list'));
 	},
-
+	
 	render: function(eventName) {
 		var arr_criteres = new Array(),
 			models = this.model.models;
@@ -1203,7 +1198,7 @@ directory.views.CritereListItemView = Backbone.View.extend({
 		//console.log(data);
 		this.template = _.template(directory.utils.templateLoader.get('critere-list-item'));
 	},
-
+	
 	render: function(eventName) {
 		var arr_valeurs = new Array(),
 			arr_checked = new Array();
@@ -1254,7 +1249,7 @@ directory.views.saisieObs = Backbone.View.extend({
 		this.model.attributes.date = aujourdhui;
 		this.template = _.template(directory.utils.templateLoader.get('saisie-obs'));
 	},
-
+	
 	render: function(eventName) {
 		this.model.attributes.position = this.position;
 		//console.log(this.model);
@@ -1322,13 +1317,19 @@ directory.views.transmissionObs = Backbone.View.extend({
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Page Compte
 directory.views.comptePage = Backbone.View.extend({
 	initialize: function() {
+		this.utilisateur = new directory.models.UtilisateurCollection();
+		this.utilisateur.findOne();
+		this.utilisateur.bind('reset', this.render, this);
 		this.template = _.template(directory.utils.templateLoader.get('compte'));
 	},
-
+	
 	render: function(eventName) {
 		//console.log(this.model);
+		var json = {
+			'email' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.email
+		}
 		
-		$(this.el).html(this.template());
+		$(this.el).html(this.template(json));
 		return this;
 	}
 });
@@ -1361,7 +1362,7 @@ directory.Router = Backbone.Router.extend({
 		'transmission' : 'transmissionObs',
 		'compte' : 'compteUtilisateur'
 	},
-
+	
 	initialize: function() {
 		var self = this;
 		
@@ -1386,7 +1387,7 @@ directory.Router = Backbone.Router.extend({
 			var sql = 
 				"SELECT id_critere, intitule FROM critere  " +
 				"WHERE intitule LIKE '%floraison%' ";
-
+			
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre = results.rows.length,
 					i = 0;
@@ -1404,7 +1405,7 @@ directory.Router = Backbone.Router.extend({
 			var sql = 
 				"SELECT id_critere, intitule FROM critere  " +
 				"WHERE intitule LIKE '%fructification%' ";
-
+			
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre = results.rows.length,
 					i = 0;
@@ -1420,7 +1421,7 @@ directory.Router = Backbone.Router.extend({
 		});
 		
 		
-	
+		
 		// Keep track of the history of pages (we only store the page URL). Used to identify the direction
 		// (left or right) of the sliding transition between pages.
 		this.pageHistory = [];
@@ -1430,7 +1431,7 @@ directory.Router = Backbone.Router.extend({
 			window.history.back();
 			return false;
 		});
-
+		
 		$('body').on('click', '#modalReset', function(event) {
 			var id = event.currentTarget.attributes.id.value;
 			var hash = window.location.hash,
@@ -1515,7 +1516,7 @@ directory.Router = Backbone.Router.extend({
 			$('#vue-modal').modal('show');
 			window.history.back();
 		});
-
+		
 		$('#content').on('click', '.img_criterium', function(event) {
 			var id = this.alt,
 				value = ($('#'+id).attr('checked') == undefined) ? 'checked' : false;
@@ -1548,7 +1549,7 @@ directory.Router = Backbone.Router.extend({
 			} else {
 				sql_where = "";
 			}
-
+			
 			directory.pheno.liste = new Array();
 			for (var i = 0; i < inputs.length; i++) {
 				$('#img_'+inputs[i].id).removeClass('selection-critere');
@@ -1850,14 +1851,17 @@ directory.Router = Backbone.Router.extend({
 			);
 		});
 		
-		$('#content').on('blur', '#courriel', requeterIdentite);
+		//$('#content').on('blur', '#courriel', requeterIdentite);
 		$('#content').on('keypress', '#courriel', function(event) {
 			if (event.which == 13) {
 				requeterIdentite(event);
 			}
 		});
 		$('#content').on('click', '#valider_courriel', requeterIdentite);
-
+		$('#content').on('click', '#transmettre-obs', function(event) {
+			alert($('#transmission-courriel').html());
+		});
+		
 		
 		// Check of browser supports touch events...
 		if (document.documentElement.hasOwnProperty('ontouchstart')) {
@@ -2218,6 +2222,8 @@ function requeterIdentite() {
 	var SERVICE_ANNUAIRE = 'http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/';
 	var courriel = $('#courriel').val();
 	if (validerCourriel(courriel)) {
+		$('#utilisateur-infos').addClass('text-info');
+		$('#utilisateur-infos').removeClass('text-error');
 		$('#utilisateur-infos').html('Vérification en cours...');
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
 		$.ajax({
@@ -2302,7 +2308,6 @@ function miseAJourCourriel(courriel) {
 					tx.executeSql(sql, parametres,
 						function(success) {		},
 						function(error) {
-							alert('DB | Error processing SQL: ' + error);
 							console.log('DB | Error processing SQL: ' + error.code, error);
 						}
 					);
