@@ -2216,10 +2216,9 @@ function surErreurGeoloc(error){
 
 function requeterIdentite() {
 	var SERVICE_ANNUAIRE = 'http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/';
-	var courriel = $('#courriel').val(),
-		flag = validerCourriel(courriel);
-	if (flag) {
-		$('#utilisateur-infos').html('Vérification en cours... Email valide : ' + flag);
+	var courriel = $('#courriel').val();
+	if (validerCourriel(courriel)) {
+		$('#utilisateur-infos').html('Vérification en cours...);
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
 		$.ajax({
 			url : urlAnnuaire,
@@ -2249,6 +2248,10 @@ function requeterIdentite() {
 				$('#zone_courriel_confirmation').removeClass('hide');
 			}
 		});
+	} else {
+		$('#utilisateur-infos').addClass('text-error');
+		$('#utilisateur-infos').removeClass('text-info');
+		$('#utilisateur-infos').html('Courriel invalide.');
 	}
 }
 function validerCourriel(email) { 
@@ -2278,6 +2281,9 @@ function miseAJourCourriel(courriel) {
 				parametres.push($('#nom_utilisateur').val());
 				parametres.push($('#prenom_utilisateur').val());
 				parametres.push($('#courriel_confirmation').val() == courriel);
+				alert($('#courriel_confirmation').val());
+				alert($(courriel);
+				alert($('#courriel_confirmation').val() == courriel);
 				if (index == -1) {
 					sql = 
 						"INSERT INTO utilisateur " +
