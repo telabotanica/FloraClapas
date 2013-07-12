@@ -1736,10 +1736,17 @@ directory.Router = Backbone.Router.extend({
 						for (var i = 0; i < results.rows.length; i = i + 1) {
 							var fichier = new FileEntry();
 							fichier.fullPath = results.rows.item(i).chemin;
-							fichier.remove
+							fichier.remove(null, null);
+							tx.executeSql("DELETE FROM photo WHERE id_photo = " + results.rows.item(i).id_photo, [],
+								function(evt) {
+									alert('Suppression okay' + evt);
+								}, 
+								function(evt) {
+									alert('Suppression nokay' + evt);
+								}
+							);
 						}
 					});
-					tx.executeSql("DELETE FROM photo WHERE id_photo = " + results.rows.item(i).id_photo);
 					tx.executeSql("DELETE FROM obs WHERE id_obs = " + id);
 					
 					var txt = 'Observation n° ' + id + ' supprimée.';
@@ -1785,17 +1792,17 @@ directory.Router = Backbone.Router.extend({
 					tx.executeSql("DELETE FROM photo WHERE id_photo = " + id);
 					
 					var fichier = new FileEntry();
-					alert($('#img_'+id).attr('src'));
 					fichier.fullPath = $('#img_'+id).attr('src');
-					fichier.remove(null, fail);
+					fichier.remove(null, null);
 					
 					$('#elt_'+id).remove();
 					$('#nbre-photos').html($('#nbre-photos').html()-1);
 				},
 				function(error) {
 					console.log('DB | Error processing SQL: ' + error.code, error);
-					var txt = 'Erreur de suppression dans la base de données.';
-					$('#obs-photos-info').html('<p class="text-center alert alert-error alert-block">' + txt + '</p>')
+					$('#obs-photos-info').addClass('alert-error');
+					$('#obs-photos-info').removeClass('alert-success');
+					$('#obs-photos-info').append('Erreur de suppression dans la base de données.')
 						.fadeIn(0)
 						.delay(1600)
 						.fadeOut('slow');	
@@ -2029,10 +2036,6 @@ function moisPhenoEstCouvert( debut, fin) {
 	return(flag);
 }
 
-function fail() {
-    alert("There was an error in setting the metadata");
-}
-
 
 
 function onPhotoSuccess(imageData){
@@ -2068,7 +2071,7 @@ function surPhotoSuccesCopie(entry) {
 				var nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
 					elt = 
 						'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
-							'<img src="' + chemin + '" alt="' + id + '" />' +
+							'<img src="' + chemin + '" alt="' + id + '" id="img_' + id + '"/>' +
 							'<a href="#observation/' + ce_obs + '" id="' + id + '" class="suppression-element supprimer-photos"><span></span></a>' + 
 						'</div>';
 				$('#obs-photos').append(elt);
