@@ -2218,7 +2218,7 @@ function requeterIdentite() {
 	var SERVICE_ANNUAIRE = 'http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/';
 	var courriel = $('#courriel').val();
 	if (validerCourriel(courriel)) {
-		$('#utilisateur-infos').html('Vérification en cours...);
+		$('#utilisateur-infos').html('Vérification en cours...');
 		var urlAnnuaire = SERVICE_ANNUAIRE + courriel;
 		$.ajax({
 			url : urlAnnuaire,
@@ -2282,7 +2282,7 @@ function miseAJourCourriel(courriel) {
 				parametres.push($('#prenom_utilisateur').val());
 				parametres.push($('#courriel_confirmation').val() == courriel);
 				alert($('#courriel_confirmation').val());
-				alert($(courriel);
+				alert(courriel);
 				alert($('#courriel_confirmation').val() == courriel);
 				if (index == -1) {
 					sql = 
