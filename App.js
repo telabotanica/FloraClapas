@@ -674,7 +674,7 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 				var sql = 
 					"SELECT id_user, nom, prenom, email, compte_verifie " +
 					"FROM utilisateur " + 
-					"WHERE compte_verifie = 1 "
+					"WHERE compte_verifie = true "
 					"ORDER BY id_user DESC";
 				tx.executeSql(sql, [], function(tx, results) {
 					callback(results.rows.length >= 1 ? results.rows.item(0) : null);
@@ -2281,9 +2281,6 @@ function miseAJourCourriel(courriel) {
 				parametres.push($('#nom_utilisateur').val());
 				parametres.push($('#prenom_utilisateur').val());
 				parametres.push($('#courriel_confirmation').val() == courriel);
-				alert($('#courriel_confirmation').val());
-				alert(courriel);
-				alert($('#courriel_confirmation').val() == courriel);
 				if (index == -1) {
 					sql = 
 						"INSERT INTO utilisateur " +
@@ -2292,7 +2289,7 @@ function miseAJourCourriel(courriel) {
 					parametres.push(id);
 					parametres.push(courriel);
 				} else {
-					if (utilisateurs[index].compte_verifie == 0) {
+					if (!utilisateurs[index].compte_verifie) {
 						sql = 
 							"UPDATE utilisateur " +
 							"SET nom = ?, prenom = ?, compte_verifie = ? " +
