@@ -2234,7 +2234,6 @@ function requeterIdentite() {
 					$('#nom_utilisateur').val(infos.nom);
 					$('#courriel_confirmation').val(courriel);
 					$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').attr('disabled', 'disabled');
-					miseAJourCourriel(courriel);
 				} else {
 					surErreurCompletionCourriel();
 				}
@@ -2245,6 +2244,7 @@ function requeterIdentite() {
 			},
 			complete : function(jqXHR, textStatus) {
 				console.log('Annuaire COMPLETE: ' + textStatus);
+				miseAJourCourriel(courriel);
 				$('#zone_prenom_nom').removeClass('hide');
 				$('#zone_courriel_confirmation').removeClass('hide');
 			}
@@ -2255,7 +2255,7 @@ function miseAJourCourriel(courriel) {
 	directory.db.transaction(
 		function(tx) {
 			var sql =
-				"SELECT id_user, email " +
+				"SELECT id_user, email, compte_verifie " +
 				"FROM utilisateur " +
 				"ORDER BY id_user DESC";
 			tx.executeSql(sql, [], function(tx, results) {
@@ -2277,22 +2277,21 @@ function miseAJourCourriel(courriel) {
 					parametres.push(courriel);
 					parametres.push(0);
 				} else {
-					sql = 
-						"UPDATE utilisateur " +
-						"SET nom = ?, prenom = ?, compte_verifie = ? " +
-						"WHERE id_utilisateur = ?";
-					parametres.push(id);
-					parametres.push($('#nom_utilisateur').val());
-					parametres.push($('#prenom_utilisateur').val());
-					parametres.push($('#courriel_confirmation').val() == courriel);
+					if (utilisateurs[index].compte_verifie == 0) {
+						sql = 
+							"UPDATE utilisateur " +
+							"SET nom = ?, prenom = ?, compte_verifie = ? " +
+							"WHERE id_utilisateur = ?";
+						parametres.push($('#nom_utilisateur').val());
+						parametres.push($('#prenom_utilisateur').val());
+						parametres.push($('#courriel_confirmation').val() == courriel);
+						parametres.push(id);
+					}
 				}
 				
-				tx.executeSql(sql, parametres, 
+				tx.executeSql(sql, parametres, null,
 				function(error) {
-					alert('DB | OKAY processing SQL');
-				},
-				function(error) {
-					alert('DB | Error processing SQL: ' + error.code, error);
+					alert('DB | Error processing SQL: ' + error);
 				});
 			});
 		},
