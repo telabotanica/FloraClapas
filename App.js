@@ -1781,6 +1781,16 @@ directory.Router = Backbone.Router.extend({
 				function(tx) {
 					tx.executeSql("DELETE FROM photo WHERE id_photo = " + id);
 					
+					var fichier = new FileEntry();
+					fichier.fullPath = $('#img_'+id).attr('src');
+					fichier.remove(
+						function (succes) {
+							alert(succes);
+						},
+						function (error) {
+							alert(error);
+						}
+					);
 					$('#elt_'+id).remove();
 					$('#nbre-photos').html($('#nbre-photos').html()-1);
 				},
@@ -2050,17 +2060,16 @@ function surCopiePhoto(entry) {
 				photo.push(id);
 				photo.push(chemin);
 				photo.push(ce_obs);
-				
 				tx.executeSql(sql, photo);
-				//self.transmissionObs();
 				
-				var elt = 
-				'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
-					'<img src="' + chemin + '" alt="' + id + '" />' +
-					'<a href="#observation/' + ce_obs + '" id="' + id + '" class="suppression-element supprimer-photos"><span></span></a>' + 
-				'</div>';
+				var nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
+					elt = 
+						'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
+							'<img src="' + chemin + '" alt="' + id + '" />' +
+							'<a href="#observation/' + ce_obs + '" id="' + id + '" class="suppression-element supprimer-photos"><span></span></a>' + 
+						'</div>';
 				$('#obs-photos').append(elt);
-				$('#nbre-photos').html(($('#nbre-photos').html()+1));
+				$('#nbre-photos').html(nbre_photos);
 			});
 		},
 		surErreurPhoto
@@ -2142,9 +2151,6 @@ function surSuccesGeoloc(position) {
 			},
 			complete : function(jqXHR, textStatus) {
 				$('#sauver-obs').removeAttr('disabled');
-				//$('#geo-infos').html(''); 
-				//var texte = ($('#location').html() == '') ? TEXTE_HORS_LIGNE : $('#location').html();
-				//$('#location').html(texte);
 			}
 		});
 	}
