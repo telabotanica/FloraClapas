@@ -2428,6 +2428,7 @@ function stockerObsData(obs) {
 				nbre = results.rows.length;
 			for (var i = 0; i < nbre; i++) {
 				photo = results.rows.item(i);
+				alert(photo.id_photo);
 				//console.log('Photo ', photo);
 				
 				var arr_nom = photo.chemin.split('/'),
@@ -2441,7 +2442,7 @@ function stockerObsData(obs) {
 					alert(evt.target.result);
 					base64 = evt.target.result;
 				};
-				reader.readAsDataURL(photo.chemin);
+				reader.readAsDataURL(fichier);
 
 				img_codes.push(base64);
 				console.log('base64 ' + base64);
