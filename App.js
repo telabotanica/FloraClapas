@@ -2455,7 +2455,6 @@ function stockerObsData(obs) {
 							alert("read success");
 							alert(evt.target.result);
 							base64 = evt.target.result;
-							alert(base64.split[';'][0]);
 						};
 						reader.readAsDataURL(file);
 					}, function(error) {
