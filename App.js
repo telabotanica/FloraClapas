@@ -2375,6 +2375,7 @@ function transmettreObs() {
 						//obs[i] = results.rows.item(i);
 						stockerObsData(results.rows.item(i));
 					}
+					alert('transmission ' + i);
 				});
 			},
 			function(error) {
@@ -2419,17 +2420,8 @@ function verifierConnexion() {
 }
 
 function stockerObsData(obs) {
-	//console.log('Obs ', obs);
 	var img_noms = new Array(),
-		img_codes = new Array();
-/*
-	fileSystem.root.getDirectory('FlorasClapas', null, function(dir) {
-			dossier = dir;
-		}, null);
-	};
-	
-	console.log(dossier);
-//*/	
+		img_codes = new Array();	
 	
 	directory.db.transaction(function(tx) {
 		tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
@@ -2437,68 +2429,55 @@ function stockerObsData(obs) {
 				dossier = null,
 				nbre = results.rows.length;
 			
-			
 			for (var i = 0; i < nbre; i++) {
 				photo = results.rows.item(i);
 				alert(photo.id_photo);
-				//console.log('Photo ', photo);
-				var arr_nom = photo.chemin.split('/'),
-					fichier = new FileEntry(),
-					singleton = null,
-					base64 = -1;
-				//*
+				var fichier = new FileEntry();
+				
 				fichier.fullPath = photo.chemin;
 				fichier.file(
 					function(file) {
 						var reader = new FileReader();
 						reader.onloadend = function(evt) {
 							alert("read success");
-							alert(evt.target.result);
-							base64 = evt.target.result;
+							img_codes.push(evt.target.result);
+							img_noms.push(file.name);
+							alert(img_noms[0]);
 						};
 						reader.readAsDataURL(file);
 					}, function(error) {
 						alert(error);
-					});
-				
-				//*/
-			/*
-				dossier.getFile(photo.chemin, null, function(fichier) {
-						
-					}, null
-				});
-			//*/
-				img_codes.push(base64);
-				console.log('base64 ' + base64);
-				img_noms.push(arr_nom[arr_nom.length-1]);
-				
-				alert('details');
-				$('#details-obs').data(obs.num, {
-					'date' : obs.date, 
-					'notes' : '',
-					
-					'nom_sel' : obs.nom_sci,
-					'num_nom_sel' : obs.num_nom,
-					'nom_ret' : obs.nom_sci,
-					'num_nom_ret' : obs.num_nom,
-					'num_taxon' : obs.num_taxon,
-					'famille' : obs.famille,
-					'referentiel' : obs.referentiel,
-					
-					'latitude' : obs.latitude,
-					'longitude' : obs.longitude,
-					'commune_nom' : obs.commune,
-					'commune_code_insee' : obs.code_insee,
-					'lieudit' : '',
-					'station' : '',
-					'milieu' : '',
-					
-					//Ajout des champs images
-					'image_nom' : img_noms,
-					'image_b64' : img_codes 
-				});
-				alert('fin details');
+					}
+				);
 			}
+
+			alert('fin ' + img_noms[0]);
+			alert('details');
+			$('#details-obs').data(obs.num, {
+				'date' : obs.date, 
+				'notes' : '',
+				
+				'nom_sel' : obs.nom_sci,
+				'num_nom_sel' : obs.num_nom,
+				'nom_ret' : obs.nom_sci,
+				'num_nom_ret' : obs.num_nom,
+				'num_taxon' : obs.num_taxon,
+				'famille' : obs.famille,
+				'referentiel' : obs.referentiel,
+				
+				'latitude' : obs.latitude,
+				'longitude' : obs.longitude,
+				'commune_nom' : obs.commune,
+				'commune_code_insee' : obs.code_insee,
+				'lieudit' : '',
+				'station' : '',
+				'milieu' : '',
+				
+				//Ajout des champs images
+				'image_nom' : img_noms,
+				'image_b64' : img_codes 
+			});
+			alert('fin details');
 		}, null);
 	});	
 }
