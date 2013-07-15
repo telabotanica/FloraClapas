@@ -10,8 +10,8 @@
 		<div class="row-fluid">
 			<div> 
 				<label for="courriel">Courriel * :</label> 
-				<input id="courriel" type="email" name="courriel"/>
-				<input id="id_utilisateur" name="id_utilisateur" type="hidden" value="<%= email %>"/>
+				<input id="courriel" type="email" name="courriel" value="<%= email %>"/>
+				<input id="id_utilisateur" name="id_utilisateur" type="hidden"/>
 				
 				<label for="courriel_memoire">
 					Se souvenir de moi :
@@ -28,12 +28,12 @@
 				<hr />
 				<div>
 					<label for="prenom">Prénom :</label>
-					<input id="prenom_utilisateur" name="prenom" type="text"/>
+					<input id="prenom_utilisateur" name="prenom" type="text" value="<%= prenom %>"/>
 				</div>
 				
 				<div>
 					<label for="nom">Nom :</label>
-					<input id="nom_utilisateur" name="nom" type="text"/>
+					<input id="nom_utilisateur" name="nom" type="text" value="<%= nom %>"/>
 				</div>
 			</div>
 			<div id="zone_courriel_confirmation" class="hide">
