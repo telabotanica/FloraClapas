@@ -2430,33 +2430,33 @@ function stockerObsData(obs) {
 	directory.db.transaction(function(tx) {
 		tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 			var photo = null,
-				dossier = null,
 				nbre = results.rows.length;
 			
 			for (var i = 0; i < nbre; i++) {
 				photo = results.rows.item(i);
 				alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
+				var fichier = new FileEntry();
 				
-				var fs = requestFileSystemSync(TEMPORARY, 1024*1024 /*1MB*/),
-					dirEntry = fs.root.getDirectory('FlorasClapas', null, 
-						function(success) {alert('success dir');}, 
-						function(error) {alert('error dir ' + error);});
-					fichier = dirEntry.fullPath.getFile(photo.chemin, null,
-						function(success) {alert('success fichier');}, 
-						function(error) {alert('error fichier ' + error);});
-					var reader = new FileReader();
-					reader.onloadend = function(evt) {
-						alert('read success ' + i);
-						img_codes.push(evt.target.result);
-						img_noms.push(file.name);
-						alert(img_noms[0]);
-					};
-					reader.readAsDataURL(fichier);
+				fichier.fullPath = photo.chemin;
+				fichier.file(
+					function(file) {
+						var reader = new FileReader();
+						reader.onloadend = function(evt) {
+							alert('read success ' + i + '(' + obs.id_obs);
+							img_codes.push(evt.target.result);
+							img_noms.push(file.name);
+							alert(img_noms[0]);
+						};
+						reader.readAsDataURL(file);
+					}, function(error) {
+						alert(error);
+					}
+				);
 			}
 
 			alert('fin ' + img_noms[0]);
 			alert('details');
-			$('#details-obs').data(obs.num, {
+			$('#details-obs').data(obs.id_obs, {
 				'date' : obs.date, 
 				'notes' : '',
 				
