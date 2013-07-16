@@ -2433,10 +2433,10 @@ function transmettreObs() {
 														'image_nom' : img_noms,
 														'image_b64' : img_codes 
 													};
-													jQuery.data($('div')[0], ''+obs.id_obs, json);
-													console.log(jQuery.data($('div')[0], ''+obs.id_obs));
+													jQuery.data($('#details-obs'), ''+obs.id_obs, json);
+													console.log(jQuery.data($('#details-obs'), ''+obs.id_obs));
 													var msg = '',
-														observations = jQuery.data($('div')[0], ''+obs.id_obs);
+														observations = jQuery.data($('#details-obs'), ''+obs.id_obs);
 													if (observations == undefined || jQuery.isEmptyObject(observations)) {
 														msg = 'Aucune observation à transmettre.';
 													} else {
@@ -2449,8 +2449,9 @@ function transmettreObs() {
 														
 														var utilisateur = new directory.models.UtilisateurCollection();
 														utilisateur.findOne();
-														alert(utilisateur);
-														alert(utilisateur.models);
+														for (var index in utilisateur) {
+															alert(index + ' : ' + utilisateur[index]);
+														}
 														
 														/*
 														var utilisateur = new Object();
