@@ -2432,10 +2432,10 @@ function transmettreObs() {
 														'image_nom' : img_noms,
 														'image_b64' : img_codes 
 													};
-													jQuery.data($('#details-obs'), ''+obs.id_obs, json);
-													console.log(jQuery.data($('#details-obs'), ''+obs.id_obs));
+													jQuery.data($('div')[0], ''+obs.id_obs, json);
+													console.log(jQuery.data($('div')[0], ''+obs.id_obs));
 													var msg = '',
-														observations = jQuery.data($('#details-obs'), ''+obs.id_obs);
+														observations = jQuery.data($('div')[0], ''+obs.id_obs);
 													if (observations == undefined || jQuery.isEmptyObject(observations)) {
 														msg = 'Aucune observation à transmettre.';
 													} else {
