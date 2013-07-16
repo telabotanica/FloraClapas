@@ -1392,8 +1392,14 @@ directory.Router = Backbone.Router.extend({
 	
 	initialize: function() {
 		var self = this;
-
+		
+		
 		directory.db.transaction(function (tx) {
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
 			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'test@tela-botanica.org', 'true')");
 		},
 		function(error) {
@@ -2374,7 +2380,7 @@ function transmettreObs() {
 					"JOIN obs ON num_nom = ce_espece " +
 					"ORDER BY id_obs";
 				tx.executeSql(sql, [], function(tx, results) {
-					 var nbre = results.rows.length;
+					 var nbre_obs = results.rows.length;
 					var img_noms = new Array(),
 						img_codes = new Array();	
 					for (var i = 0; i < 1; i = i + 1) {
@@ -2384,24 +2390,24 @@ function transmettreObs() {
 						directory.db.transaction(function(tx) {
 							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
-									nbre = results.rows.length;
+									nbre_photos = results.rows.length;
 								
-								for (var j = 0; j < nbre; j++) {
+								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
 									alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
 									var fichier = new FileEntry();
-									
 									fichier.fullPath = photo.chemin;
 									fichier.file(
 										function(file) {
 											var reader = new FileReader();
 											reader.onloadend = function(evt) {
-												alert('read success ' + i + '|' + j);
+												//alert('read success ' + i + '|' + j);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												//alert('Espece ' + obs.num_nom);
-												//*
-												jQuery.data('#details-obs', obs.id_obs, {
+
+												if (j == nbre_photos-1) {
+												jQuery.data($('div')[0], ''+obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
 													
@@ -2425,9 +2431,9 @@ function transmettreObs() {
 													'image_nom' : img_noms,
 													'image_b64' : img_codes 
 												});
-												//*/
+												console.log(jQuery.data($('div')[0], ''+obs.id_obs));
 												var msg = '',
-													observations = $('#details-obs').data();
+													observations = $('div')[0].data();
 												if (observations == undefined || jQuery.isEmptyObject(observations)) {
 													msg = 'Aucune observation à transmettre.';
 												} else {
@@ -2450,6 +2456,7 @@ function transmettreObs() {
 													*/
 												}
 												alert(msg);
+												}
 											};
 											reader.readAsDataURL(file);
 										}, function(error) {
