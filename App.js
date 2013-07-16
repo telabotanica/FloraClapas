@@ -2436,23 +2436,22 @@ function stockerObsData(obs) {
 			for (var i = 0; i < nbre; i++) {
 				photo = results.rows.item(i);
 				alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
-				var fichier = new FileEntry();
 				
-				fichier.fullPath = photo.chemin;
-				fichier.file(
-					function(file) {
-						var reader = new FileReaderSync();
-						reader.onloadend = function(evt) {
-							alert('read success ' + i);
-							img_codes.push(evt.target.result);
-							img_noms.push(file.name);
-							alert(img_noms[0]);
-						};
-						reader.readAsDataURL(file);
-					}, function(error) {
-						alert(error);
-					}
-				);
+				var fs = requestFileSystemSync(TEMPORARY, 1024*1024 /*1MB*/),
+					dirEntry = fs.root.getDirectory('FlorasClapas', null, 
+						function(success) {alert('success dir');}, 
+						function(error) {alert('error dir ' + error);});
+					fichier = dirEntry.fullPath.getFile(photo.chemin, null,
+						function(success) {alert('success fichier');}, 
+						function(error) {alert('error fichier ' + error);});
+					var reader = new FileReader();
+					reader.onloadend = function(evt) {
+						alert('read success ' + i);
+						img_codes.push(evt.target.result);
+						img_noms.push(file.name);
+						alert(img_noms[0]);
+					};
+					reader.readAsDataURL(fichier);
 			}
 
 			alert('fin ' + img_noms[0]);
