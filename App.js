@@ -2438,7 +2438,8 @@ function transmettreObs() {
 													'image_nom' : img_noms,
 													'image_b64' : img_codes 
 												});
-												alert(jQuery.data($('div')[0], ''+obs.id_obs, json));
+									jQuery.data($('div')[0], ''+obs.id_obs, json);
+												alert(jQuery.data($('div')[0], ''+obs.id_obs));
 												console.log(jQuery.data($('div')[0], ''+obs.id_obs));
 												var msg = '',
 													observations = jQuery.data($('div')[0], ''+obs.id_obs);
