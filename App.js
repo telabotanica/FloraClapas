@@ -1392,7 +1392,15 @@ directory.Router = Backbone.Router.extend({
 	
 	initialize: function() {
 		var self = this;
-		
+
+		directory.db.transaction(function (tx) {
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
+			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
+			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'zedd@tela-botanica.org', 1)");
+		});
 		directory.db.transaction(function (tx) {
 			var sql = 
 				"SELECT id_critere, intitule FROM critere  " +
@@ -2366,7 +2374,7 @@ function transmettreObs() {
 							"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
 					"FROM espece " +
 					"JOIN obs ON num_nom = ce_espece " +
-					"ORDER BY id_obs DESC";
+					"ORDER BY id_obs";
 				tx.executeSql(sql, [], function(tx, results) {
 					 var nbre = results.rows.length,
 						obs = [],
@@ -2375,7 +2383,7 @@ function transmettreObs() {
 						//obs[i] = results.rows.item(i);
 						stockerObsData(results.rows.item(i));
 					}
-					alert('transmission ' + i);
+					alert('transmission obs ' + i);
 				});
 			},
 			function(error) {
@@ -2422,7 +2430,7 @@ function verifierConnexion() {
 function stockerObsData(obs) {
 	var img_noms = new Array(),
 		img_codes = new Array();	
-	
+	alert('Obs n°' + obs.id_obs);
 	directory.db.transaction(function(tx) {
 		tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 			var photo = null,
@@ -2431,7 +2439,7 @@ function stockerObsData(obs) {
 			
 			for (var i = 0; i < nbre; i++) {
 				photo = results.rows.item(i);
-				alert(photo.id_photo);
+				alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
 				var fichier = new FileEntry();
 				
 				fichier.fullPath = photo.chemin;
@@ -2477,7 +2485,7 @@ function stockerObsData(obs) {
 				'image_nom' : img_noms,
 				'image_b64' : img_codes 
 			});
-			alert('fin details');
+			alert('fin details ' + img_codes.length);
 		}, null);
 	});	
 }
