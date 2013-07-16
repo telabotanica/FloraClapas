@@ -2394,7 +2394,7 @@ function transmettreObs() {
 								
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
-									photo.index = j;
+									photo.index = j+1;
 									alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
 									var fichier = new FileEntry();
 									fichier.fullPath = photo.chemin;
@@ -2407,7 +2407,8 @@ function transmettreObs() {
 												img_noms.push(file.name);
 												alert('Espece ' + obs.num_nom);
 												
-												if (photo.index == nbre_photos-1) {
+												if (photo.index == nbre_photos) {
+													alert('fin');
 												jQuery.data($('div')[0], ''+obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
