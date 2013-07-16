@@ -69,7 +69,7 @@
 			function onDeviceReady() {
 				pictureSource = navigator.camera.PictureSourceType;
 				destinationType = navigator.camera.DestinationType;
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
+				window.requestFileSystemSync(LocalFileSystem.PERSISTENT, 0,
 					function(object) {
 						fileSystem = object;
 					}, 

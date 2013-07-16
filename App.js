@@ -699,7 +699,7 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 				var sql = 
 					"SELECT id_user, nom, prenom, email, compte_verifie " +
 					"FROM utilisateur " + 
-					"WHERE compte_verifie LIKE true "
+					"WHERE compte_verifie LIKE 'true' "
 					"ORDER BY id_user DESC";
 				tx.executeSql(sql, [], function(tx, results) {
 					callback(results.rows.length >= 1 ? results.rows.item(0) : null);
@@ -1394,16 +1394,14 @@ directory.Router = Backbone.Router.extend({
 		var self = this;
 
 		directory.db.transaction(function (tx) {
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
-			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'zedd@tela-botanica.org', true)");
+			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'zedd@tela-botanica.org', 'true')");
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
 		});
 		directory.db.transaction(function (tx) {
 			var sql = 
-				"SELECT id_critere, intitule FROM critere  " +
+				"SELECT id_critere, intitule FROM critere " +
 				"WHERE intitule LIKE '%feuillaison%' ";
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre = results.rows.length,
@@ -2118,7 +2116,7 @@ function moisPhenoEstCouvert( debut, fin) {
 
 function onPhotoSuccess(imageData){
 	fileSystem.root.getDirectory('FlorasClapas', { create: true, exclusive: false }, function(dossier) {
-		var fichier = new FileEntry();
+		var fichier = new FileEntrySync();
 		fichier.fullPath = imageData;
 		fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', surPhotoSuccesCopie, surPhotoErreurAjout);
 	}, surPhotoErreurAjout);
@@ -2365,13 +2363,13 @@ function surErreurCompletionCourriel() {
 
 function transmettreObs() {
 	var msg = '',
-		TAG_PROJET = "WidgetSaisie";
+		TAG_PROJET = 'WidgetSaisie';
 	if (verifierConnexion()) {	
 		directory.db.transaction(
 			function(tx) {
 				var sql = 
 					"SELECT num_nom, nom_sci, num_taxon, famille, referentiel, " + 
-							"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
+						"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
 					"FROM espece " +
 					"JOIN obs ON num_nom = ce_espece " +
 					"ORDER BY id_obs";
@@ -2383,7 +2381,6 @@ function transmettreObs() {
 						//obs[i] = results.rows.item(i);
 						stockerObsData(results.rows.item(i));
 					}
-					alert('transmission obs ' + i);
 				});
 			},
 			function(error) {
@@ -2391,7 +2388,8 @@ function transmettreObs() {
 			}
 		);
 		
-		
+
+		alert('Transmission obs');
 		/*
 		var observations = $('#details-obs').data();
 		if (observations == undefined || jQuery.isEmptyObject(observations)) {
@@ -2422,11 +2420,9 @@ function transmettreObs() {
 			.fadeOut('slow');
 	}
 }
-
 function verifierConnexion() {
 	return ( ('onLine' in navigator) && (navigator.onLine) );
 }
-
 function stockerObsData(obs) {
 	var img_noms = new Array(),
 		img_codes = new Array();	
@@ -2440,14 +2436,14 @@ function stockerObsData(obs) {
 			for (var i = 0; i < nbre; i++) {
 				photo = results.rows.item(i);
 				alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
-				var fichier = new FileEntry();
+				var fichier = new FileEntrySync();
 				
 				fichier.fullPath = photo.chemin;
 				fichier.file(
 					function(file) {
 						var reader = new FileReaderSync();
 						reader.onloadend = function(evt) {
-							alert("read success");
+							alert('read success ' + i);
 							img_codes.push(evt.target.result);
 							img_noms.push(file.name);
 							alert(img_noms[0]);
