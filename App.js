@@ -1372,7 +1372,6 @@ directory.pheno['fructification'] = new Array();
 directory.pheno.liste = new Array();
 directory.nbre_criteres = new Array();
 directory.nbre_especes = null;
-directory.obs = null;
 
 
 
@@ -2400,10 +2399,8 @@ function transmettreObs() {
 												alert('read success ' + i + '|' + j);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
-												alert(img_noms[0] + ' ' + obs.num_nom);
+												//alert('Espece ' + obs.num_nom);
 												
-												alert('fin ' + img_noms[0]);
-												alert('details');
 												$('#details-obs').data(obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
@@ -2428,7 +2425,30 @@ function transmettreObs() {
 													'image_nom' : img_noms,
 													'image_b64' : img_codes 
 												});
-												alert('fin details ' + img_codes.length);
+												var msg = '',
+													observations = $('#details-obs').data();
+												if (observations == undefined || jQuery.isEmptyObject(observations)) {
+													msg = 'Aucune observation à transmettre.';
+												} else {
+													msg = 'Transmission en cours...';
+													var utilisateur = new directory.models.UtilisateurCollection();
+													utilisateur.findOne();
+													alert(utilisateur.models[0].attributes.email);
+													/*
+													observations['projet'] = TAG_PROJET;
+													observations['tag-obs'] = '';
+													observations['tag-img'] = '';
+													
+													var utilisateur = new Object();
+													utilisateur.id_utilisateur = ($('#id-utilisateur').val() == '') ? bdd.getItem('utilisateur.id') : $('#id-utilisateur').val();
+													utilisateur.prenom = ($('#prenom-utilisateur').val() == '') ? bdd.getItem('utilisateur.prenom') : $('#prenom-utilisateur').val();
+													utilisateur.nom = ($('#nom-utilisateur').val() == '') ? bdd.getItem('utilisateur.nom') : $('#nom-utilisateur').val();
+													utilisateur.courriel = ($('#courriel').val() == '') ? bdd.getItem('utilisateur.courriel') : $('#courriel').val();
+													observations['utilisateur'] = utilisateur;
+													envoyerObsAuCel(observations);
+													*/
+												}
+												alert(msg);
 											};
 											reader.readAsDataURL(file);
 										}, function(error) {
