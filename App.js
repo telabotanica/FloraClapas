@@ -2391,16 +2391,12 @@ function transmettreObs() {
 							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
 									nbre_photos = results.rows.length;
-
-								//var utilisateur = new directory.models.UtilisateurCollection();
-								//utilisateur.findOne();
-								//console.log(utilisateur);
-								//console.log(utilisateur.models);
 								
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
 									photo.index = j+1;
 									alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
+									
 									var fichier = new FileEntry();
 									fichier.fullPath = photo.chemin;
 									fichier.file(
@@ -2413,55 +2409,60 @@ function transmettreObs() {
 												alert('Espece ' + obs.num_nom);
 												
 												if (photo.index == nbre_photos) {
-													alert('fin');
-												var json = {
-													'date' : obs.date, 
-													'notes' : '',
-													
-													'nom_sel' : obs.nom_sci,
-													'num_nom_sel' : obs.num_nom,
-													'nom_ret' : obs.nom_sci,
-													'num_nom_ret' : obs.num_nom,
-													'num_taxon' : obs.num_taxon,
-													'famille' : obs.famille,
-													'referentiel' : obs.referentiel,
-													
-													'latitude' : obs.latitude,
-													'longitude' : obs.longitude,
-													'commune_nom' : obs.commune,
-													'commune_code_insee' : obs.code_insee,
-													'lieudit' : '',
-													'station' : '',
-													'milieu' : '',
-													
-													//Ajout des champs images
-													'image_nom' : img_noms,
-													'image_b64' : img_codes 
-												};
-									jQuery.data($('div')[0], ''+obs.id_obs, json);
-												alert(jQuery.data($('div')[0], ''+obs.id_obs));
-												console.log(jQuery.data($('div')[0], ''+obs.id_obs));
-												var msg = '',
-													observations = jQuery.data($('div')[0], ''+obs.id_obs);
-												if (observations == undefined || jQuery.isEmptyObject(observations)) {
-													msg = 'Aucune observation à transmettre.';
-												} else {
-													msg = 'Transmission en cours...';
-													/*
-													observations['projet'] = TAG_PROJET;
-													observations['tag-obs'] = '';
-													observations['tag-img'] = '';
-													
-													var utilisateur = new Object();
-													utilisateur.id_utilisateur = ($('#id-utilisateur').val() == '') ? bdd.getItem('utilisateur.id') : $('#id-utilisateur').val();
-													utilisateur.prenom = ($('#prenom-utilisateur').val() == '') ? bdd.getItem('utilisateur.prenom') : $('#prenom-utilisateur').val();
-													utilisateur.nom = ($('#nom-utilisateur').val() == '') ? bdd.getItem('utilisateur.nom') : $('#nom-utilisateur').val();
-													utilisateur.courriel = ($('#courriel').val() == '') ? bdd.getItem('utilisateur.courriel') : $('#courriel').val();
-													observations['utilisateur'] = utilisateur;
-													envoyerObsAuCel(observations);
-													*/
-												}
-												alert(msg);
+													var json = {
+														'date' : obs.date, 
+														'notes' : '',
+														
+														'nom_sel' : obs.nom_sci,
+														'num_nom_sel' : obs.num_nom,
+														'nom_ret' : obs.nom_sci,
+														'num_nom_ret' : obs.num_nom,
+														'num_taxon' : obs.num_taxon,
+														'famille' : obs.famille,
+														'referentiel' : obs.referentiel,
+														
+														'latitude' : obs.latitude,
+														'longitude' : obs.longitude,
+														'commune_nom' : obs.commune,
+														'commune_code_insee' : obs.code_insee,
+														'lieudit' : '',
+														'station' : '',
+														'milieu' : '',
+														
+														//Ajout des champs images
+														'image_nom' : img_noms,
+														'image_b64' : img_codes 
+													};
+													jQuery.data($('div')[0], obs.id_obs, json);
+													console.log(jQuery.data($('div')[0], obs.id_obs));
+													var msg = '',
+														observations = jQuery.data($('div')[0], obs.id_obs);
+													if (observations == undefined || jQuery.isEmptyObject(observations)) {
+														msg = 'Aucune observation à transmettre.';
+													} else {
+														msg = 'Transmission en cours...';
+														
+														observations['projet'] = TAG_PROJET;
+														observations['tag-obs'] = '';
+														observations['tag-img'] = '';
+														
+														
+														var utilisateur = new directory.models.UtilisateurCollection();
+														utilisateur.findOne();
+														alert(utilisateur);
+														alert(utilisateur.models);
+														
+														/*
+														var utilisateur = new Object();
+														utilisateur.id_utilisateur = ($('#id-utilisateur').val() == '') ? bdd.getItem('utilisateur.id') : $('#id-utilisateur').val();
+														utilisateur.prenom = ($('#prenom-utilisateur').val() == '') ? bdd.getItem('utilisateur.prenom') : $('#prenom-utilisateur').val();
+														utilisateur.nom = ($('#nom-utilisateur').val() == '') ? bdd.getItem('utilisateur.nom') : $('#nom-utilisateur').val();
+														utilisateur.courriel = ($('#courriel').val() == '') ? bdd.getItem('utilisateur.courriel') : $('#courriel').val();
+														observations['utilisateur'] = utilisateur;
+														envoyerObsAuCel(observations);
+														//*/
+													}
+													alert(msg);
 												}
 											};
 											reader.readAsDataURL(file);
@@ -2479,28 +2480,6 @@ function transmettreObs() {
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			}
 		);
-		
-
-		alert('Transmission obs');
-		/*
-		var observations = $('#details-obs').data();
-		if (observations == undefined || jQuery.isEmptyObject(observations)) {
-			msg = 'Aucune observation à transmettre.';
-		} else {
-			msg = 'Transmission en cours...';
-			observations['projet'] = TAG_PROJET;
-			observations['tag-obs'] = '';
-			observations['tag-img'] = '';
-			
-			var utilisateur = new Object();
-			utilisateur.id_utilisateur = ($('#id-utilisateur').val() == '') ? bdd.getItem('utilisateur.id') : $('#id-utilisateur').val();
-			utilisateur.prenom = ($('#prenom-utilisateur').val() == '') ? bdd.getItem('utilisateur.prenom') : $('#prenom-utilisateur').val();
-			utilisateur.nom = ($('#nom-utilisateur').val() == '') ? bdd.getItem('utilisateur.nom') : $('#nom-utilisateur').val();
-			utilisateur.courriel = ($('#courriel').val() == '') ? bdd.getItem('utilisateur.courriel') : $('#courriel').val();
-			observations['utilisateur'] = utilisateur;
-			envoyerObsAuCel(observations);
-		}
-		//*/
 	} else {
 		msg = 'Aucune connexion disponible. Merci de réessayer ultérieurement.';
 	}
