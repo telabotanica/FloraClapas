@@ -2388,7 +2388,7 @@ function transmettreObs() {
 						
 						alert('Obs n°' + obs.id_obs);
 						directory.db.transaction(function(tx) {
-							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
+							tx.executeSql('SELECT *, count(id_photo) AS total FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
 									nbre_photos = results.rows.length;
 								
@@ -2405,8 +2405,8 @@ function transmettreObs() {
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												alert('Espece ' + obs.num_nom);
-												alert(j == nbre_photos-1);
-												if (j == nbre_photos-1) {
+												
+												if (photo.total == nbre_photos-1) {
 												jQuery.data($('div')[0], ''+obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
