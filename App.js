@@ -699,7 +699,7 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 				var sql = 
 					"SELECT id_user, nom, prenom, email, compte_verifie " +
 					"FROM utilisateur " + 
-					"WHERE compte_verifie = 'true' "
+					"WHERE compte_verifie LIKE true "
 					"ORDER BY id_user DESC";
 				tx.executeSql(sql, [], function(tx, results) {
 					callback(results.rows.length >= 1 ? results.rows.item(0) : null);
@@ -1399,7 +1399,7 @@ directory.Router = Backbone.Router.extend({
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
 			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
-			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'zedd@tela-botanica.org', 1)");
+			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'zedd@tela-botanica.org', true)");
 		});
 		directory.db.transaction(function (tx) {
 			var sql = 
@@ -2445,7 +2445,7 @@ function stockerObsData(obs) {
 				fichier.fullPath = photo.chemin;
 				fichier.file(
 					function(file) {
-						var reader = new FileReader();
+						var reader = new FileReaderSync();
 						reader.onloadend = function(evt) {
 							alert("read success");
 							img_codes.push(evt.target.result);
