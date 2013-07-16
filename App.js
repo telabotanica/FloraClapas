@@ -2388,12 +2388,13 @@ function transmettreObs() {
 						
 						alert('Obs n°' + obs.id_obs);
 						directory.db.transaction(function(tx) {
-							tx.executeSql('SELECT *, count(id_photo) AS total FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
+							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
 									nbre_photos = results.rows.length;
 								
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
+									photo.index = j;
 									alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
 									var fichier = new FileEntry();
 									fichier.fullPath = photo.chemin;
@@ -2401,12 +2402,12 @@ function transmettreObs() {
 										function(file) {
 											var reader = new FileReader();
 											reader.onloadend = function(evt) {
-												alert('read success ' + i + '|' + j);
+												alert('read success ' + i + '|' + j + ':' + photo.index);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												alert('Espece ' + obs.num_nom);
 												
-												if (photo.total == nbre_photos-1) {
+												if (photo.index == nbre_photos-1) {
 												jQuery.data($('div')[0], ''+obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
