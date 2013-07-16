@@ -1372,6 +1372,7 @@ directory.pheno['fructification'] = new Array();
 directory.pheno.liste = new Array();
 directory.nbre_criteres = new Array();
 directory.nbre_especes = null;
+directory.obs = null;
 
 
 
@@ -1890,7 +1891,7 @@ directory.Router = Backbone.Router.extend({
 		});
 		$('#content').on('click', '#valider_courriel', requeterIdentite);
 		$('#content').on('click', '#transmettre-obs', function(event) {
-			alert($('#transmission-courriel').attr('disabled'));
+			//alert($('#transmission-courriel').attr('disabled'));
 			transmettreObs();
 		});
 		
@@ -2399,7 +2400,7 @@ function transmettreObs() {
 												alert('read success ' + i + '|' + j);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
-												alert(img_noms[0]);
+												alert(img_noms[0] + ' ' + obs.num_nom);
 												
 												alert('fin ' + img_noms[0]);
 												alert('details');
