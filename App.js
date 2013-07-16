@@ -2400,8 +2400,8 @@ function transmettreObs() {
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												//alert('Espece ' + obs.num_nom);
-												/*
-												$('#details-obs').data(obs.id_obs, {
+												//*
+												jQuery.data('#details-obs', obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
 													
