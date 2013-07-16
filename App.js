@@ -2409,6 +2409,10 @@ function transmettreObs() {
 												
 												if (photo.index == nbre_photos) {
 													alert('fin');
+
+													var utilisateur = new directory.models.UtilisateurCollection();
+													utilisateur.findOne();
+													alert(utilisateur.models[0].attributes.email);
 												jQuery.data($('div')[0], ''+obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
@@ -2433,6 +2437,7 @@ function transmettreObs() {
 													'image_nom' : img_noms,
 													'image_b64' : img_codes 
 												});
+												alert(jQuery.data($('div')[0], ''+obs.id_obs));
 												console.log(jQuery.data($('div')[0], ''+obs.id_obs));
 												var msg = '',
 													observations = jQuery.data($('div')[0], ''+obs.id_obs);
@@ -2440,9 +2445,6 @@ function transmettreObs() {
 													msg = 'Aucune observation à transmettre.';
 												} else {
 													msg = 'Transmission en cours...';
-													var utilisateur = new directory.models.UtilisateurCollection();
-													utilisateur.findOne();
-													alert(utilisateur.models[0].attributes.email);
 													/*
 													observations['projet'] = TAG_PROJET;
 													observations['tag-obs'] = '';
