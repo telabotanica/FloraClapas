@@ -2461,6 +2461,8 @@ function transmettreObs() {
 																		utilisateur.nom = results.rows.item(0).nom;
 																		utilisateur.courriel = results.rows.item(0).email;
 																		observations['utilisateur'] = utilisateur;
+																		
+																		alert(utilisateur.id_utilisateur);
 																		envoyerObsAuCel(observations);
 																	});
 																},
@@ -2468,17 +2470,12 @@ function transmettreObs() {
 																	console.log('DB | Error processing SQL: ' + error.code, error);
 																}
 															);
-														
-														/*
-														
-														//*/
 													}
-													alert(msg);
 												}
 											};
 											reader.readAsDataURL(file);
 										}, function(error) {
-											alert(error);
+											alert('Fichier inaccessible.');
 										}
 									);
 								}
@@ -2496,7 +2493,7 @@ function transmettreObs() {
 	}
 		
 	if (msg != '') {
-		$('#details-obs').html('<p class="reponse">' + msg + '</p>')
+		$('#details-obs').html('<p class="alert alert-info alert-block">' + msg + '</p>')
 			.fadeIn(0)
 			.delay(2000)
 			.fadeOut('slow');
@@ -2509,7 +2506,47 @@ function stockerObsData(obs) {
 	
 }
 function envoyerObsAuCel(obs) {
-	for (var index in obs) {
-		alert(index + ' : ' + obs[index]);
-	}
+	var SERVICE_SAISIE_URL = "http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie";
+	console.log(obs);
+	
+	var msg = '';
+	var erreurMsg = '';
+	$.ajax({
+		url : SERVICE_SAISIE_URL,
+		type : 'POST',
+		data : obs,
+		dataType : 'json',
+		success : function(data, textStatus, jqXHR) {
+			console.log('Transmission SUCCESS.');
+			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
+		},
+		statusCode : {
+			500 : function(jqXHR, textStatus, errorThrown) {
+				erreurMsg += 'Erreur 500 :\ntype : ' + textStatus + ' ' + errorThrown + '\n';
+				msg = 'Erreur 500. Merci de contacter le responsable.';
+		    }
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			erreurMsg += 'Erreur Ajax :\ntype : ' + textStatus + ' ' + errorThrown + '\n';
+				msg = 'Erreur indéterminée. Merci de contacter le responsable.';
+			try {
+				reponse = jQuery.parseJSON(jqXHR.responseText);
+				if (reponse != null) {
+					$.each(reponse, function (cle, valeur) {
+						erreurMsg += valeur + '\n';
+					});
+				}
+			} catch(e) {
+				erreurMsg += 'L\'erreur n\'était pas en JSON.';
+			}
+		},
+		complete : function(jqXHR, textStatus) {
+			console.log('Transmission COMPLETE.');
+			console.log(jqXHR);
+			$('#details-obs').html('<p class="alert alert-info alert-block">' + msg + '</p>')
+				.fadeIn(0)
+				.delay(2000)
+				.fadeOut('slow');
+		}
+	});
 }
