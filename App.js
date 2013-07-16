@@ -1394,7 +1394,7 @@ directory.Router = Backbone.Router.extend({
 		var self = this;
 
 		directory.db.transaction(function (tx) {
-			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'zedd@tela-botanica.org', 'true')");
+			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'test@tela-botanica.org', 'true')");
 		},
 		function(error) {
 			console.log('DB | Error processing SQL: ' + error.code, error);
@@ -1890,7 +1890,7 @@ directory.Router = Backbone.Router.extend({
 		});
 		$('#content').on('click', '#valider_courriel', requeterIdentite);
 		$('#content').on('click', '#transmettre-obs', function(event) {
-			//alert($('#transmission-courriel').html());
+			alert($('#transmission-courriel').attr('disabled'));
 			transmettreObs();
 		});
 		
@@ -2354,7 +2354,7 @@ function miseAJourCourriel(courriel) {
 function surErreurCompletionCourriel() {
 	$('#utilisateur-infos').addClass('text-error');
 	$('#utilisateur-infos').removeClass('text-info');
-	$('#utilisateur-infos').html('Vérification impossible.');
+	$('#utilisateur-infos').html('Echec de la vérification.');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').val('');
 	$('#prenom_utilisateur, #nom_utilisateur, #courriel_confirmation').removeAttr('disabled');
 }
@@ -2374,12 +2374,69 @@ function transmettreObs() {
 					"JOIN obs ON num_nom = ce_espece " +
 					"ORDER BY id_obs";
 				tx.executeSql(sql, [], function(tx, results) {
-					 var nbre = results.rows.length,
-						obs = [],
-						i = 0;
-					for (; i < nbre; i = i + 1) {
-						//obs[i] = results.rows.item(i);
-						stockerObsData(results.rows.item(i));
+					 var nbre = results.rows.length;
+					var img_noms = new Array(),
+						img_codes = new Array();	
+					for (var i = 0; i < 1; i = i + 1) {
+						var obs = results.rows.item(i);
+						
+						alert('Obs n°' + obs.id_obs);
+						directory.db.transaction(function(tx) {
+							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
+								var photo = null,
+									nbre = results.rows.length;
+								
+								for (var j = 0; j < nbre; j++) {
+									photo = results.rows.item(j);
+									alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
+									var fichier = new FileEntry();
+									
+									fichier.fullPath = photo.chemin;
+									fichier.file(
+										function(file) {
+											var reader = new FileReader();
+											reader.onloadend = function(evt) {
+												alert('read success ' + i + '|' + j);
+												img_codes.push(evt.target.result);
+												img_noms.push(file.name);
+												alert(img_noms[0]);
+												
+												alert('fin ' + img_noms[0]);
+												alert('details');
+												$('#details-obs').data(obs.id_obs, {
+													'date' : obs.date, 
+													'notes' : '',
+													
+													'nom_sel' : obs.nom_sci,
+													'num_nom_sel' : obs.num_nom,
+													'nom_ret' : obs.nom_sci,
+													'num_nom_ret' : obs.num_nom,
+													'num_taxon' : obs.num_taxon,
+													'famille' : obs.famille,
+													'referentiel' : obs.referentiel,
+													
+													'latitude' : obs.latitude,
+													'longitude' : obs.longitude,
+													'commune_nom' : obs.commune,
+													'commune_code_insee' : obs.code_insee,
+													'lieudit' : '',
+													'station' : '',
+													'milieu' : '',
+													
+													//Ajout des champs images
+													'image_nom' : img_noms,
+													'image_b64' : img_codes 
+												});
+												alert('fin details ' + img_codes.length);
+											};
+											reader.readAsDataURL(file);
+										}, function(error) {
+											alert(error);
+										}
+									);
+								}
+							}, null);
+						});
 					}
 				});
 			},
@@ -2424,63 +2481,5 @@ function verifierConnexion() {
 	return ( ('onLine' in navigator) && (navigator.onLine) );
 }
 function stockerObsData(obs) {
-	var img_noms = new Array(),
-		img_codes = new Array();	
-	alert('Obs n°' + obs.id_obs);
-	directory.db.transaction(function(tx) {
-		tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
-			var photo = null,
-				nbre = results.rows.length;
-			
-			for (var i = 0; i < nbre; i++) {
-				photo = results.rows.item(i);
-				alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
-				var fichier = new FileEntry();
-				
-				fichier.fullPath = photo.chemin;
-				fichier.file(
-					function(file) {
-						var reader = new FileReader();
-						reader.onloadend = function(evt) {
-							alert('read success ' + i + '(' + obs.id_obs);
-							img_codes.push(evt.target.result);
-							img_noms.push(file.name);
-							alert(img_noms[0]);
-						};
-						reader.readAsDataURL(file);
-					}, function(error) {
-						alert(error);
-					}
-				);
-			}
-
-			alert('fin ' + img_noms[0]);
-			alert('details');
-			$('#details-obs').data(obs.id_obs, {
-				'date' : obs.date, 
-				'notes' : '',
-				
-				'nom_sel' : obs.nom_sci,
-				'num_nom_sel' : obs.num_nom,
-				'nom_ret' : obs.nom_sci,
-				'num_nom_ret' : obs.num_nom,
-				'num_taxon' : obs.num_taxon,
-				'famille' : obs.famille,
-				'referentiel' : obs.referentiel,
-				
-				'latitude' : obs.latitude,
-				'longitude' : obs.longitude,
-				'commune_nom' : obs.commune,
-				'commune_code_insee' : obs.code_insee,
-				'lieudit' : '',
-				'station' : '',
-				'milieu' : '',
-				
-				//Ajout des champs images
-				'image_nom' : img_noms,
-				'image_b64' : img_codes 
-			});
-			alert('fin details ' + img_codes.length);
-		}, null);
-	});	
+	
 }
