@@ -2405,8 +2405,8 @@ function transmettreObs() {
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												alert('Espece ' + obs.num_nom);
-
-												if (j == nbre_photos) {
+												alert(j == nbre_photos-1);
+												if (j == nbre_photos-1) {
 												jQuery.data($('div')[0], ''+obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
