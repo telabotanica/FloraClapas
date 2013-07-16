@@ -1401,7 +1401,7 @@ directory.Router = Backbone.Router.extend({
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
-			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'test@tela-botanica.org', 'true')");
+			tx.executeSql("INSERT INTO utilisateur (id_user, email) VALUES (1, 'test@tela-botanica.org')");
 		},
 		function(error) {
 			console.log('DB | Error processing SQL: ' + error.code, error);
@@ -2448,28 +2448,28 @@ function transmettreObs() {
 														
 														
 														directory.db.transaction(
-																function(tx) {
-																	var sql = 
-																		"SELECT id_user, nom, prenom, email, id_utilisateur_cel, compte_verifie " +
-																		"FROM utilisateur " + 
-																		"WHERE compte_verifie LIKE 'true' "
-																		"ORDER BY id_user DESC";
-																	tx.executeSql(sql, [], function(tx, results) {
-																		var utilisateur = new Object();
-																		utilisateur.id_utilisateur = results.rows.item(0).id_utilisateur_cel;
-																		utilisateur.prenom = results.rows.item(0).prenom;
-																		utilisateur.nom = results.rows.item(0).nom;
-																		utilisateur.courriel = results.rows.item(0).email;
-																		observations['utilisateur'] = utilisateur;
-																		
-																		alert(utilisateur.id_utilisateur);
-																		envoyerObsAuCel(observations);
-																	});
-																},
-																function(error) {
-																	console.log('DB | Error processing SQL: ' + error.code, error);
-																}
-															);
+															function(tx) {
+																var sql = 
+																	"SELECT id_user, nom, prenom, email, id_utilisateur_cel, compte_verifie " +
+																	"FROM utilisateur " + 
+																	"WHERE compte_verifie LIKE 'true' "
+																	"ORDER BY id_user DESC";
+																tx.executeSql(sql, [], function(tx, results) {
+																	var utilisateur = new Object();
+																	utilisateur.id_utilisateur = results.rows.item(0).id_utilisateur_cel;
+																	utilisateur.prenom = results.rows.item(0).prenom;
+																	utilisateur.nom = results.rows.item(0).nom;
+																	utilisateur.courriel = results.rows.item(0).email;
+																	observations['utilisateur'] = utilisateur;
+																	
+																	alert(utilisateur.id_utilisateur);
+																	//envoyerObsAuCel(observations);
+																});
+															},
+															function(error) {
+																console.log('DB | Error processing SQL: ' + error.code, error);
+															}
+														);
 													}
 												}
 											};
@@ -2506,7 +2506,7 @@ function stockerObsData(obs) {
 	
 }
 function envoyerObsAuCel(obs) {
-	var SERVICE_SAISIE_URL = "http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie";
+	var SERVICE_SAISIE_URL = 'http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie';
 	console.log(obs);
 	
 	var msg = '';
