@@ -718,11 +718,12 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 				//tx.executeSql('DROP TABLE IF EXISTS utilisateur');
 				var sql =
 					"CREATE TABLE IF NOT EXISTS utilisateur (" +
-						"id_user INT NOT NULL ," +
-						"nom VARCHAR(255) NULL ," +
-						"prenom VARCHAR(255) NULL," +
-						"email VARCHAR(255) NOT NULL," +
-						"compte_verifie BOOLEAN NOT NULL," +
+						"id_user INT NOT NULL, " +
+						"nom VARCHAR(255) NULL, " +
+						"prenom VARCHAR(255) NULL, " +
+						"email VARCHAR(255) NOT NULL, " +
+						"compte_verifie BOOLEAN NOT NULL, " +
+						"id_utilisateur_cel INT NULL, " +
 						"PRIMARY KEY (id_user) " +
 					")";
 				console.log('Creating UTILISATEUR table');
@@ -2325,20 +2326,20 @@ function miseAJourCourriel(courriel) {
 				parametres.push($('#nom_utilisateur').val());
 				parametres.push($('#prenom_utilisateur').val());
 				parametres.push($('#courriel_confirmation').val() == courriel);
+				parametres.push($('#id_utilisateur').val());
+				parametres.push(id);
 				if (index == -1) {
 					sql = 
 						"INSERT INTO utilisateur " +
-						"(nom, prenom, compte_verifie, id_user, email) VALUES " + 
+						"(nom, prenom, compte_verifie, id_utilisateur_cel, id_user, email) VALUES " + 
 						"(?, ?, ?, ?, ?) ";
-					parametres.push(id);
 					parametres.push(courriel);
 				} else {
 					if (!utilisateurs[index].compte_verifie) {
 						sql = 
 							"UPDATE utilisateur " +
-							"SET nom = ?, prenom = ?, compte_verifie = ? " +
+							"SET nom = ?, prenom = ?, compte_verifie = ?,  id_utilisateur_cel = ? " +
 							"WHERE id_user = ?";
-						parametres.push(id);
 					}
 				}
 				
@@ -2446,20 +2447,30 @@ function transmettreObs() {
 														observations['tag-img'] = '';
 														
 														
-														var utilisateur = new directory.models.UtilisateurCollection();
-														utilisateur.findOne();
-														for (var index in utilisateur) {
-															alert(index + ' : ' + utilisateur[index]);
-														}
+														directory.db.transaction(
+																function(tx) {
+																	var sql = 
+																		"SELECT id_user, nom, prenom, email, id_utilisateur_cel, compte_verifie " +
+																		"FROM utilisateur " + 
+																		"WHERE compte_verifie LIKE 'true' "
+																		"ORDER BY id_user DESC";
+																	tx.executeSql(sql, [], function(tx, results) {
+																		var utilisateur = new Object();
+																		utilisateur.id_utilisateur = results.rows.item(0).id_utilisateur_cel;
+																		utilisateur.prenom = results.rows.item(0).prenom;
+																		utilisateur.nom = results.rows.item(0).nom;
+																		utilisateur.courriel = results.rows.item(0).email;
+																		observations['utilisateur'] = utilisateur;
+																		envoyerObsAuCel(observations);
+																	});
+																},
+																function(error) {
+																	console.log('DB | Error processing SQL: ' + error.code, error);
+																}
+															);
 														
 														/*
-														var utilisateur = new Object();
-														utilisateur.id_utilisateur = ($('#id-utilisateur').val() == '') ? bdd.getItem('utilisateur.id') : $('#id-utilisateur').val();
-														utilisateur.prenom = ($('#prenom-utilisateur').val() == '') ? bdd.getItem('utilisateur.prenom') : $('#prenom-utilisateur').val();
-														utilisateur.nom = ($('#nom-utilisateur').val() == '') ? bdd.getItem('utilisateur.nom') : $('#nom-utilisateur').val();
-														utilisateur.courriel = ($('#courriel').val() == '') ? bdd.getItem('utilisateur.courriel') : $('#courriel').val();
-														observations['utilisateur'] = utilisateur;
-														envoyerObsAuCel(observations);
+														
 														//*/
 													}
 													alert(msg);
@@ -2496,4 +2507,9 @@ function verifierConnexion() {
 }
 function stockerObsData(obs) {
 	
+}
+function envoyerObsAuCel(obs) {
+	for (var index in obs) {
+		alert(index + ' : ' + obs[index]);
+	}
 }
