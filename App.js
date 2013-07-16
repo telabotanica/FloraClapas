@@ -2406,7 +2406,6 @@ function transmettreObs() {
 												alert('read success ' + i + '|' + j + ':' + photo.index);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
-												alert('Espece ' + obs.num_nom);
 												
 												if (photo.index == nbre_photos) {
 													var json = {
