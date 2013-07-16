@@ -2391,6 +2391,11 @@ function transmettreObs() {
 							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
 									nbre_photos = results.rows.length;
+
+								//var utilisateur = new directory.models.UtilisateurCollection();
+								//utilisateur.findOne();
+								//console.log(utilisateur);
+								//console.log(utilisateur.models);
 								
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
@@ -2409,11 +2414,7 @@ function transmettreObs() {
 												
 												if (photo.index == nbre_photos) {
 													alert('fin');
-
-													var utilisateur = new directory.models.UtilisateurCollection();
-													utilisateur.findOne();
-													alert(utilisateur.models[0].attributes.email);
-												jQuery.data($('div')[0], ''+obs.id_obs, {
+												var json = {
 													'date' : obs.date, 
 													'notes' : '',
 													
@@ -2437,7 +2438,7 @@ function transmettreObs() {
 													'image_nom' : img_noms,
 													'image_b64' : img_codes 
 												});
-												alert(jQuery.data($('div')[0], ''+obs.id_obs));
+												alert(jQuery.data($('div')[0], ''+obs.id_obs, json));
 												console.log(jQuery.data($('div')[0], ''+obs.id_obs));
 												var msg = '',
 													observations = jQuery.data($('div')[0], ''+obs.id_obs);
