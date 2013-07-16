@@ -2400,7 +2400,7 @@ function transmettreObs() {
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												//alert('Espece ' + obs.num_nom);
-												
+												/*
 												$('#details-obs').data(obs.id_obs, {
 													'date' : obs.date, 
 													'notes' : '',
@@ -2425,6 +2425,7 @@ function transmettreObs() {
 													'image_nom' : img_noms,
 													'image_b64' : img_codes 
 												});
+												//*/
 												var msg = '',
 													observations = $('#details-obs').data();
 												if (observations == undefined || jQuery.isEmptyObject(observations)) {
