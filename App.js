@@ -1395,12 +1395,12 @@ directory.Router = Backbone.Router.extend({
 		
 		
 		directory.db.transaction(function (tx) {
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
-			tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
-			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'test@tela-botanica.org', 'true')");
+			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
+			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
+			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
+			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
+			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
+			//tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'test@tela-botanica.org', 'true')");
 		},
 		function(error) {
 			console.log('DB | Error processing SQL: ' + error.code, error);
@@ -2401,10 +2401,10 @@ function transmettreObs() {
 										function(file) {
 											var reader = new FileReader();
 											reader.onloadend = function(evt) {
-												//alert('read success ' + i + '|' + j);
+												alert('read success ' + i + '|' + j);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
-												//alert('Espece ' + obs.num_nom);
+												alert('Espece ' + obs.num_nom);
 
 												if (j == nbre_photos-1) {
 												jQuery.data($('div')[0], ''+obs.id_obs, {
@@ -2433,7 +2433,7 @@ function transmettreObs() {
 												});
 												console.log(jQuery.data($('div')[0], ''+obs.id_obs));
 												var msg = '',
-													observations = $('div')[0].data();
+													observations = jQuery.data($('div')[0], ''+obs.id_obs);
 												if (observations == undefined || jQuery.isEmptyObject(observations)) {
 													msg = 'Aucune observation à transmettre.';
 												} else {
