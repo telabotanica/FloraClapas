@@ -2116,7 +2116,7 @@ function moisPhenoEstCouvert( debut, fin) {
 
 function onPhotoSuccess(imageData){
 	fileSystem.root.getDirectory('FlorasClapas', { create: true, exclusive: false }, function(dossier) {
-		var fichier = new FileEntrySync();
+		var fichier = new FileEntry();
 		fichier.fullPath = imageData;
 		fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', surPhotoSuccesCopie, surPhotoErreurAjout);
 	}, surPhotoErreurAjout);
@@ -2436,7 +2436,7 @@ function stockerObsData(obs) {
 			for (var i = 0; i < nbre; i++) {
 				photo = results.rows.item(i);
 				alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
-				var fichier = new FileEntrySync();
+				var fichier = new FileEntry();
 				
 				fichier.fullPath = photo.chemin;
 				fichier.file(
