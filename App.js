@@ -2371,17 +2371,79 @@ function transmettreObs() {
 					"JOIN obs ON num_nom = ce_espece " +
 					"ORDER BY id_obs";
 				tx.executeSql(sql, [], function(tx, results) {
-					var nbre_obs = results.rows.length,
-						img_noms = new Array(),
-						img_codes = new Array();	
+					var nbre_obs = results.rows.length;
 					for (var i = 0; i < nbre_obs; i = i + 1) {
-						var obs = results.rows.item(i);
+						var obs = results.rows.item(i),
+							img_noms = new Array(),
+							img_codes = new Array();
 						tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [obs.id_obs], function(tx, results) {
 							var photo = null,
 								nbre_photos = results.rows.length;
 							
 							if (nbre_photos == 0) {
-								construireObs(obs, img_codes, img_noms);
+								var json = {
+										'date' : obs.date, 
+										'notes' : '',
+										
+										'nom_sel' : obs.nom_sci,
+										'num_nom_sel' : obs.num_nom,
+										'nom_ret' : obs.nom_sci,
+										'num_nom_ret' : obs.num_nom,
+										'num_taxon' : obs.num_taxon,
+										'famille' : obs.famille,
+										'referentiel' : obs.referentiel,
+										
+										'latitude' : obs.latitude,
+										'longitude' : obs.longitude,
+										'commune_nom' : obs.commune,
+										'commune_code_insee' : obs.code_insee,
+										'lieudit' : '',
+										'station' : '',
+										'milieu' : '',
+										
+										//Ajout des champs images
+										'image_nom' : img_noms,
+										'image_b64' : img_codes 
+									};
+									jQuery.data($('div')[0], ''+obs.id_obs, json);
+									var msg = '',
+										observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
+									if (observations == undefined || jQuery.isEmptyObject(observations)) {
+										msg = 'Aucune observation à transmettre.';
+									} else {
+										msg = 'Transmission en cours...';
+										observations['projet'] = TAG_PROJET;
+										observations['tag-obs'] = '';
+										observations['tag-img'] = '';
+										
+										directory.db.transaction(
+											function(tx) {
+												var sql = 
+													"SELECT id_user, nom, prenom, email, compte_verifie " +
+													"FROM utilisateur " + 
+													"WHERE compte_verifie LIKE 'true' "
+													"ORDER BY id_user DESC";
+												tx.executeSql(sql, [], function(tx, results) {
+													var utilisateur = new Object();
+													utilisateur.id_utilisateur = null;
+													utilisateur.prenom = results.rows.item(0).prenom;
+													utilisateur.nom = results.rows.item(0).nom;
+													utilisateur.courriel = results.rows.item(0).email;
+													observations['utilisateur'] = utilisateur;
+													envoyerObsAuCel(observations);
+												});
+											},
+											function(error) {
+												console.log('DB | Error processing SQL: ' + error.code, error);
+											}
+										);	
+									}
+									
+									$('#details-obs').removeClass('hide');
+									$('#details-obs').html(msg)
+										.fadeIn(0)
+										.delay(2000)
+										.fadeOut('slow');
 							} else {
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
@@ -2397,7 +2459,7 @@ function transmettreObs() {
 												alert('read success ' + i + '|' + j + ':' + photo.index);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
-												alert(file.index + ' ' + file.name);
+												alert(fichier.index + ' ' + file.name);
 												
 												if (photo.index == nbre_photos) {
 													construireObs(obs, img_codes, img_noms);
