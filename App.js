@@ -2381,69 +2381,7 @@ function transmettreObs() {
 								nbre_photos = results.rows.length;
 							
 							if (nbre_photos == 0) {
-								var json = {
-										'date' : obs.date, 
-										'notes' : '',
-										
-										'nom_sel' : obs.nom_sci,
-										'num_nom_sel' : obs.num_nom,
-										'nom_ret' : obs.nom_sci,
-										'num_nom_ret' : obs.num_nom,
-										'num_taxon' : obs.num_taxon,
-										'famille' : obs.famille,
-										'referentiel' : obs.referentiel,
-										
-										'latitude' : obs.latitude,
-										'longitude' : obs.longitude,
-										'commune_nom' : obs.commune,
-										'commune_code_insee' : obs.code_insee,
-										'lieudit' : '',
-										'station' : '',
-										'milieu' : '',
-										
-										//Ajout des champs images
-										'image_nom' : img_noms,
-										'image_b64' : img_codes 
-									};
-									jQuery.data($('div')[0], ''+obs.id_obs, json);
-									var msg = '',
-										observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
-									if (observations == undefined || jQuery.isEmptyObject(observations)) {
-										msg = 'Aucune observation à transmettre.';
-									} else {
-										msg = 'Transmission en cours...';
-										observations['projet'] = TAG_PROJET;
-										observations['tag-obs'] = '';
-										observations['tag-img'] = '';
-										
-										directory.db.transaction(
-											function(tx) {
-												var sql = 
-													"SELECT id_user, nom, prenom, email, compte_verifie " +
-													"FROM utilisateur " + 
-													"WHERE compte_verifie LIKE 'true' "
-													"ORDER BY id_user DESC";
-												tx.executeSql(sql, [], function(tx, results) {
-													var utilisateur = new Object();
-													utilisateur.id_utilisateur = null;
-													utilisateur.prenom = results.rows.item(0).prenom;
-													utilisateur.nom = results.rows.item(0).nom;
-													utilisateur.courriel = results.rows.item(0).email;
-													observations['utilisateur'] = utilisateur;
-													envoyerObsAuCel(observations);
-												});
-											},
-											function(error) {
-												console.log('DB | Error processing SQL: ' + error.code, error);
-											}
-										);	
-									}
-									
-									$('#details-obs').removeClass('hide');
-									$('#details-obs').html(msg)
-										.fadeIn(0)
-										.delay(2000)
-										.fadeOut('slow');
+								construireObs(obs, img_codes, img_noms);
 							} else {
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
@@ -2530,27 +2468,15 @@ function construireObs(obs, img_codes, img_noms) {
 		observations['tag-obs'] = '';
 		observations['tag-img'] = '';
 		
-		directory.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT id_user, nom, prenom, email, compte_verifie " +
-					"FROM utilisateur " + 
-					"WHERE compte_verifie LIKE 'true' "
-					"ORDER BY id_user DESC";
-				tx.executeSql(sql, [], function(tx, results) {
-					var utilisateur = new Object();
-					utilisateur.id_utilisateur = null;
-					utilisateur.prenom = results.rows.item(0).prenom;
-					utilisateur.nom = results.rows.item(0).nom;
-					utilisateur.courriel = results.rows.item(0).email;
-					observations['utilisateur'] = utilisateur;
-					envoyerObsAuCel(observations);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);	
+		var utilisateur = new Object();
+		utilisateur.id_utilisateur = null;
+		utilisateur.prenom = null;
+		utilisateur.nom = null;
+		alert($('#transmission-courriel').html());
+		utilisateur.courriel = $('#transmission-courriel').html();
+		observations['utilisateur'] = utilisateur;
+		
+		envoyerObsAuCel(observations);	
 	}
 	
 	$('#details-obs').removeClass('hide');
