@@ -2485,7 +2485,7 @@ function construireObs(id, img_codes, img_noms) {
 		utilisateur.courriel = $('#transmission-courriel').html();
 		observations['utilisateur'] = utilisateur;
 		
-		envoyerObsAuCel(observations);	
+		envoyerObsAuCel(observations, obs.id_obs);	
 	}
 	
 	$('#details-obs').removeClass('hide');
@@ -2494,7 +2494,7 @@ function construireObs(id, img_codes, img_noms) {
 		.delay(2000)
 		.fadeOut('slow');
 }
-function envoyerObsAuCel(obs) {
+function envoyerObsAuCel(obs, id_obs) {
 	console.log(obs);
 	
 	var msg = '',
@@ -2508,7 +2508,7 @@ function envoyerObsAuCel(obs) {
 			console.log('Transmission SUCCESS.');
 			$('#details-obs').addClass('alert-success');
 			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
-			supprimerObs(obs['obsId1'].id_obs);
+			supprimerObs(id_obs);
 		},
 		statusCode : {
 			500 : function(jqXHR, textStatus, errorThrown) {
