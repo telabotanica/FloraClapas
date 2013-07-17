@@ -2391,16 +2391,16 @@ function transmettreObs() {
 			.fadeOut('slow');
 	}
 }
-function enregistrerPhotosObs(id) {
+function enregistrerPhotosObs(identifiant) {
 	var	img_noms = new Array(),
 		img_codes = new Array();
 	directory.db.transaction(function(tx) {
-		tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [id], function(tx, results) {
+		tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [identifiant], function(tx, results) {
 			var photo = null,
 				nbre_photos = results.rows.length;
 			
 			if (nbre_photos == 0) {
-				construireObs(observation, img_codes, img_noms);
+				construireObs(identifiant, img_codes, img_noms);
 			} else {
 				for (var j = 0; j < nbre_photos; j++) {
 					photo = results.rows.item(j);
@@ -2419,7 +2419,7 @@ function enregistrerPhotosObs(id) {
 								alert(fichier.index + ' ' + file.name);
 								
 								if (photo.index == nbre_photos) {
-									//construireObs(observation, img_codes, img_noms);
+									construireObs(identifiant, img_codes, img_noms);
 								}
 							};
 							reader.readAsDataURL(file);
@@ -2435,31 +2435,32 @@ function enregistrerPhotosObs(id) {
 function verifierConnexion() {
 	return ( ('onLine' in navigator) && (navigator.onLine) );
 }
-function construireObs(obs, img_codes, img_noms) {
-	var json = {
-		'date' : obs.date, 
-		'notes' : '',
-		
-		'nom_sel' : obs.nom_sci,
-		'num_nom_sel' : obs.num_nom,
-		'nom_ret' : obs.nom_sci,
-		'num_nom_ret' : obs.num_nom,
-		'num_taxon' : obs.num_taxon,
-		'famille' : obs.famille,
-		'referentiel' : obs.referentiel,
-		
-		'latitude' : obs.latitude,
-		'longitude' : obs.longitude,
-		'commune_nom' : obs.commune,
-		'commune_code_insee' : obs.code_insee,
-		'lieudit' : '',
-		'station' : '',
-		'milieu' : '',
-		
-		//Ajout des champs images
-		'image_nom' : img_noms,
-		'image_b64' : img_codes 
-	};
+function construireObs(id, img_codes, img_noms) {
+	var obs = arr_obs[id],
+		json = {
+			'date' : obs.date, 
+			'notes' : '',
+			
+			'nom_sel' : obs.nom_sci,
+			'num_nom_sel' : obs.num_nom,
+			'nom_ret' : obs.nom_sci,
+			'num_nom_ret' : obs.num_nom,
+			'num_taxon' : obs.num_taxon,
+			'famille' : obs.famille,
+			'referentiel' : obs.referentiel,
+			
+			'latitude' : obs.latitude,
+			'longitude' : obs.longitude,
+			'commune_nom' : obs.commune,
+			'commune_code_insee' : obs.code_insee,
+			'lieudit' : '',
+			'station' : '',
+			'milieu' : '',
+			
+			//Ajout des champs images
+			'image_nom' : img_noms,
+			'image_b64' : img_codes 
+		};
 	jQuery.data($('div')[0], ''+obs.id_obs, json);
 	var msg = '',
 		observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
