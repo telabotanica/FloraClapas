@@ -2376,21 +2376,19 @@ function transmettreObs() {
 						img_codes = new Array();	
 					for (var i = 0; i < nbre_obs; i = i + 1) {
 						var obs = results.rows.item(i);
-						//directory.db.transaction(function(tx) {
-						alert(obs.id_obs);
-							tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [obs.id_obs], function(tx, results) {
-								var photo = null,
-									nbre_photos = results.rows.length;
-								alert(nbre_photos);
-								if (nbre_photos == 0) {
-									construireObs(obs, img_codes, img_noms);
-								}
-								//*
+						tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [obs.id_obs], function(tx, results) {
+							var photo = null,
+								nbre_photos = results.rows.length;
+							
+							if (nbre_photos == 0) {
+								construireObs(obs, img_codes, img_noms);
+							} else {
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
 									photo.index = j + 1;
 									
 									var fichier = new FileEntry();
+									fichier.index = j + 1;
 									fichier.fullPath = photo.chemin;
 									fichier.file(
 										function(file) {
@@ -2399,6 +2397,7 @@ function transmettreObs() {
 												alert('read success ' + i + '|' + j + ':' + photo.index);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
+												alert(file.index + ' ' + file.name);
 												
 												if (photo.index == nbre_photos) {
 													construireObs(obs, img_codes, img_noms);
@@ -2408,11 +2407,10 @@ function transmettreObs() {
 										}, function(error) {
 											alert('Fichier inaccessible.');
 										}
-									);
+									)
 								}
-								//*/
-							}, null);
-						//});
+							}
+						}, null);
 					}
 				});
 			},
