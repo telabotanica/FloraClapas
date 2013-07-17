@@ -2504,7 +2504,9 @@ function envoyerObsAuCel(obs) {
 	var SERVICE_SAISIE_URL = 'http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie';
 	console.log(obs);
 	$('#obs-suppression-infos').removeClass('hide');
-	$('#obs-suppression-infos').html(obs);
+	for (var index in obs) {
+		$('#obs-suppression-infos').append(index + ' : ' + obs[index] + '<br/>');
+	}
 	var msg = '',
 		erreurMsg = '';
 	$.ajax({
