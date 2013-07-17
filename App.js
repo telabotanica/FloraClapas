@@ -2442,13 +2442,13 @@ function transmettreObs() {
 														directory.db.transaction(
 															function(tx) {
 																var sql = 
-																	"SELECT id_user, nom, prenom, email, id_utilisateur_cel, compte_verifie " +
+																	"SELECT id_user, nom, prenom, email, compte_verifie " +
 																	"FROM utilisateur " + 
 																	"WHERE compte_verifie LIKE 'true' "
 																	"ORDER BY id_user DESC";
 																tx.executeSql(sql, [], function(tx, results) {
 																	var utilisateur = new Object();
-																	utilisateur.id_utilisateur = results.rows.item(0).id_utilisateur_cel;
+																	utilisateur.id_utilisateur = null;
 																	utilisateur.prenom = results.rows.item(0).prenom;
 																	utilisateur.nom = results.rows.item(0).nom;
 																	utilisateur.courriel = results.rows.item(0).email;
@@ -2463,6 +2463,11 @@ function transmettreObs() {
 															}
 														);
 													}
+													$('#details-obs').removeClass('hide');
+													$('#details-obs').html(msg)
+														.fadeIn(0)
+														.delay(2000)
+														.fadeOut('slow');
 												}
 											};
 											reader.readAsDataURL(file);
