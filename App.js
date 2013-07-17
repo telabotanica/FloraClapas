@@ -1400,7 +1400,7 @@ directory.Router = Backbone.Router.extend({
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (5, 'img/90094.jpg', 1)");
-			tx.executeSql("INSERT INTO utilisateur (id_user, email) VALUES (1, 'test@tela-botanica.org')");
+			tx.executeSql("INSERT INTO utilisateur (id_user, email, compte_verifie) VALUES (1, 'test@tela-botanica.org', 'true')");
 		},
 		function(error) {
 			console.log('DB | Error processing SQL: ' + error.code, error);
@@ -2453,9 +2453,7 @@ function transmettreObs() {
 																	utilisateur.nom = results.rows.item(0).nom;
 																	utilisateur.courriel = results.rows.item(0).email;
 																	observations['utilisateur'] = utilisateur;
-																	
-																	alert(utilisateur.id_utilisateur);
-																	//envoyerObsAuCel(observations);
+																	envoyerObsAuCel(observations);
 																});
 															},
 															function(error) {
