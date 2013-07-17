@@ -2376,8 +2376,9 @@ function transmettreObs() {
 						img_codes = new Array();	
 					for (var i = 0; i < nbre_obs; i = i + 1) {
 						var obs = results.rows.item(i);
-						directory.db.transaction(function(tx) {
-							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
+						//directory.db.transaction(function(tx) {
+						alert(obs.id_obs);
+							tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [obs.id_obs], function(tx, results) {
 								var photo = null,
 									nbre_photos = results.rows.length;
 								alert(nbre_photos);
@@ -2411,7 +2412,7 @@ function transmettreObs() {
 								}
 								//*/
 							}, null);
-						});
+						//});
 					}
 				});
 			},
