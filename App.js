@@ -2213,9 +2213,6 @@ function geolocaliser() {
 	}
 }
 function surSuccesGeoloc(position) {
-	var TEXTE_HORS_LIGNE = 'Aucune connexion.',
-		SERVICE_NOM_COMMUNE_URL = 'http://www.tela-botanica.org/service:eflore:0.1/osm/nom-commune?lon={lon}&lat={lat}';
-	
 	if (position) {
 		var lat = position.coords.latitude;
 		var lng = position.coords.longitude;
@@ -2257,7 +2254,6 @@ function surErreurGeoloc(error){
 
 
 function requeterIdentite() {
-	var SERVICE_ANNUAIRE = 'http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/';
 	var courriel = ($('#courriel').val()).toLowerCase();
 	if (validerCourriel(courriel)) {
 		$('#utilisateur-infos').addClass('text-info');
@@ -2364,8 +2360,7 @@ function surErreurCompletionCourriel() {
 
 
 function transmettreObs() {
-	var msg = '',
-		TAG_PROJET = 'WidgetSaisie';
+	var msg = '';
 	if (verifierConnexion()) {	
 		directory.db.transaction(
 			function(tx) {
@@ -2392,6 +2387,7 @@ function transmettreObs() {
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
 									photo.index = j + 1;
+									
 									var fichier = new FileEntry();
 									fichier.fullPath = photo.chemin;
 									fichier.file(
@@ -2461,7 +2457,7 @@ function construireObs(obs) {
 		'image_b64' : img_codes 
 	};
 	jQuery.data($('div')[0], ''+obs.id_obs, json);
-	var msg = '',
+	var msg = '';
 		observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
 	if (observations == undefined || jQuery.isEmptyObject(observations)) {
 		msg = 'Aucune observation à transmettre.';
@@ -2493,7 +2489,7 @@ function construireObs(obs) {
 			}
 		);	
 	}
-	alert(msg);
+	
 	$('#details-obs').removeClass('hide');
 	$('#details-obs').html(msg)
 		.fadeIn(0)
@@ -2501,9 +2497,7 @@ function construireObs(obs) {
 		.fadeOut('slow');
 }
 function envoyerObsAuCel(obs) {
-	var SERVICE_SAISIE_URL = 'http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie';
 	console.log(obs);
-	$('#obs-suppression-infos').removeClass('hide');
 	
 	var msg = '',
 		erreurMsg = '';
@@ -2513,9 +2507,6 @@ function envoyerObsAuCel(obs) {
 		data : obs,
 		dataType : 'json',
 		success : function(data, textStatus, jqXHR) {
-			if (data["msg"] == 'ok') {
-				alert('okay');
-			}
 			console.log('Transmission SUCCESS.');
 			$('#details-obs').addClass('alert-success');
 			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
@@ -2527,9 +2518,6 @@ function envoyerObsAuCel(obs) {
 			}
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			//console.log(jqXHR);
-			//console.log(textStatus);
-			//console.log(errorThrown);
 			$('#details-obs').addClass('alert-error');
 			msg = 'Erreur indéterminée. Merci de contacter le responsable.';
 			erreurMsg += 'Erreur Ajax :\ntype : ' + textStatus + '\n' + errorThrown + '\n';
@@ -2543,12 +2531,10 @@ function envoyerObsAuCel(obs) {
 			} catch(e) {
 				erreurMsg += 'L\'erreur n\'était pas en JSON.';
 			}
-			alert(erreurMsg);
 			console.log(erreurMsg);
 		},
 		complete : function(jqXHR, textStatus) {
 			console.log('Transmission COMPLETE.');
-			//console.log(jqXHR);
 			$('#details-obs').html(msg)
 				.fadeIn(0)
 				.delay(2000)
