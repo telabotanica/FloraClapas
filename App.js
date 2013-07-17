@@ -2374,16 +2374,17 @@ function transmettreObs() {
 					var nbre_obs = results.rows.length,
 						img_noms = new Array(),
 						img_codes = new Array();	
-					for (var i = 0; i < 1; i = i + 1) {
+					for (var i = 0; i < nbre_obs; i = i + 1) {
 						var obs = results.rows.item(i);
 						directory.db.transaction(function(tx) {
 							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
 									nbre_photos = results.rows.length;
-								
+								alert(nbre_photos);
 								if (nbre_photos == 0) {
-									construireObs(obs);
+									construireObs(obs, img_codes, img_noms);
 								}
+								//*
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
 									photo.index = j + 1;
@@ -2399,7 +2400,7 @@ function transmettreObs() {
 												img_noms.push(file.name);
 												
 												if (photo.index == nbre_photos) {
-													construireObs(obs);
+													construireObs(obs, img_codes, img_noms);
 												}
 											};
 											reader.readAsDataURL(file);
@@ -2408,6 +2409,7 @@ function transmettreObs() {
 										}
 									);
 								}
+								//*/
 							}, null);
 						});
 					}
@@ -2431,7 +2433,7 @@ function transmettreObs() {
 function verifierConnexion() {
 	return ( ('onLine' in navigator) && (navigator.onLine) );
 }
-function construireObs(obs) {
+function construireObs(obs, img_codes, img_noms) {
 	var json = {
 		'date' : obs.date, 
 		'notes' : '',
@@ -2457,7 +2459,7 @@ function construireObs(obs) {
 		'image_b64' : img_codes 
 	};
 	jQuery.data($('div')[0], ''+obs.id_obs, json);
-	var msg = '';
+	var msg = '',
 		observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
 	if (observations == undefined || jQuery.isEmptyObject(observations)) {
 		msg = 'Aucune observation à transmettre.';
