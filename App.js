@@ -2414,7 +2414,11 @@ function enregistrerPhotosObs(identifiant) {
 					alert('after file');
 					fichier.file(
 						function(file) {
+							alert(''+file.size);
 							var reader = new FileReader();
+							reader.onerror = function(error) {
+								alert(error);
+							};
 							alert('after reader');
 							reader.onloadend = function(evt) {
 								alert('read success ' + i + '|' + j + ':' + photo.index);
