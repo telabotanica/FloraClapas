@@ -2381,17 +2381,16 @@ function transmettreObs() {
 						img_codes = new Array();	
 					for (var i = 0; i < 1; i = i + 1) {
 						var obs = results.rows.item(i);
-						alert('Obs n°' + obs.id_obs);
-							//*
 						directory.db.transaction(function(tx) {
 							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
 									nbre_photos = results.rows.length;
 								
+								if (nbre_photos == 0) {
+									construireObs(obs);
+								}
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
-									photo.index = j+1;
-									alert('Obs n°' + obs.id_obs + ', photo ' + photo.id_photo);
 									
 									var fichier = new FileEntry();
 									fichier.fullPath = photo.chemin;
@@ -2399,74 +2398,12 @@ function transmettreObs() {
 										function(file) {
 											var reader = new FileReader();
 											reader.onloadend = function(evt) {
-												alert('read success ' + i + '|' + j + ':' + photo.index);
+												alert('read success ' + i + '|' + j);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												
-												if (photo.index == nbre_photos) {
-													var json = {
-														'date' : obs.date, 
-														'notes' : '',
-														
-														'nom_sel' : obs.nom_sci,
-														'num_nom_sel' : obs.num_nom,
-														'nom_ret' : obs.nom_sci,
-														'num_nom_ret' : obs.num_nom,
-														'num_taxon' : obs.num_taxon,
-														'famille' : obs.famille,
-														'referentiel' : obs.referentiel,
-														
-														'latitude' : obs.latitude,
-														'longitude' : obs.longitude,
-														'commune_nom' : obs.commune,
-														'commune_code_insee' : obs.code_insee,
-														'lieudit' : '',
-														'station' : '',
-														'milieu' : '',
-														
-														//Ajout des champs images
-														'image_nom' : img_noms,
-														'image_b64' : img_codes 
-													};
-													jQuery.data($('div')[0], ''+obs.id_obs, json);
-													var msg = '',
-														observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
-													if (observations == undefined || jQuery.isEmptyObject(observations)) {
-														msg = 'Aucune observation à transmettre.';
-													} else {
-														msg = 'Transmission en cours...';
-														observations['projet'] = TAG_PROJET;
-														observations['tag-obs'] = '';
-														observations['tag-img'] = '';
-														
-														directory.db.transaction(
-															function(tx) {
-																var sql = 
-																	"SELECT id_user, nom, prenom, email, compte_verifie " +
-																	"FROM utilisateur " + 
-																	"WHERE compte_verifie LIKE 'true' "
-																	"ORDER BY id_user DESC";
-																tx.executeSql(sql, [], function(tx, results) {
-																	var utilisateur = new Object();
-																	utilisateur.id_utilisateur = null;
-																	utilisateur.prenom = results.rows.item(0).prenom;
-																	utilisateur.nom = results.rows.item(0).nom;
-																	utilisateur.courriel = results.rows.item(0).email;
-																	observations['utilisateur'] = utilisateur;
-																	envoyerObsAuCel(observations);
-																});
-															},
-															function(error) {
-																console.log('DB | Error processing SQL: ' + error.code, error);
-															}
-														);
-													}
-																			
-													$('#details-obs').removeClass('hide');
-													$('#details-obs').html(msg)
-														.fadeIn(0)
-														.delay(2000)
-														.fadeOut('slow');
+												if (j == nbre_photos) {
+													construireObs(obs);
 												}
 											};
 											reader.readAsDataURL(file);
@@ -2476,7 +2413,7 @@ function transmettreObs() {
 									);
 								}
 							}, null);
-						});//*/
+						});
 					}
 				});
 			},
@@ -2498,8 +2435,70 @@ function transmettreObs() {
 function verifierConnexion() {
 	return ( ('onLine' in navigator) && (navigator.onLine) );
 }
-function stockerObsData(obs) {
+function construireObs(obs) {
+	var json = {
+		'date' : obs.date, 
+		'notes' : '',
+		
+		'nom_sel' : obs.nom_sci,
+		'num_nom_sel' : obs.num_nom,
+		'nom_ret' : obs.nom_sci,
+		'num_nom_ret' : obs.num_nom,
+		'num_taxon' : obs.num_taxon,
+		'famille' : obs.famille,
+		'referentiel' : obs.referentiel,
+		
+		'latitude' : obs.latitude,
+		'longitude' : obs.longitude,
+		'commune_nom' : obs.commune,
+		'commune_code_insee' : obs.code_insee,
+		'lieudit' : '',
+		'station' : '',
+		'milieu' : '',
+		
+		//Ajout des champs images
+		'image_nom' : img_noms,
+		'image_b64' : img_codes 
+	};
+	jQuery.data($('div')[0], ''+obs.id_obs, json);
+	var msg = '',
+		observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
+	if (observations == undefined || jQuery.isEmptyObject(observations)) {
+		msg = 'Aucune observation à transmettre.';
+	} else {
+		msg = 'Transmission en cours...';
+		observations['projet'] = TAG_PROJET;
+		observations['tag-obs'] = '';
+		observations['tag-img'] = '';
+		
+		directory.db.transaction(
+			function(tx) {
+				var sql = 
+					"SELECT id_user, nom, prenom, email, compte_verifie " +
+					"FROM utilisateur " + 
+					"WHERE compte_verifie LIKE 'true' "
+					"ORDER BY id_user DESC";
+				tx.executeSql(sql, [], function(tx, results) {
+					var utilisateur = new Object();
+					utilisateur.id_utilisateur = null;
+					utilisateur.prenom = results.rows.item(0).prenom;
+					utilisateur.nom = results.rows.item(0).nom;
+					utilisateur.courriel = results.rows.item(0).email;
+					observations['utilisateur'] = utilisateur;
+					envoyerObsAuCel(observations);
+				});
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			}
+		);	
+	}
 	
+	$('#details-obs').removeClass('hide');
+	$('#details-obs').html(msg)
+		.fadeIn(0)
+		.delay(2000)
+		.fadeOut('slow');
 }
 function envoyerObsAuCel(obs) {
 	var SERVICE_SAISIE_URL = 'http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie';
@@ -2514,8 +2513,8 @@ function envoyerObsAuCel(obs) {
 		data : obs,
 		dataType : 'json',
 		success : function(data, textStatus, jqXHR) {
-			for (var index in data) {
-				$('#obs-suppression-infos').append(index + ' : ' + data[index] + '<br/>');
+			if (data["msg"] == 'ok') {
+				alert('okay');
 			}
 			console.log('Transmission SUCCESS.');
 			$('#details-obs').addClass('alert-success');
