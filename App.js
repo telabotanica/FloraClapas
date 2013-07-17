@@ -2408,7 +2408,7 @@ function enregistrerPhotosObs(identifiant) {
 				for (var j = 0; j < nbre_photos; j++) {
 					photo = results.rows.item(j);
 					photo.index = j + 1;
-					alert(photo);
+					alert(photo.index);
 					var fichier = new FileEntry();
 					fichier.fullPath = photo.chemin;
 					fichier.file(
@@ -2428,7 +2428,7 @@ function enregistrerPhotosObs(identifiant) {
 						}, function(error) {
 							alert('Fichier inaccessible.');
 						}
-					)
+					);
 				}
 			}
 		}, null);
