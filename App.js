@@ -2408,7 +2408,7 @@ function enregistrerPhotosObs(identifiant) {
 				for (var j = 0; j < nbre_photos; j++) {
 					photo = results.rows.item(j);
 					photo.index = j + 1;
-					alert(photo.index);
+					alert(photo.chemin);
 					var fichier = new FileEntry();
 					fichier.fullPath = photo.chemin;
 					fichier.file(
@@ -2418,7 +2418,6 @@ function enregistrerPhotosObs(identifiant) {
 								alert('read success ' + i + '|' + j + ':' + photo.index);
 								img_codes.push(evt.target.result);
 								img_noms.push(file.name);
-								alert(fichier.index + ' ' + file.name);
 								
 								if (photo.index == nbre_photos) {
 									construireObs(identifiant, img_codes, img_noms);
