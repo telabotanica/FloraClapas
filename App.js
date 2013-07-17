@@ -2391,6 +2391,9 @@ function transmettreObs() {
 			.fadeOut('slow');
 	}
 }
+function verifierConnexion() {
+	return ( ('onLine' in navigator) && (navigator.onLine) );
+}
 function enregistrerPhotosObs(identifiant) {
 	var	img_noms = new Array(),
 		img_codes = new Array();
@@ -2405,9 +2408,8 @@ function enregistrerPhotosObs(identifiant) {
 				for (var j = 0; j < nbre_photos; j++) {
 					photo = results.rows.item(j);
 					photo.index = j + 1;
-					
+					alert(photo);
 					var fichier = new FileEntry();
-					fichier.index = j + 1;
 					fichier.fullPath = photo.chemin;
 					fichier.file(
 						function(file) {
@@ -2431,9 +2433,6 @@ function enregistrerPhotosObs(identifiant) {
 			}
 		}, null);
 	});
-}
-function verifierConnexion() {
-	return ( ('onLine' in navigator) && (navigator.onLine) );
 }
 function construireObs(id, img_codes, img_noms) {
 	var obs = arr_obs[id],
