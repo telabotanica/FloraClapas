@@ -2376,12 +2376,13 @@ function transmettreObs() {
 					"JOIN obs ON num_nom = ce_espece " +
 					"ORDER BY id_obs";
 				tx.executeSql(sql, [], function(tx, results) {
-					 var nbre_obs = results.rows.length;
-					var img_noms = new Array(),
+					var nbre_obs = results.rows.length,
+						img_noms = new Array(),
 						img_codes = new Array();	
 					for (var i = 0; i < 1; i = i + 1) {
 						var obs = results.rows.item(i);
 						alert('Obs n°' + obs.id_obs);
+							//*
 						directory.db.transaction(function(tx) {
 							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
 								var photo = null,
@@ -2428,9 +2429,8 @@ function transmettreObs() {
 														'image_b64' : img_codes 
 													};
 													jQuery.data($('div')[0], ''+obs.id_obs, json);
-													console.log(jQuery.data($('div')[0], ''+obs.id_obs));
 													var msg = '',
-														observations = jQuery.data($('div')[0], ''+obs.id_obs);
+														observations = { 'obsId1' : jQuery.data($('div')[0], ''+obs.id_obs) };
 													if (observations == undefined || jQuery.isEmptyObject(observations)) {
 														msg = 'Aucune observation à transmettre.';
 													} else {
@@ -2461,6 +2461,7 @@ function transmettreObs() {
 															}
 														);
 													}
+																			
 													$('#details-obs').removeClass('hide');
 													$('#details-obs').html(msg)
 														.fadeIn(0)
@@ -2475,7 +2476,7 @@ function transmettreObs() {
 									);
 								}
 							}, null);
-						});
+						});//*/
 					}
 				});
 			},
@@ -2504,9 +2505,7 @@ function envoyerObsAuCel(obs) {
 	var SERVICE_SAISIE_URL = 'http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie';
 	console.log(obs);
 	$('#obs-suppression-infos').removeClass('hide');
-	for (var index in obs) {
-		$('#obs-suppression-infos').append(index + ' : ' + obs[index] + '<br/>');
-	}
+	
 	var msg = '',
 		erreurMsg = '';
 	$.ajax({
@@ -2515,18 +2514,26 @@ function envoyerObsAuCel(obs) {
 		data : obs,
 		dataType : 'json',
 		success : function(data, textStatus, jqXHR) {
+			for (var index in data) {
+				$('#obs-suppression-infos').append(index + ' : ' + data[index] + '<br/>');
+			}
 			console.log('Transmission SUCCESS.');
+			$('#details-obs').addClass('alert-success');
 			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
 		},
 		statusCode : {
 			500 : function(jqXHR, textStatus, errorThrown) {
-				erreurMsg += 'Erreur 500 :\ntype : ' + textStatus + ' ' + errorThrown + '\n';
 				msg = 'Erreur 500. Merci de contacter le responsable.';
+				erreurMsg += 'Erreur 500 :\ntype : ' + textStatus + '\n' + errorThrown + '\n';
 			}
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			erreurMsg += 'Erreur Ajax :\ntype : ' + textStatus + ' ' + errorThrown + '\n';
-				msg = 'Erreur indéterminée. Merci de contacter le responsable.';
+			//console.log(jqXHR);
+			//console.log(textStatus);
+			//console.log(errorThrown);
+			$('#details-obs').addClass('alert-error');
+			msg = 'Erreur indéterminée. Merci de contacter le responsable.';
+			erreurMsg += 'Erreur Ajax :\ntype : ' + textStatus + '\n' + errorThrown + '\n';
 			try {
 				var reponse = jQuery.parseJSON(jqXHR.responseText);
 				if (reponse != null) {
@@ -2538,11 +2545,12 @@ function envoyerObsAuCel(obs) {
 				erreurMsg += 'L\'erreur n\'était pas en JSON.';
 			}
 			alert(erreurMsg);
+			console.log(erreurMsg);
 		},
 		complete : function(jqXHR, textStatus) {
 			console.log('Transmission COMPLETE.');
-			console.log(jqXHR);
-			$('#details-obs').html('<p class="alert alert-info alert-block">' + msg + '</p>')
+			//console.log(jqXHR);
+			$('#details-obs').html(msg)
 				.fadeIn(0)
 				.delay(2000)
 				.fadeOut('slow');
