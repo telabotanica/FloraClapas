@@ -2411,9 +2411,11 @@ function enregistrerPhotosObs(identifiant) {
 					alert(photo.chemin);
 					var fichier = new FileEntry();
 					fichier.fullPath = photo.chemin;
+					alert('after file');
 					fichier.file(
 						function(file) {
 							var reader = new FileReader();
+							alert('after reader');
 							reader.onloadend = function(evt) {
 								alert('read success ' + i + '|' + j + ':' + photo.index);
 								img_codes.push(evt.target.result);
@@ -2424,6 +2426,7 @@ function enregistrerPhotosObs(identifiant) {
 								}
 							};
 							reader.readAsDataURL(file);
+							alert('after reading');
 						}, function(error) {
 							alert('Fichier inaccessible.');
 						}
