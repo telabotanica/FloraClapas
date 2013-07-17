@@ -2408,10 +2408,9 @@ function enregistrerPhotosObs(identifiant) {
 				for (var j = 0; j < nbre_photos; j++) {
 					photo = results.rows.item(j);
 					photo.index = j + 1;
-					alert(photo.chemin);
+					
 					var fichier = new FileEntry();
 					fichier.fullPath = photo.chemin;
-					alert('after file');
 					fichier.file(
 						function(file) {
 							alert(''+file.size);
@@ -2419,9 +2418,8 @@ function enregistrerPhotosObs(identifiant) {
 							reader.onerror = function(error) {
 								alert(error);
 							};
-							alert('after reader');
 							reader.onloadend = function(evt) {
-								alert('read success ' + i + '|' + j + ':' + photo.index);
+								alert('read success ' + photo.index);
 								img_codes.push(evt.target.result);
 								img_noms.push(file.name);
 								
@@ -2430,7 +2428,6 @@ function enregistrerPhotosObs(identifiant) {
 								}
 							};
 							reader.readAsDataURL(file);
-							alert('after reading');
 						}, function(error) {
 							alert('Fichier inaccessible.');
 						}
