@@ -2508,7 +2508,7 @@ function envoyerObsAuCel(obs) {
 			console.log('Transmission SUCCESS.');
 			$('#details-obs').addClass('alert-success');
 			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
-			supprimerObs(obs.id_obs);
+			supprimerObs(obs['obsId1'].id_obs);
 		},
 		statusCode : {
 			500 : function(jqXHR, textStatus, errorThrown) {
