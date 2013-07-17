@@ -2373,15 +2373,15 @@ function transmettreObs() {
 				tx.executeSql(sql, [], function(tx, results) {
 					var nbre_obs = results.rows.length;
 					for (var i = 0; i < nbre_obs; i = i + 1) {
-						var obs = results.rows.item(i),
+						var observation = results.rows.item(i),
 							img_noms = new Array(),
 							img_codes = new Array();
-						tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [obs.id_obs], function(tx, results) {
+						tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [observation.id_obs], function(tx, results) {
 							var photo = null,
 								nbre_photos = results.rows.length;
 							
 							if (nbre_photos == 0) {
-								construireObs(obs, img_codes, img_noms);
+								construireObs(observation, img_codes, img_noms);
 							} else {
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
@@ -2400,7 +2400,7 @@ function transmettreObs() {
 												alert(fichier.index + ' ' + file.name);
 												
 												if (photo.index == nbre_photos) {
-													construireObs(obs, img_codes, img_noms);
+													construireObs(observation, img_codes, img_noms);
 												}
 											};
 											reader.readAsDataURL(file);
@@ -2472,7 +2472,6 @@ function construireObs(obs, img_codes, img_noms) {
 		utilisateur.id_utilisateur = null;
 		utilisateur.prenom = null;
 		utilisateur.nom = null;
-		alert($('#transmission-courriel').html());
 		utilisateur.courriel = $('#transmission-courriel').html();
 		observations['utilisateur'] = utilisateur;
 		
