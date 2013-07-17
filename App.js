@@ -2391,18 +2391,18 @@ function transmettreObs() {
 								}
 								for (var j = 0; j < nbre_photos; j++) {
 									photo = results.rows.item(j);
-									
+									photo.index = j + 1;
 									var fichier = new FileEntry();
 									fichier.fullPath = photo.chemin;
 									fichier.file(
 										function(file) {
 											var reader = new FileReader();
 											reader.onloadend = function(evt) {
-												alert('read success ' + i + '|' + j);
+												alert('read success ' + i + '|' + j + ':' + photo.index);
 												img_codes.push(evt.target.result);
 												img_noms.push(file.name);
 												
-												if (j == nbre_photos) {
+												if (photo.index == nbre_photos) {
 													construireObs(obs);
 												}
 											};
@@ -2493,7 +2493,7 @@ function construireObs(obs) {
 			}
 		);	
 	}
-	
+	alert(msg);
 	$('#details-obs').removeClass('hide');
 	$('#details-obs').html(msg)
 		.fadeIn(0)
