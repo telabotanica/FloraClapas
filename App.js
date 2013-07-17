@@ -2302,52 +2302,50 @@ function validerCourriel(email) {
 	return flag;
 } 
 function miseAJourCourriel(courriel) {
-	directory.db.transaction(
-		function(tx) {
-			var sql =
-				"SELECT id_user, email, compte_verifie " +
-				"FROM utilisateur " +
-				"ORDER BY id_user DESC";
-			tx.executeSql(sql, [], function(tx, results) {
-				var id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_user+1,
-					sql = '',
-					parametres = new Array(),
-					utilisateurs = [];
-				for (var i = 0; i < results.rows.length; i = i + 1) {
-					utilisateurs[results.rows.item(i).id_user] = results.rows.item(i).email;
-				}
-				
-				var index = $.inArray(courriel, utilisateurs);
-				parametres.push($('#nom_utilisateur').val());
-				parametres.push($('#prenom_utilisateur').val());
-				parametres.push($('#courriel_confirmation').val() == courriel);
-				if (index == -1) {
+	directory.db.transaction(function(tx) {
+		var sql =
+			"SELECT id_user, email, compte_verifie " +
+			"FROM utilisateur " +
+			"ORDER BY id_user DESC";
+		tx.executeSql(sql, [], function(tx, results) {
+			var id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_user+1,
+				sql = '',
+				parametres = new Array(),
+				utilisateurs = [];
+			for (var i = 0; i < results.rows.length; i = i + 1) {
+				utilisateurs[results.rows.item(i).id_user] = results.rows.item(i).email;
+			}
+			
+			var index = $.inArray(courriel, utilisateurs);
+			parametres.push($('#nom_utilisateur').val());
+			parametres.push($('#prenom_utilisateur').val());
+			parametres.push($('#courriel_confirmation').val() == courriel);
+			if (index == -1) {
+				sql = 
+					"INSERT INTO utilisateur " +
+					"(nom, prenom, compte_verifie, id_user, email) VALUES " + 
+					"(?, ?, ?, ?, ?) ";
+				parametres.push(id);
+				parametres.push(courriel);
+			} else {
+				if (!utilisateurs[index].compte_verifie) {
 					sql = 
-						"INSERT INTO utilisateur " +
-						"(nom, prenom, compte_verifie, id_user, email) VALUES " + 
-						"(?, ?, ?, ?, ?) ";
-					parametres.push(id);
-					parametres.push(courriel);
-				} else {
-					if (!utilisateurs[index].compte_verifie) {
-						sql = 
-							"UPDATE utilisateur " +
-							"SET nom = ?, prenom = ?, compte_verifie = ?" +
-							"WHERE id_user = ?";
-						parametres.push(index);
-					}
+						"UPDATE utilisateur " +
+						"SET nom = ?, prenom = ?, compte_verifie = ?" +
+						"WHERE id_user = ?";
+					parametres.push(index);
 				}
+			}
 
-				console.log(sql, parametres);
-				if (sql != '') {
-					tx.executeSql(sql, parametres);
-				}
-			});
-		},
-		function(error) {
-			console.log('DB | Error processing SQL: ' + error.code, error);
-		}
-	);
+			console.log(sql, parametres);
+			if (sql != '') {
+				tx.executeSql(sql, parametres);
+			}
+		});
+	},
+	function(error) {
+		console.log('DB | Error processing SQL: ' + error.code, error);
+	});
 }
 function surErreurCompletionCourriel() {
 	$('#utilisateur-infos').addClass('text-error');
@@ -2359,65 +2357,29 @@ function surErreurCompletionCourriel() {
 
 
 
+var arr_obs = new Array();
 function transmettreObs() {
 	var msg = '';
 	if (verifierConnexion()) {	
-		directory.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT num_nom, nom_sci, num_taxon, famille, referentiel, " + 
-						"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
-					"FROM espece " +
-					"JOIN obs ON num_nom = ce_espece " +
-					"ORDER BY id_obs";
-				tx.executeSql(sql, [], function(tx, results) {
-					var nbre_obs = results.rows.length;
-					for (var i = 0; i < nbre_obs; i = i + 1) {
-						var observation = results.rows.item(i),
-							img_noms = new Array(),
-							img_codes = new Array();
-						tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [observation.id_obs], function(tx, results) {
-							var photo = null,
-								nbre_photos = results.rows.length;
-							
-							if (nbre_photos == 0) {
-								construireObs(observation, img_codes, img_noms);
-							} else {
-								for (var j = 0; j < nbre_photos; j++) {
-									photo = results.rows.item(j);
-									photo.index = j + 1;
-									
-									var fichier = new FileEntry();
-									fichier.index = j + 1;
-									fichier.fullPath = photo.chemin;
-									fichier.file(
-										function(file) {
-											var reader = new FileReader();
-											reader.onloadend = function(evt) {
-												alert('read success ' + i + '|' + j + ':' + photo.index);
-												img_codes.push(evt.target.result);
-												img_noms.push(file.name);
-												alert(fichier.index + ' ' + file.name);
-												
-												if (photo.index == nbre_photos) {
-													construireObs(observation, img_codes, img_noms);
-												}
-											};
-											reader.readAsDataURL(file);
-										}, function(error) {
-											alert('Fichier inaccessible.');
-										}
-									)
-								}
-							}
-						}, null);
-					}
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		directory.db.transaction(function(tx) {
+			var sql = 
+				"SELECT num_nom, nom_sci, num_taxon, famille, referentiel, " + 
+					"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
+				"FROM espece " +
+				"JOIN obs ON num_nom = ce_espece " +
+				"ORDER BY id_obs";
+			tx.executeSql(sql, [], function(tx, results) {
+				var nbre_obs = results.rows.length;
+				for (var i = 0; i < nbre_obs; i = i + 1) {
+					var id = results.rows.item(i).id_obs;
+					arr_obs[id] = results.rows.item(i);
+					enregistrerPhotosObs(id);
+				}
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	} else {
 		msg = 'Aucune connexion disponible. Merci de réessayer ultérieurement.';
 	}
@@ -2428,6 +2390,47 @@ function transmettreObs() {
 			.delay(2000)
 			.fadeOut('slow');
 	}
+}
+function enregistrerPhotosObs(id) {
+	var	img_noms = new Array(),
+		img_codes = new Array();
+	directory.db.transaction(function(tx) {
+		tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [id], function(tx, results) {
+			var photo = null,
+				nbre_photos = results.rows.length;
+			
+			if (nbre_photos == 0) {
+				construireObs(observation, img_codes, img_noms);
+			} else {
+				for (var j = 0; j < nbre_photos; j++) {
+					photo = results.rows.item(j);
+					photo.index = j + 1;
+					
+					var fichier = new FileEntry();
+					fichier.index = j + 1;
+					fichier.fullPath = photo.chemin;
+					fichier.file(
+						function(file) {
+							var reader = new FileReader();
+							reader.onloadend = function(evt) {
+								alert('read success ' + i + '|' + j + ':' + photo.index);
+								img_codes.push(evt.target.result);
+								img_noms.push(file.name);
+								alert(fichier.index + ' ' + file.name);
+								
+								if (photo.index == nbre_photos) {
+									//construireObs(observation, img_codes, img_noms);
+								}
+							};
+							reader.readAsDataURL(file);
+						}, function(error) {
+							alert('Fichier inaccessible.');
+						}
+					)
+				}
+			}
+		}, null);
+	});
 }
 function verifierConnexion() {
 	return ( ('onLine' in navigator) && (navigator.onLine) );
