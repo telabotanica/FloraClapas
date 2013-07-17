@@ -2503,9 +2503,10 @@ function stockerObsData(obs) {
 function envoyerObsAuCel(obs) {
 	var SERVICE_SAISIE_URL = 'http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie';
 	console.log(obs);
-	
-	var msg = '';
-	var erreurMsg = '';
+	$('#obs-suppression-infos').removeClass('hide');
+	$('#obs-suppression-infos').html(obs);
+	var msg = '',
+		erreurMsg = '';
 	$.ajax({
 		url : SERVICE_SAISIE_URL,
 		type : 'POST',
@@ -2519,13 +2520,13 @@ function envoyerObsAuCel(obs) {
 			500 : function(jqXHR, textStatus, errorThrown) {
 				erreurMsg += 'Erreur 500 :\ntype : ' + textStatus + ' ' + errorThrown + '\n';
 				msg = 'Erreur 500. Merci de contacter le responsable.';
-		    }
+			}
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			erreurMsg += 'Erreur Ajax :\ntype : ' + textStatus + ' ' + errorThrown + '\n';
 				msg = 'Erreur indéterminée. Merci de contacter le responsable.';
 			try {
-				reponse = jQuery.parseJSON(jqXHR.responseText);
+				var reponse = jQuery.parseJSON(jqXHR.responseText);
 				if (reponse != null) {
 					$.each(reponse, function (cle, valeur) {
 						erreurMsg += valeur + '\n';
@@ -2534,6 +2535,7 @@ function envoyerObsAuCel(obs) {
 			} catch(e) {
 				erreurMsg += 'L\'erreur n\'était pas en JSON.';
 			}
+			alert(erreurMsg);
 		},
 		complete : function(jqXHR, textStatus) {
 			console.log('Transmission COMPLETE.');
