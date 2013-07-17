@@ -1810,39 +1810,7 @@ directory.Router = Backbone.Router.extend({
 			//console.log(obs);
 		});
 		$('#content').on('click', '.suppression-obs', function() {
-			var id = this.id;
-			directory.db.transaction(
-				function(tx) {
-					var sql =
-						"SELECT id_photo, chemin " +
-						"FROM photo " + 
-						"WHERE ce_obs = " + id;
-					tx.executeSql(sql, [], function(tx, results) {
-						for (var i = 0; i < results.rows.length; i = i + 1) {
-							var fichier = new FileEntry();
-							fichier.fullPath = results.rows.item(i).chemin;
-							fichier.remove(null, null);
-							tx.executeSql("DELETE FROM photo WHERE id_photo = " + results.rows.item(i).id_photo);
-						}
-					});
-					tx.executeSql("DELETE FROM obs WHERE id_obs = " + id);
-					
-					var txt = 'Observation n° ' + id + ' supprimée.';
-					$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
-						.fadeIn(0)
-						.delay(1600)
-						.fadeOut('slow');		
-					$('#li_'+id).remove();
-				},
-				function(error) {
-					console.log('DB | Error processing SQL: ' + error.code, error);
-					var txt = 'Erreur de suppression dans la base de données.';
-					$('#obs-suppression-infos').html('<p class="text-center alert alert-error alert-block">' + txt + '</p>')
-						.fadeIn(0)
-						.delay(1600)
-						.fadeOut('slow');	
-				}
-			);
+			supprimerObs(this.id);
 		});
 		
 		
@@ -2116,6 +2084,41 @@ function moisPhenoEstCouvert( debut, fin) {
 	}
 	
 	return(flag);
+}
+
+
+
+function supprimerObs(id) {
+	directory.db.transaction(function(tx) {
+		var sql =
+			"SELECT id_photo, chemin " +
+			"FROM photo " + 
+			"WHERE ce_obs = " + id;
+		tx.executeSql(sql, [], function(tx, results) {
+			for (var i = 0; i < results.rows.length; i = i + 1) {
+				var fichier = new FileEntry();
+				fichier.fullPath = results.rows.item(i).chemin;
+				fichier.remove(null, null);
+				tx.executeSql("DELETE FROM photo WHERE id_photo = " + results.rows.item(i).id_photo);
+			}
+		});
+		tx.executeSql("DELETE FROM obs WHERE id_obs = " + id);
+		
+		var txt = 'Observation n° ' + id + ' supprimée.';
+		$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
+			.fadeIn(0)
+			.delay(1600)
+			.fadeOut('slow');		
+		$('#li_'+id).remove();
+	},
+	function(error) {
+		console.log('DB | Error processing SQL: ' + error.code, error);
+		var txt = 'Erreur de suppression dans la base de données.';
+		$('#obs-suppression-infos').html('<p class="text-center alert alert-error alert-block">' + txt + '</p>')
+			.fadeIn(0)
+			.delay(1600)
+			.fadeOut('slow');	
+	});
 }
 
 
@@ -2505,6 +2508,7 @@ function envoyerObsAuCel(obs) {
 			console.log('Transmission SUCCESS.');
 			$('#details-obs').addClass('alert-success');
 			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
+			supprimerObs(obs.id_obs);
 		},
 		statusCode : {
 			500 : function(jqXHR, textStatus, errorThrown) {
