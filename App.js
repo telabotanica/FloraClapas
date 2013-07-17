@@ -723,7 +723,6 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 						"prenom VARCHAR(255) NULL, " +
 						"email VARCHAR(255) NOT NULL, " +
 						"compte_verifie BOOLEAN NOT NULL, " +
-						"id_utilisateur_cel INT NULL, " +
 						"PRIMARY KEY (id_user) " +
 					")";
 				console.log('Creating UTILISATEUR table');
@@ -2326,30 +2325,26 @@ function miseAJourCourriel(courriel) {
 				parametres.push($('#nom_utilisateur').val());
 				parametres.push($('#prenom_utilisateur').val());
 				parametres.push($('#courriel_confirmation').val() == courriel);
-				parametres.push($('#id_utilisateur').val());
-				parametres.push(id);
 				if (index == -1) {
 					sql = 
 						"INSERT INTO utilisateur " +
-						"(nom, prenom, compte_verifie, id_utilisateur_cel, id_user, email) VALUES " + 
+						"(nom, prenom, compte_verifie, id_user, email) VALUES " + 
 						"(?, ?, ?, ?, ?) ";
+					parametres.push(id);
 					parametres.push(courriel);
 				} else {
 					if (!utilisateurs[index].compte_verifie) {
 						sql = 
 							"UPDATE utilisateur " +
-							"SET nom = ?, prenom = ?, compte_verifie = ?,  id_utilisateur_cel = ? " +
+							"SET nom = ?, prenom = ?, compte_verifie = ?" +
 							"WHERE id_user = ?";
+						parametres.push(index);
 					}
 				}
-				
+
+				console.log(sql, parametres);
 				if (sql != '') {
-					tx.executeSql(sql, parametres,
-						function(success) {		},
-						function(error) {
-							console.log('DB | Error processing SQL: ' + error.code, error);
-						}
-					);
+					tx.executeSql(sql, parametres);
 				}
 			});
 		},
@@ -2386,7 +2381,6 @@ function transmettreObs() {
 						img_codes = new Array();	
 					for (var i = 0; i < 1; i = i + 1) {
 						var obs = results.rows.item(i);
-						
 						alert('Obs n°' + obs.id_obs);
 						directory.db.transaction(function(tx) {
 							tx.executeSql('SELECT * FROM photo WHERE ce_obs = ?', [obs.id_obs], function(tx, results) {
@@ -2441,11 +2435,9 @@ function transmettreObs() {
 														msg = 'Aucune observation à transmettre.';
 													} else {
 														msg = 'Transmission en cours...';
-														
 														observations['projet'] = TAG_PROJET;
 														observations['tag-obs'] = '';
 														observations['tag-img'] = '';
-														
 														
 														directory.db.transaction(
 															function(tx) {
