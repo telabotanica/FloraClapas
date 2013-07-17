@@ -2395,8 +2395,10 @@ function verifierConnexion() {
 	return ( ('onLine' in navigator) && (navigator.onLine) );
 }
 function enregistrerPhotosObs(identifiant) {
-	var	img_noms = new Array(),
-		img_codes = new Array();
+	var	k = 0,
+		img_noms = new Array(),
+		img_codes = new Array(),
+		arr_photos = new Array();
 	directory.db.transaction(function(tx) {
 		tx.executeSql("SELECT * FROM photo WHERE ce_obs = ?", [identifiant], function(tx, results) {
 			var photo = null,
@@ -2407,23 +2409,22 @@ function enregistrerPhotosObs(identifiant) {
 			} else {
 				for (var j = 0; j < nbre_photos; j++) {
 					photo = results.rows.item(j);
-					photo.index = j + 1;
+					arr_photos.push(results.rows.item(j));
 					
 					var fichier = new FileEntry();
-					fichier.fullPath = photo.chemin;
+					fichier.fullPath = arr_photos[arr_photos.length-1].chemin;
 					fichier.file(
 						function(file) {
-							alert(''+file.size);
 							var reader = new FileReader();
 							reader.onerror = function(error) {
-								alert(error);
+								alert('Erreur de la lecture de l\'image.');
 							};
 							reader.onloadend = function(evt) {
-								alert('read success ' + photo.index);
+								k++;
 								img_codes.push(evt.target.result);
 								img_noms.push(file.name);
 								
-								if (photo.index == nbre_photos) {
+								if (k == nbre_photos) {
 									construireObs(identifiant, img_codes, img_noms);
 								}
 							};
