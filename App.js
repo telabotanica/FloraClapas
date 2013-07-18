@@ -2530,6 +2530,7 @@ function envoyerObsAuCel(obs, id_obs) {
 			} catch(e) {
 				erreurMsg += 'L\'erreur n\'était pas en JSON.';
 			}
+			alert(erreurMsg);
 			console.log(erreurMsg);
 		},
 		complete : function(jqXHR, textStatus) {
