@@ -12,7 +12,7 @@
 			texte = 'Transmettre sur <span id="transmission-courriel">' + user + '</span>';
 		} %>
 	</div>
-	<button id="transmettre-obs" class="btn btn-warning btn-block <%= disabled %>"><%= texte %></button>
+	<button id="transmettre-obs" class="btn btn-warning btn-block <%= disabled %>" <%= disabled %>><%= texte %></button>
 </div>
 
 <div id="details-obs" class="text-center alert alert-block hide"></div>

@@ -662,7 +662,7 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 		directory.db.transaction(
 			function(tx) {
 				//console.log('Dropping PHOTO table');
-				//tx.executeSql('DROP TABLE IF EXISTS photo');
+				tx.executeSql('DROP TABLE IF EXISTS photo');
 				var sql =
 					"CREATE TABLE IF NOT EXISTS photo (" +
 						"id_photo INT NOT NULL ," +
@@ -1029,11 +1029,11 @@ directory.views.ListPage = Backbone.View.extend({
 	render: function(eventName) {
 		var lien = (this.model.id == 0) ? '' : '/'+this.model.id,
 			json = {
-			'nom_parcours' : this.model.name,
-			'id_parcours' : this.model.id,
-			'id_critere' : this.model.id_critere,
-			'lien_parcours' : 'parcours'+lien
-		};
+				'nom_parcours' : this.model.name,
+				'id_parcours' : this.model.id,
+				'id_critere' : this.model.id_critere,
+				'lien_parcours' : 'parcours'+lien
+			};
 		
 		$(this.el).html(this.template(json));
 		this.listView = new directory.views.EspeceListView({el: $('ul', this.el), model: this.model});
@@ -1864,7 +1864,7 @@ directory.Router = Backbone.Router.extend({
 		});
 		$('#content').on('click', '#valider_courriel', requeterIdentite);
 		$('#content').on('click', '#transmettre-obs', function(event) {
-			//alert($('#transmission-courriel').attr('disabled'));
+			$('#transmission-modal').modal('show');
 			transmettreObs();
 		});
 		
@@ -2370,7 +2370,8 @@ function transmettreObs() {
 					"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
 				"FROM espece " +
 				"JOIN obs ON num_nom = ce_espece " +
-				"ORDER BY id_obs";
+				"ORDER BY id_obs " +
+				"LIMIT 0, " + LIMITE_NBRE_TRANSMISSION;
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre_obs = results.rows.length;
 				for (var i = 0; i < nbre_obs; i = i + 1) {
@@ -2506,6 +2507,7 @@ function envoyerObsAuCel(obs, id_obs) {
 		dataType : 'json',
 		success : function(data, textStatus, jqXHR) {
 			console.log('Transmission SUCCESS.');
+			$('#nbre_obs').html(parseInt($('#nbre_obs').html()) + 1);
 			$('#details-obs').addClass('alert-success');
 			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
 			supprimerObs(id_obs);
@@ -2519,7 +2521,7 @@ function envoyerObsAuCel(obs, id_obs) {
 		error : function(jqXHR, textStatus, errorThrown) {
 			$('#details-obs').addClass('alert-error');
 			msg = 'Erreur indéterminée. Merci de contacter le responsable.';
-			erreurMsg += 'Erreur Ajax :\ntype : ' + textStatus + '\n' + errorThrown + '\n';
+			erreurMsg += 'Erreur Ajax de type : ' + textStatus + '\n' + errorThrown + '\n';
 			try {
 				var reponse = jQuery.parseJSON(jqXHR.responseText);
 				if (reponse != null) {
@@ -2535,10 +2537,13 @@ function envoyerObsAuCel(obs, id_obs) {
 		},
 		complete : function(jqXHR, textStatus) {
 			console.log('Transmission COMPLETE.');
-			$('#details-obs').html(msg)
-				.fadeIn(0)
-				.delay(2000)
-				.fadeOut('slow');
+			if ($('#total_obs').html() == $('#nbre_obs').html()) {
+				//$('#transmission-modal').modal('hide');
+				$('#details-obs').html(msg)
+					.fadeIn(0)
+					.delay(2000)
+					.fadeOut('slow');
+			}
 		}
 	});
 }
