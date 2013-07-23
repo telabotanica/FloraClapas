@@ -153,7 +153,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 						+ "VALUES (" + sql + ")"
 					);
 				}
-				//console.log(arr_sql);
+				console.log(arr_sql);
 				directory.db.transaction(function (tx) {
 					for (var c = 0; c < arr_sql.length; c++) {
 						tx.executeSql(arr_sql[c]);
