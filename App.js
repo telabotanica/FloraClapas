@@ -1951,7 +1951,7 @@ directory.Router = Backbone.Router.extend({
 			navigator.camera.getPicture(
 				onPhotoSuccess, 
 				function(message){
-					//alert('Erreur camera: ' + message);
+					alert('Erreur camera: ' + message);
 					console.log('CAMERA failed because: ' + message);
 				},
 				options
@@ -2383,7 +2383,7 @@ function surSuccesGeoloc(position) {
 			},
 			complete : function(jqXHR, textStatus) {
 				$('#sauver-obs').removeAttr('disabled');
-				$('#obs-transmission-icone').addClass('hide');
+				$('#obs-attente-icone').addClass('hide');
 			}
 		});
 	}
