@@ -1945,9 +1945,11 @@ directory.Router = Backbone.Router.extend({
 				destinationType: destinationType.FILE_URI,
 				encodingType: Camera.EncodingType.JPEG
 			};
+			/*
 			if (this.id == 'chercher-photos') {
 				options.sourceType = pictureSource.PHOTOLIBRARY;
 			}
+			*/
 			navigator.camera.getPicture(
 				onPhotoSuccess, 
 				function(message){
@@ -2348,6 +2350,7 @@ function surPhotoErreurSuppression(error) {
 
 function geolocaliser() {
 	$('#geo-infos').html('Calcul en cours...');
+	$('#obs-attente-icone').removeClass('hide');
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(surSuccesGeoloc, surErreurGeoloc);
 	} else {
