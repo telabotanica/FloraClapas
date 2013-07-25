@@ -235,7 +235,8 @@ body{
 .tableview-links li>a.tappable-active *{
 	color: #fff;
 }
-.tableview-links li>a.detail-disclosure, .tableview-links li>a.suppression-element{
+.tableview-links li>a.detail-disclosure, .tableview-links li>a.suppression-element, 
+.tableview-links li>span.suppression-element {
 	-webkit-touch-callout: none;
 	padding: 0;
 	width: 44px;
@@ -249,10 +250,12 @@ body{
 	-moz-box-flex: 0;
 	box-flex: 0;
 }
-.tableview-links li>a.detail-disclosure.tappable-active, .tableview-links li>a.suppression-element.tappable-active{
+.tableview-links li>a.detail-disclosure.tappable-active, .tableview-links li>a.suppression-element.tappable-active, 
+.tableview-links li>span.suppression-element.tappable-active {
 	background: transparent none;
 }
-.tableview-links li>a.detail-disclosure span, .tableview-links li>a.suppression-element span, a.suppression-element span{
+.tableview-links li>a.detail-disclosure span, .tableview-links li>a.suppression-element span, a.suppression-element span,
+.tableview-links li>span.suppression-element span, span.suppression-element span {
 	display: inline-block;
 	width: 29px;
 	height: 31px;
@@ -265,10 +268,11 @@ body{
 	-o-background-size: 58px 31px;
 	background-size: 58px 31px;
 }
-.tableview-links li>a.suppression-element {
+.tableview-links li>a.suppression-element, .tableview-links li>span.suppression-element {
 	border-right: 2px solid #CCC;
 }
-.tableview-links li>a.suppression-element span, a.suppression-element span {
+.tableview-links li>a.suppression-element span, a.suppression-element span,
+.tableview-links li>span.suppression-element span, span.suppression-element span {
 	background: transparent url(images/detail-suppression-button.png);
 	-webkit-background-size: 58px 31px;
 	-moz-background-size: 58px 31px;
@@ -276,7 +280,8 @@ body{
 	-o-background-size: 58px 31px;
 	background-size: 58px 31px;
 }
-.tableview-links li>a.detail-disclosure.tappable-active span, .tableview-links li>a.suppression-element.tappable-active span{
+.tableview-links li>a.detail-disclosure.tappable-active span, .tableview-links li>a.suppression-element.tappable-active span,
+.tableview-links li>span.suppression-element.tappable-active span {
 	background-position: top right;
 }
 
@@ -293,21 +298,13 @@ body{
 	position: absolute;
 	background: #ddd;
 	width: 100%;
- /*
-    height: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
- */
 }
 
 .page {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: #ddd;
-    /*
-    -webkit-transform:translate3d(0,0,0);
-    */
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: #ddd;
 }
 
 .stage-center {

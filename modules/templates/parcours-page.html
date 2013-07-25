@@ -23,21 +23,33 @@
 						<a href="img/<%= photo %>" rel="external">
 							<img src="img/<%= photo %>" width="100"/>
 						</a>
+						Légende
 					<% }); %>
 				</li>
 			</ul>
 		</div>
-		
+		<hr class="fine"/>
+		<div class="text-center">	
+			<a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">
+				<button class="btn btn-primary" >
+					Commencer
+				</button>
+			</a>
+			<br />
+			Espèces trouvées : <%= total %>
+		</div>
+		<hr class="fine"/>
 		<%= description %>
 	</div>
 </div>
 
 
 <div class="navbar navbar-fixed-bottom">
-	<ul class="nav parc-nav">
-		<li class="active"><a href="#parcours/<%= id %>">Parcours</a></li>
-		<li><a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">Liste</a></li>
-		<li><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>">Recherche</a></li>
+	<ul class="nav parc-nav row-fluid">
+		<li class="active span4"><a href="#parcours/<%= id %>">Parcours</a></li>
+		<li class="span3"><a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">Liste</a></li>
+		<li class="span2"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>"><i class="icon-search icon-white"></i></a></li>
+		<li class="span2"><a href="#transmission"><i class="icon-user icon-white"></i></a></li>
 	</ul>
 </div>
 

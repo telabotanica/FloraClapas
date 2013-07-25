@@ -153,7 +153,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 						+ "VALUES (" + sql + ")"
 					);
 				}
-				console.log(arr_sql);
+				//console.log(arr_sql);
 				directory.db.transaction(function (tx) {
 					for (var c = 0; c < arr_sql.length; c++) {
 						tx.executeSql(arr_sql[c]);
@@ -225,13 +225,51 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 					"WHERE c.id_critere = :id_parcours " + 
 					"ORDER BY nom_vernaculaire";
 				tx.executeSql(sql, [id], function(tx, results) {
-					 var nbre = results.rows.length,
+					var nbre = results.rows.length,
 						especes = [],
 						i = 0;
 					for (; i < nbre; i = i + 1) {
 						especes[i] = results.rows.item(i);
 					}
 					callback(especes);
+				});
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			}
+		);
+	},
+
+	countVueByParcours: function(id, callback) {
+		this.db.transaction(
+			function(tx) {
+				var sql = 
+					"SELECT count(e.num_nom) AS nbre_vues " +
+					"FROM espece e " +
+					"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
+					"WHERE c.id_critere = :id_parcours " + 
+					"AND vue = 1";
+				tx.executeSql(sql, [id], function(tx, results) {
+					//console.log(sql, id);
+					callback(results.rows.length === 1 ? results.rows.item(0) : null);
+				});
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			}
+		);
+	},
+	countByParcours: function(id, callback) {
+		this.db.transaction(
+			function(tx) {
+				var sql = 
+					"SELECT count(e.num_nom) AS total " +
+					"FROM espece e " +
+					"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
+					"WHERE c.id_critere = :id_parcours ";
+				tx.executeSql(sql, [id], function(tx, results) {
+					//console.log(sql, id);
+					callback(results.rows.length === 1 ? results.rows.item(0) : null);
 				});
 			},
 			function(error) {
@@ -549,10 +587,10 @@ _.extend(directory.dao.ObsDAO.prototype, {
 		this.db.transaction(
 			function(tx) {
 				var sql = 
-					"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee " +
+					"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee, a_ete_transmise " +
 					"FROM espece " +
 					"JOIN obs ON num_nom = ce_espece " +
-					"ORDER BY id_obs DESC";
+					"ORDER BY a_ete_transmise ASC, id_obs DESC";
 				tx.executeSql(sql, [], function(tx, results) {
 					 var nbre = results.rows.length,
 						especes = [],
@@ -608,6 +646,7 @@ _.extend(directory.dao.ObsDAO.prototype, {
 						"commune VARCHAR(255) NULL ," +
 						"code_insee INT NULL ," +
 						"mise_a_jour TINYINT(1) NOT NULL DEFAULT 0 ," +
+						"a_ete_transmise TINYINT(1) NOT NULL DEFAULT 0 ," +
 						"ce_espece INT NOT NULL," +
 						"PRIMARY KEY (id_obs)," +
 						"CONSTRAINT ce_espece " +
@@ -777,7 +816,7 @@ directory.models.Parcours = Backbone.Model.extend({
 directory.models.ParcoursCollection = Backbone.Collection.extend({
 	dao: directory.dao.ParcoursDAO,
 	model: directory.models.Parcours,
-	
+
 	findByName: function(key) {
 		var parcoursDAO = new directory.dao.ParcoursDAO(directory.db),
 			self = this;
@@ -831,6 +870,24 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
 		especeDAO.findByParcours(key, function(data) {
 			self.reset(data);
 			//console.log('EspeceCollection | findByParcours ', data);
+		});
+	},
+	
+	countVueByParcours: function(key) {
+		var especeDAO = new directory.dao.EspeceDAO(directory.db),
+			self = this;
+		especeDAO.countVueByParcours(key, function(data) {
+			self.reset(data);
+			//console.log('EspeceCollection | countVueByParcours ', data);
+		});
+	},
+	countByParcours: function(key) {
+		var especeDAO = new directory.dao.EspeceDAO(directory.db),
+			self = this;
+		especeDAO.countByParcours(key, function(data) {
+			self.reset(data);
+			return(data);
+			//console.log('EspeceCollection | countByParcours ', data);
 		});
 	},
 	
@@ -984,24 +1041,43 @@ directory.views.ParcoursListItemView = Backbone.View.extend({
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Détails PARCOURS
 directory.views.ParcoursPage = Backbone.View.extend({
-	initialize: function() {
+	initialize: function(data) {
 		directory.liste = new Array();
 		directory.criteria = new Array();
 		directory.nbre_criteres = new Array();
 		directory.nbre_especes = null;
+
+		//console.log(this.model);	
+		this.model.bind('reset', this.render, this);	
+		
+		this.temp = new directory.models.EspeceCollection();
+		this.id_parcours = data.model.attributes.ce_critere;
+		//this.total = this.temp.countByParcours(this.id_parcours);
+		//console.log( this.temp.countByParcours(this.id_parcours));
+		this.temp.countVueByParcours(this.id_parcours);
+		this.utilisateur = new directory.models.EspeceCollection();
+		this.utilisateur.countByParcours(this.id_parcours);
+		this.utilisateur.bind('reset', this.render, this);
+		//this.nbre_vues = this.temp.countVueByParcours(this.id_parcours);
+		//this.temp.bind('reset', this.render, this);
 		
 		this.template = _.template(directory.utils.templateLoader.get('parcours-page'));
 	},
 	
 	render: function(eventName) {
-		var arr_photos = new Array();
-		var temp_photos = this.model.attributes.photos.split(',');
+		var arr_photos = new Array(),
+			temp_photos = String(this.model.attributes.photos).split(',');
 		for (var i = 0; i < temp_photos.length; i++) {
 			if (temp_photos[i] != '') {
 				arr_photos.push(temp_photos[i]);
 			}
 		}
-		this.model.attributes.photos = arr_photos;
+		//console.log((new directory.models.EspeceCollection()).findAll());
+		console.log(this.utilisateur.models, this.temp);
+		this.model.attributes.photos = arr_photos;		
+		this.model.attributes.total = this.total;	
+		this.model.attributes.nbre_vues = this.nbre_vues;	
+	
 		$(this.el).html(this.template(this.model.toJSON()));
 		return this;
 	}
@@ -1190,13 +1266,13 @@ directory.views.CriterePage = Backbone.View.extend({
 			arr_fructification = new Array();
 			
 		arr_floraison.push('La plante est-elle en fleur ?');
-		arr_floraison.push('floraison;La plante est en fleur.;reports.png');
+		arr_floraison.push('floraison;La plante est en fleur.;pheno_fleur.png');
 		
 		arr_feuillaison.push('L\'espèce est-elle en feuille ?');
-		arr_feuillaison.push('feuillaison;L\'espèce est en feuille.;reports.png');
+		arr_feuillaison.push('feuillaison;;pheno_feuille.png');
 		
 		arr_fructification.push('Des fruits sont-ils présents ?');
-		arr_fructification.push('fructification;Il y a des fruits.;reports.png');
+		arr_fructification.push('fructification;Il y a des fruits.;manager.png');
 		
 		arr_criteres.push(arr_floraison);
 		arr_criteres.push(arr_feuillaison);
@@ -1327,9 +1403,19 @@ directory.views.transmissionObs = Backbone.View.extend({
 	},
 
 	render: function(eventName) { 
+		var arr_obs = new Array(),
+			arr_transmises = new Array();
+		
+		for (var i = 0; i < this.model.models.length; i++) {
+			if (this.model.models[i].attributes.a_ete_transmise == 1) {
+				arr_transmises.push(this.model.models[i]);
+			} else {
+				arr_obs.push(this.model.models[i]);
+			}
+		}
 		var json = {
-			'taille' : this.model.models.length,
-			'obs' : this.model.models,
+			'obs' : arr_obs,
+			'transmises' : arr_transmises,
 			'user' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.email
 		}
 		
@@ -1351,9 +1437,9 @@ directory.views.comptePage = Backbone.View.extend({
 	render: function(eventName) {
 		//console.log(this.model);
 		var json = {
-				'email' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.email,
-				'prenom' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.prenom,
-				'nom' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.nom
+			'email' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.email,
+			'prenom' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.prenom,
+			'nom' : (this.utilisateur.models[0] == undefined) ? null : this.utilisateur.models[0].attributes.nom
 		}
 		
 		$(this.el).html(this.template(json));
@@ -1474,60 +1560,54 @@ directory.Router = Backbone.Router.extend({
 			var hash = window.location.hash,
 				arr_hash = hash.split('/'),
 				id = arr_hash[arr_hash.length-1];
-			directory.db.transaction(
-				function(tx) {
-					var sql =
-						"UPDATE parcours " +
-						"SET est_commence = 0 " +
-						"WHERE id = :id_parcours";
-					tx.executeSql(sql, [id]);
-					
-					sql =
-						"UPDATE avoir_critere " +
-						"SET vue = 0 " +
-						"WHERE id_critere = " +
-							"(SELECT ce_critere " +
-							"FROM parcours " +
-							"WHERE id = :id_parcours)";
-					tx.executeSql(sql, [id]);
-				},
-				function(error) {
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				}
-			);
+			directory.db.transaction(function(tx) {
+				var sql =
+					"UPDATE parcours " +
+					"SET est_commence = 0 " +
+					"WHERE id = :id_parcours";
+				tx.executeSql(sql, [id]);
+				
+				sql =
+					"UPDATE avoir_critere " +
+					"SET vue = 0 " +
+					"WHERE id_critere = " +
+						"(SELECT ce_critere " +
+						"FROM parcours " +
+						"WHERE id = :id_parcours)";
+				tx.executeSql(sql, [id]);
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			});
 			$('#parcours-modal').modal('hide');
 		});
 		
 		$('#content').on('click', '.choix-parcours', function(event) {
 			var id = this.id;
-			directory.db.transaction(
-				function(tx) {
-					var sql =
-						"SELECT est_commence " +
-						"FROM parcours " +
-						"WHERE id = :id_parcours";
-					tx.executeSql(sql, [id], function(tx, results) {
-						if (results.rows.item(0).est_commence == 1) {
-							$('#parcours-modal').modal('show');	
-						}
-					});
-				},
-				function(error) {
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				}
-			);
-			directory.db.transaction(
-				function(tx) {
-					var sql =
-						"UPDATE parcours " +
-						"SET est_commence = 1 " +
-						"WHERE id = :id_parcours";
-					tx.executeSql(sql, [id]);
-				},
-				function(error) {
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				}
-			);
+			directory.db.transaction(function(tx) {
+				var sql =
+					"SELECT est_commence " +
+					"FROM parcours " +
+					"WHERE id = :id_parcours";
+				tx.executeSql(sql, [id], function(tx, results) {
+					if (results.rows.item(0).est_commence == 1) {
+						$('#parcours-modal').modal('show');	
+					}
+				});
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			});
+			directory.db.transaction(function(tx) {
+				var sql =
+					"UPDATE parcours " +
+					"SET est_commence = 1 " +
+					"WHERE id = :id_parcours";
+				tx.executeSql(sql, [id]);
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			});
 		});
 		
 		$('#content').on('click', '.vue-espece', function(event) {
@@ -1536,19 +1616,17 @@ directory.Router = Backbone.Router.extend({
 				num_nom = arr_hash[arr_hash.length - 2],
 				ce_critere = arr_hash[arr_hash.length - 1];
 				
-			directory.db.transaction(
-				function(tx) {
-					var sql =
-						"UPDATE avoir_critere " +
-							"SET vue = 1 " +
-							"WHERE id_espece = :num_nom " +
-							"AND id_critere = :ce_critere";
-					tx.executeSql(sql, [num_nom, ce_critere]);
-				},
-				function(error) {
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				}
-			);
+			directory.db.transaction(function(tx) {
+				var sql =
+					"UPDATE avoir_critere " +
+						"SET vue = 1 " +
+						"WHERE id_espece = :num_nom " +
+						"AND id_critere = :ce_critere";
+				tx.executeSql(sql, [num_nom, ce_critere]);
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			});
 			
 			$('#vue-modal').modal('show');
 			window.history.back();
@@ -1572,7 +1650,7 @@ directory.Router = Backbone.Router.extend({
 				arr_hash = hash.split('/'),
 				id_parcours = arr_hash[arr_hash.length - 1],
 				parent = document.getElementById('criteres-liste'),
-				inputs = document.getElementsByTagName('input', parent);
+				inputs = parent.getElementsByTagName('input');
 			
 			if (id_parcours != 0) {
 				sql_where = 
@@ -1610,40 +1688,40 @@ directory.Router = Backbone.Router.extend({
 			//console.log(directory.criteria);
 			//console.log(arr_ids, directory.pheno.liste);
 			
-			var sql_conditions = '',
-				index = (id_parcours == 0) ? 0 : 1; 
-			for (var i = index; i < arr_ids.length; i++) {
-				sql_conditions += '?';
-				if (i <= arr_ids.length - 2) {
-					sql_conditions += ', ';
+			if (nbre_choix > 0) {
+				var sql_conditions = '',
+					index = (id_parcours == 0) ? 0 : 1; 
+				for (var i = index; i < arr_ids.length; i++) {
+					sql_conditions += '?';
+					if (i <= arr_ids.length - 2) {
+						sql_conditions += ', ';
+					}
 				}
-			}
-			if (arr_ids.length != 0) {
-				if (id_parcours != 0 && arr_ids.length == 1) {
-					sql_select = ", COALESCE(NULL, 0) AS count ";
-				} else {
-					sql_select = ", count(num_nom) AS count ";
+				if (arr_ids.length != 0) {
+					if (id_parcours != 0 && arr_ids.length == 1) {
+						sql_select = ", COALESCE(NULL, 0) AS count ";
+					} else {
+						sql_select = ", count(num_nom) AS count ";
+					}
+					
+					if (id_parcours != 0 && arr_ids.length > 1 || id_parcours == 0) {
+						sql_and = (sql_where == "") ? "WHERE" : "AND";
+						sql_and += 
+						" id_critere IN (" +
+							sql_conditions + 
+						") ";
+					}
+					sql_order_by = "count DESC, ";
 				}
 				
-				if (id_parcours != 0 && arr_ids.length > 1 || id_parcours == 0) {
-					sql_and = (sql_where == "") ? "WHERE" : "AND";
-					sql_and += 
-					" id_critere IN (" +
-						sql_conditions + 
-					") ";
+				
+				var i = 0,
+					criteres = [];
+				directory.nbre_especes = 0;
+				for (var index in directory.nbre_criteres) {
+					directory.nbre_criteres[index] = 0;
 				}
-				sql_order_by = "count DESC, ";
-			}
-			
-			
-			var i = 0,
-				criteres = [];
-			directory.nbre_especes = 0;
-			for (var index in directory.nbre_criteres) {
-				directory.nbre_criteres[index] = 0;
-			}
-			directory.db.transaction(
-				function(ta) {
+				directory.db.transaction(function(ta) {
 					var sql =
 						"SELECT num_nom " + sql_select + 
 						"FROM espece e " +
@@ -1753,14 +1831,20 @@ directory.Router = Backbone.Router.extend({
 				},
 				function(error) {
 					console.log('DB | Error processing SQL: ' + error.code, error);
-				}
-			);	
+				});	
+			} else {
+				directory.liste = new Array();
+				directory.criteria = new Array();
+				directory.nbre_criteres = new Array();
+				directory.nbre_especes = null;
+				$('#resultats-recherche').html('');
+			}
 		});
 		
 		
 		$('#content').on('click', '#criteres-reset', function(event) {			
 			var parent = document.getElementById('criteres-liste'),
-				inputs = document.getElementsByTagName('input', parent);
+				inputs = parent.getElementsByTagName('input');
 				
 			for (var i = 0; i < inputs.length; i++) {
 				inputs[i].checked = false;
@@ -1776,41 +1860,83 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '#geolocaliser', geolocaliser);
 		$('#content').on('click', '#sauver-obs', function(event) {
-			directory.db.transaction(
-				function(tx) {
-					var sql =
-						"SELECT id_obs " +
-						"FROM obs " + 
-						"ORDER BY id_obs DESC";
-					tx.executeSql(sql, [], function(tx, results) {
-						var obs = new Array(),
-							id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_obs+1;
-							sql =
-								"INSERT INTO obs " +
-								"(id_obs, date, latitude, longitude, commune, code_insee, mise_a_jour, ce_espece) VALUES " + 
-								"(?, ?, ?, ?, ?, ?, ?, ?) ";
-							
-						obs.push(id);
-						obs.push($('#date').html());
-						obs.push($('#lat').html());
-						obs.push($('#lng').html());
-						obs.push($('#location').html());
-						obs.push($('#code_insee').val());
-						obs.push(($('#code_insee').val() > 0) ? 1 : 0);
-						obs.push($('#num_nom_select').val());
+			directory.db.transaction(function(tx) {
+				var sql =
+					"SELECT id_obs " +
+					"FROM obs " + 
+					"ORDER BY id_obs DESC";
+				tx.executeSql(sql, [], function(tx, results) {
+					var obs = new Array(),
+						id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_obs+1;
+						sql =
+							"INSERT INTO obs " +
+							"(id_obs, date, latitude, longitude, commune, code_insee, mise_a_jour, ce_espece) VALUES " + 
+							"(?, ?, ?, ?, ?, ?, ?, ?) ";
 						
-						tx.executeSql(sql, obs);
-						window.location = '#transmission';
-					});
-				},
-				function(error) {
-					console.log('DB | Error processing SQL: ' + error.code, error);
-				}
-			);
+					obs.push(id);
+					obs.push($('#date').html());
+					obs.push($('#lat').html());
+					obs.push($('#lng').html());
+					obs.push($('#location').html());
+					obs.push($('#code_insee').val());
+					obs.push(($('#code_insee').val() > 0) ? 1 : 0);
+					obs.push($('#num_nom_select').val());
+					
+					tx.executeSql(sql, obs);
+					//window.location = '#transmission';
+					
+					var parent = document.getElementById('obs-photos'),
+						imgs = parent.getElementsByTagName('img');
+					
+					for (var i = 0; i < imgs.length; i++) {
+						directory.db.transaction(function(tx) {
+							var photo = new Array(),
+								sql =
+									"INSERT INTO photo " +
+									"(id_photo, chemin, ce_obs) VALUES " + 
+									"(?, ?, ?)";
+							
+							//photo.push(id);
+							//photo.push(chemin);
+							//photo.push(ce_obs);
+							//tx.executeSql(sql, photo);
+							if (i == imgs.length) {
+								alert(imgs[i].src + ' ' + imgs[i].alt);
+								alert('end');
+							}
+						});
+					}
+				});
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+			});
 			//console.log(obs);
 		});
 		$('#content').on('click', '.suppression-obs', function() {
-			supprimerObs(this.id);
+			supprimerObs(this.id, true);
+		});
+		$('#content').on('click', '.supprimer-obs-transmises', function() {
+			directory.db.transaction(function(tx) {
+				var sql =
+					"SELECT id_obs " +
+					"FROM obs " + 
+					"WHERE a_ete_transmise = 1";
+				tx.executeSql(sql, [], function(tx, results) {
+					for (var i = 0; i < results.rows.length; i = i + 1) {
+						supprimerObs(results.rows.item(i).id_obs, false);
+					}
+					$('#obs-transmises-infos').html('');
+				});
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+				var txt = 'Erreur de suppression dans la base de données.';
+				$('#obs-suppression-infos').html('<p class="text-center alert alert-error alert-block">' + txt + '</p>')
+					.fadeIn(0)
+					.delay(1600)
+					.fadeOut('slow');	
+			});
 		});
 		
 		
@@ -1833,27 +1959,25 @@ directory.Router = Backbone.Router.extend({
 		});
 		$('#content').on('click', '.supprimer-photos', function() {
 			var id = this.id;
-			directory.db.transaction(
-				function(tx) {
-					tx.executeSql("DELETE FROM photo WHERE id_photo = " + id);
-					
-					var fichier = new FileEntry();
-					fichier.fullPath = $('#img_'+id).attr('src');
-					fichier.remove(null, null);
-					
-					$('#elt_'+id).remove();
-					$('#nbre-photos').html($('#nbre-photos').html()-1);
-				},
-				function(error) {
-					console.log('DB | Error processing SQL: ' + error.code, error);
-					$('#obs-photos-info').addClass('alert-error');
-					$('#obs-photos-info').removeClass('alert-success');
-					$('#obs-photos-info').append('Erreur de suppression dans la base de données.')
-						.fadeIn(0)
-						.delay(1600)
-						.fadeOut('slow');	
-				}
-			);
+			directory.db.transaction(function(tx) {
+				tx.executeSql("DELETE FROM photo WHERE id_photo = " + id);
+				
+				var fichier = new FileEntry();
+				fichier.fullPath = $('#img_'+id).attr('src');
+				fichier.remove(null, null);
+				
+				$('#elt_'+id).remove();
+				$('#nbre-photos').html($('#nbre-photos').html()-1);
+			},
+			function(error) {
+				console.log('DB | Error processing SQL: ' + error.code, error);
+				$('#obs-photos-info').addClass('alert-error');
+				$('#obs-photos-info').removeClass('alert-success');
+				$('#obs-photos-info').append('Erreur de suppression dans la base de données.')
+					.fadeIn(0)
+					.delay(1600)
+					.fadeOut('slow');	
+			});
 		});
 		
 		//$('#content').on('blur', '#courriel', requeterIdentite);
@@ -1863,9 +1987,16 @@ directory.Router = Backbone.Router.extend({
 			}
 		});
 		$('#content').on('click', '#valider_courriel', requeterIdentite);
-		$('#content').on('click', '#transmettre-obs', function(event) {
+		$('#content').on('click', '.transmettre-obs', function(event) {
+			$('#nbre_obs').html('0');
+			$('#obs-transmission-infos').html('');
 			$('#transmission-modal').modal('show');
 			transmettreObs();
+		});
+		
+		
+		$('.fermer-obs-modal').on('click', function(event) {
+			$('#sauvegarde-obs-modal').modal('hide');
 		});
 		
 		
@@ -1959,14 +2090,12 @@ directory.Router = Backbone.Router.extend({
 	nouvelleObs: function(num_nom, nom_sci) {
 		var obs = new directory.models.Obs({ id: num_nom, nom_sci: nom_sci }),
 			self = this;
-			
 		directory.liste = new Array();
 		directory.criteria = new Array();
 		obs.fetch({
 			success: function(data) {
 				//console.log(data);
 				self.slidePage(new directory.views.saisieObs({model: data}).render());
-				//window.history.back();
 			}
 		});
 	},
@@ -1974,7 +2103,6 @@ directory.Router = Backbone.Router.extend({
 	detailsObs: function(id_obs) {
 		var obs = new directory.models.Obs({ id: id_obs }),
 			self = this;
-			
 		obs.fetch({
 			success: function(data) {
 				//console.log(data);
@@ -2088,7 +2216,7 @@ function moisPhenoEstCouvert( debut, fin) {
 
 
 
-function supprimerObs(id) {
+function supprimerObs(id, flag) {
 	directory.db.transaction(function(tx) {
 		var sql =
 			"SELECT id_photo, chemin " +
@@ -2104,11 +2232,13 @@ function supprimerObs(id) {
 		});
 		tx.executeSql("DELETE FROM obs WHERE id_obs = " + id);
 		
-		var txt = 'Observation n° ' + id + ' supprimée.';
-		$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
-			.fadeIn(0)
-			.delay(1600)
-			.fadeOut('slow');		
+		if (flag) {
+			var txt = 'Observation n° ' + id + ' supprimée.';
+			$('#obs-suppression-infos').html('<p class="text-center alert alert-success alert-block">'+txt+'</p>')
+				.fadeIn(0)
+				.delay(1600)
+				.fadeOut('slow');
+		}		
 		$('#li_'+id).remove();
 	},
 	function(error) {
@@ -2120,6 +2250,18 @@ function supprimerObs(id) {
 			.fadeOut('slow');	
 	});
 }
+function miseAJourTransmission(id) {
+	directory.db.transaction(function(tx) {
+		var sql =
+			"UPDATE obs " +
+			"SET a_ete_transmise = 1 " +
+			"WHERE id_obs = :id_obs ";
+		tx.executeSql(sql, [id]);
+	},
+	function(error) {
+		console.log('DB | Error processing SQL: ' + error.code, error);
+	});
+}
 
 
 
@@ -2129,42 +2271,40 @@ function onPhotoSuccess(imageData){
 		fichier.fullPath = imageData;
 		fichier.copyTo(dossier, (new Date()).getTime()+'.jpg', surPhotoSuccesCopie, surPhotoErreurAjout);
 	}, surPhotoErreurAjout);
-};
+}
 function surPhotoSuccesCopie(entry) {
-	directory.db.transaction(
-		function(tx) {
-			var hash = window.location.hash,
-				ce_obs = hash[hash.length - 1],
-				chemin = entry.fullPath,
+	directory.db.transaction(function(tx) {
+		var hash = window.location.hash,
+			ce_obs = hash[hash.length - 1],
+			chemin = entry.fullPath,
+			sql =
+				"SELECT id_photo " +
+				"FROM photo " + 
+				"ORDER BY id_photo DESC";
+		tx.executeSql(sql, [], function(tx, results) {
+			var photo = new Array(),
+				id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
 				sql =
-					"SELECT id_photo " +
-					"FROM photo " + 
-					"ORDER BY id_photo DESC";
-			tx.executeSql(sql, [], function(tx, results) {
-				var photo = new Array(),
-					id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
-					sql =
-						"INSERT INTO photo " +
-						"(id_photo, chemin, ce_obs) VALUES " + 
-						"(?, ?, ?) ";
-					
-				photo.push(id);
-				photo.push(chemin);
-				photo.push(ce_obs);
-				tx.executeSql(sql, photo);
+					"INSERT INTO photo " +
+					"(id_photo, chemin, ce_obs) VALUES " + 
+					"(?, ?, ?) ";
 				
-				var nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
-					elt = 
-						'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
-							'<img src="' + chemin + '" alt="' + id + '" id="img_' + id + '"/>' +
-							'<a href="#observation/' + ce_obs + '" id="' + id + '" class="suppression-element supprimer-photos"><span></span></a>' + 
-						'</div>';
-				$('#obs-photos').append(elt);
-				$('#nbre-photos').html(nbre_photos);
-			});
-		},
-		surPhotoErreurAjout
-	);
+			//photo.push(id);
+			//photo.push(chemin);
+			//photo.push(ce_obs);
+			//tx.executeSql(sql, photo);
+			
+			var nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
+				elt = 
+					'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
+						'<img src="' + chemin + '" alt="' + id + '" id="img_' + id + '"/>' +
+						'<span id="' + id + '" class="suppression-element supprimer-photos"><span></span></span>' + 
+					'</div>';
+			$('#obs-photos').append(elt);
+			$('#nbre-photos').html(nbre_photos);
+		});
+	},
+	surPhotoErreurAjout);
 }
 function surPhotoErreurAjout(error) {
 	$('#obs-photos-info').addClass('text-error');
@@ -2243,6 +2383,7 @@ function surSuccesGeoloc(position) {
 			},
 			complete : function(jqXHR, textStatus) {
 				$('#sauver-obs').removeAttr('disabled');
+				$('#obs-transmission-icone').addClass('hide');
 			}
 		});
 	}
@@ -2251,6 +2392,7 @@ function surErreurGeoloc(error){
 	$('#geo-infos').addClass('text-error');
 	$('#geo-infos').removeClass('text-info');
 	$('#geo-infos').html('Calcul impossible.');
+	$('#obs-attente-icone').addClass('hide');
 	console.log('Echec de la géolocalisation, code: ' + error.code + ' message: '+ error.message);
 }
 
@@ -2334,7 +2476,7 @@ function miseAJourCourriel(courriel) {
 				if (!utilisateurs[index].compte_verifie) {
 					sql = 
 						"UPDATE utilisateur " +
-						"SET nom = ?, prenom = ?, compte_verifie = ?" +
+						"SET nom = ?, prenom = ?, compte_verifie = ? " +
 						"WHERE id_user = ?";
 					parametres.push(index);
 				}
@@ -2370,10 +2512,12 @@ function transmettreObs() {
 					"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
 				"FROM espece " +
 				"JOIN obs ON num_nom = ce_espece " +
+				"WHERE a_ete_transmise = '0' "
 				"ORDER BY id_obs " +
 				"LIMIT 0, " + LIMITE_NBRE_TRANSMISSION;
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre_obs = results.rows.length;
+				$('#total_obs').html(nbre_obs);	
 				for (var i = 0; i < nbre_obs; i = i + 1) {
 					var id = results.rows.item(i).id_obs;
 					arr_obs[id] = results.rows.item(i);
@@ -2509,13 +2653,14 @@ function envoyerObsAuCel(obs, id_obs) {
 			console.log('Transmission SUCCESS.');
 			$('#nbre_obs').html(parseInt($('#nbre_obs').html()) + 1);
 			$('#details-obs').addClass('alert-success');
-			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne et ont été supprimées sur cette application.';
-			supprimerObs(id_obs);
+			msg = 'Transmission réussie ! Vos observations sont désormais disponibles sur votre carnet en ligne. Bravo !';
+			miseAJourTransmission(id_obs);
 		},
 		statusCode : {
 			500 : function(jqXHR, textStatus, errorThrown) {
 				msg = 'Erreur 500. Merci de contacter le responsable.';
 				erreurMsg += 'Erreur 500 :\ntype : ' + textStatus + '\n' + errorThrown + '\n';
+				afficherMsgTransmission(msg);
 			}
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
@@ -2532,18 +2677,19 @@ function envoyerObsAuCel(obs, id_obs) {
 			} catch(e) {
 				erreurMsg += 'L\'erreur n\'était pas en JSON.';
 			}
-			alert(erreurMsg);
 			console.log(erreurMsg);
+			afficherMsgTransmission(msg);
 		},
 		complete : function(jqXHR, textStatus) {
 			console.log('Transmission COMPLETE.');
 			if ($('#total_obs').html() == $('#nbre_obs').html()) {
-				//$('#transmission-modal').modal('hide');
-				$('#details-obs').html(msg)
-					.fadeIn(0)
-					.delay(2000)
-					.fadeOut('slow');
+				afficherMsgTransmission(msg);
 			}
 		}
 	});
+}
+function afficherMsgTransmission(msg) {
+	$('#obs-transmission-texte').addClass('hide');
+	$('#obs-transmission-btn').removeClass('hide');
+	$('#obs-transmission-infos').html('<p>' + msg + '</p>');
 }

@@ -1,8 +1,8 @@
 <div class="header">
-	<a href="#" class="header-button header-button-left header-back-button">
-		<button>Retour</button>
-	</a>
 	<h1><i><%= nom %></i></h1>
+	<a href="#" class="header-button header-button-icon header-button-right search" id="view-home-refresh">
+		<button>Accueil</button>
+	</a>
 </div>
 
 <div class="text-center">
@@ -13,13 +13,13 @@
 <div id="criteres-liste" class="margin-navbar"></div>
 
 <div class="navbar navbar-fixed-bottom">
-	<ul class="nav parc-nav">
-		<li><a href="#" class="header-back-button">Liste</a></li>
-		<li class="active"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>">Clef</a></li>
-		<li>
+	<ul class="nav parc-nav row-fluid">
+		<li class="span5"><a href="#" class="header-back-button">Retour liste</a></li>
+		<li class="active span3"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>">Clef</a></li>
+		<li class="span4">
 			<a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">
 				<small id="resultats-recherche" class="pull-right badge badge-important"> <%= total %> </small>
-				Résultats...
+				Résultats
 			</a>
 		</li>
 	</ul>
