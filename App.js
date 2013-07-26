@@ -1974,7 +1974,7 @@ directory.Router = Backbone.Router.extend({
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			alert("test");
 			alert(fileSystem);
-			console.log(navigator.camera);
+			alert(navigator.camera);
 			/*
 			var options = { 
 				destinationType: destinationType.FILE_URI,
@@ -2223,7 +2223,19 @@ $().ready(function() {
 		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 
 		 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list', 
 		 'saisie-obs', 'compte', 'obs-list', 'obs-page'],
-		function() {
+		function() {alert('device ready');
+		pictureSource = navigator.camera.PictureSourceType;
+		destinationType = navigator.camera.DestinationType;
+				alert('camera OKAY');
+		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
+			function(object) {
+				alert('fileSystem OKAY');
+				fileSystem = object;
+			}, 
+			function(error) {
+				alert('Le système de fichiers est inaccessible.');
+			}
+		);
 			directory.app = new directory.Router();
 			Backbone.history.start();
 		});

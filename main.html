@@ -39,27 +39,6 @@
 				
 			document.addEventListener('deviceready', onDeviceReady, false);
 			function onDeviceReady() {
-				alert('device ready');
-				pictureSource = navigator.camera.PictureSourceType;
-				destinationType = navigator.camera.DestinationType;
-				navigator.camera.getPicture(
-					onPhotoSuccess, 
-					function(message){
-						alert('Erreur camera: ' + message);
-						console.log('CAMERA failed because: ' + message);
-					}
-					
-				);
-						alert('camera OKAY');
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
-					function(object) {
-						alert('fileSystem OKAY');
-						fileSystem = object;
-					}, 
-					function(error) {
-						alert('Le système de fichiers est inaccessible.');
-					}
-				);
 			}
 		</script>
 		<script src="App.js" type="text/javascript" ></script>
