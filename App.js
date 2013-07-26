@@ -2223,9 +2223,10 @@ $().ready(function() {
 		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 
 		 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list', 
 		 'saisie-obs', 'compte', 'obs-list', 'obs-page'],
-		function() {alert('device ready');
-		pictureSource = navigator.camera.PictureSourceType;
-		destinationType = navigator.camera.DestinationType;
+		function() {
+			alert('device ready');
+		//pictureSource = navigator.camera.PictureSourceType;
+		//destinationType = navigator.camera.DestinationType;
 				alert('camera OKAY');
 		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
 			function(object) {
