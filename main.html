@@ -115,6 +115,7 @@
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
 					function(object) {
 						fileSystem = object;
+						alert('fileSystem OKAY');
 					}, 
 					function(error) {
 						alert('Le système de fichiers est inaccessible.');

@@ -1972,6 +1972,7 @@ directory.Router = Backbone.Router.extend({
 		
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
+			alert("test");
 			/*
 			var options = { 
 				destinationType: destinationType.FILE_URI,
@@ -1989,6 +1990,7 @@ directory.Router = Backbone.Router.extend({
 				},
 				null
 			);
+			alert("end camera");
 		});
 		$('#content').on('click', '.supprimer-photos', function() {
 			var id = this.id;
