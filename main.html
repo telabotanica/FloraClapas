@@ -113,10 +113,11 @@
 				alert('device ready');
 				pictureSource = navigator.camera.PictureSourceType;
 				destinationType = navigator.camera.DestinationType;
+						alert('camera OKAY');
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
 					function(object) {
-						fileSystem = object;
 						alert('fileSystem OKAY');
+						fileSystem = object;
 					}, 
 					function(error) {
 						alert('Le système de fichiers est inaccessible.');
