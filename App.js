@@ -1072,6 +1072,7 @@ directory.views.ParcoursPage = Backbone.View.extend({
 				arr_photos.push(temp_photos[i]);
 			}
 		}
+		console.log(directory.parcours);
 		//console.log((new directory.models.EspeceCollection()).findAll());
 		console.log(this.utilisateur.models, this.temp);
 		this.model.attributes.photos = arr_photos;		
@@ -1458,6 +1459,7 @@ directory.pheno['fructification'] = new Array();
 directory.pheno.liste = new Array();
 directory.nbre_criteres = new Array();
 directory.nbre_especes = null;
+directory.parcours = new Array();
 
 
 
@@ -1491,6 +1493,35 @@ directory.Router = Backbone.Router.extend({
 		function(error) {
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		});
+/*
+		directory.db.transaction(function (tx) {
+			var sql = 
+				"SELECT ce_critere FROM parcours";
+			tx.executeSql(sql, [], function(ta, results) {
+				var nbre = results.rows.length,
+					i = 0;
+				
+				for (; i < nbre; i = i + 1) {
+					var ce_critere = results.rows.item(i).ce_critere,
+						sql_especes = 
+							"SELECT count(id_espece) AS total, COALESCE(NULL, NULL, " + ce_critere + ") AS ce_critere " +
+							"FROM avoir_espece " +
+							"WHERE id_critere = " + ce_critere;
+					console.log(sql_especes);
+					ta.executeSql(sql_especes, [ce_critere], function(tx, results) {
+						console.log(results);
+						if (directory.parcours[ce_critere] == undefined) {
+							directory.parcours[ce_critere] = new Array();
+						}
+						directory.parcours[ce_critere]['total'] = results.rows.item(0).total;
+					},
+					function(error) {
+						console.log('DB | Error processing SQL: ' + error.code, error);
+					});
+				}
+			});
+		});
+//*/
 		directory.db.transaction(function (tx) {
 			var sql = 
 				"SELECT id_critere, intitule FROM critere " +
