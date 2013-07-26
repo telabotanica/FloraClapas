@@ -1974,6 +1974,7 @@ directory.Router = Backbone.Router.extend({
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			alert("test");
 			alert(fileSystem);
+			console.log(navigator.camera);
 			/*
 			var options = { 
 				destinationType: destinationType.FILE_URI,
@@ -1988,8 +1989,8 @@ directory.Router = Backbone.Router.extend({
 				function(message){
 					alert('Erreur camera: ' + message);
 					console.log('CAMERA failed because: ' + message);
-				},
-				null
+				}
+				
 			);
 			alert("end camera");
 		});
