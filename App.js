@@ -1941,11 +1941,11 @@ directory.Router = Backbone.Router.extend({
 		
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
+			/*
 			var options = { 
 				destinationType: destinationType.FILE_URI,
 				encodingType: Camera.EncodingType.JPEG
 			};
-			/*
 			if (this.id == 'chercher-photos') {
 				options.sourceType = pictureSource.PHOTOLIBRARY;
 			}
@@ -1956,7 +1956,7 @@ directory.Router = Backbone.Router.extend({
 					alert('Erreur camera: ' + message);
 					console.log('CAMERA failed because: ' + message);
 				},
-				options
+				null
 			);
 		});
 		$('#content').on('click', '.supprimer-photos', function() {
