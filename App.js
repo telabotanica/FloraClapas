@@ -1973,6 +1973,7 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
 			alert("test");
+			alert(fileSystem);
 			/*
 			var options = { 
 				destinationType: destinationType.FILE_URI,
