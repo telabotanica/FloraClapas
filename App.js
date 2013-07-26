@@ -2218,6 +2218,16 @@ parcoursDAO.populate();
 (new directory.dao.PhotoDAO(directory.db)).populate();
 (new directory.dao.UtilisateurDAO(directory.db)).populate();
 
+
+var fileSystem = null,
+	pictureSource,
+	destinationType; // sets the format of returned value 
+
+var SERVICE_SAISIE_URL = 'http://www.tela-botanica.org/eflore-test/cel/jrest/CelWidgetSaisie',
+	SERVICE_ANNUAIRE = 'http://www.tela-botanica.org/client/annuaire_nouveau/actuelle/jrest/utilisateur/identite-par-courriel/',
+	SERVICE_NOM_COMMUNE_URL = 'http://www.tela-botanica.org/service:eflore:0.1/osm/nom-commune?lon={lon}&lat={lat}',
+	TAG_PROJET = 'WidgetSaisie',
+	LIMITE_NBRE_TRANSMISSION = 2;	
 $().ready(function() {
 	directory.utils.templateLoader.load(
 		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 
@@ -2225,18 +2235,10 @@ $().ready(function() {
 		 'saisie-obs', 'compte', 'obs-list', 'obs-page'],
 		function() {
 			alert('device ready');
-		//pictureSource = navigator.camera.PictureSourceType;
-		//destinationType = navigator.camera.DestinationType;
-				alert('camera OKAY');
-		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0,
-			function(object) {
-				alert('fileSystem OKAY');
-				fileSystem = object;
-			}, 
-			function(error) {
-				alert('Le système de fichiers est inaccessible.');
-			}
-		);
+			pictureSource = navigator.camera.PictureSourceType;
+			destinationType = navigator.camera.DestinationType;
+					alert('camera OKAY');
+
 			directory.app = new directory.Router();
 			Backbone.history.start();
 		});
