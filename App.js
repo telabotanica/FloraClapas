@@ -1915,29 +1915,33 @@ directory.Router = Backbone.Router.extend({
 					tx.executeSql(sql, obs);
 					
 					
-					var parent = document.getElementById('obs-photos'),
-						imgs = parent.getElementsByTagName('img');
-					for (var i = 0; i < imgs.length; i++) {
-						sql =
-							"SELECT id_photo " +
-							"FROM photo " + 
-							"ORDER BY id_photo DESC";
-						tx.executeSql(sql, [], function(tx, results) {
-							var photo = new Array(),
-								sql_photo =
-									"INSERT INTO photo " +
-									"(id_photo, chemin, ce_obs) VALUES " + 
-									"(?, ?, ?)",
-								id_photo = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
-							photo.push(id_photo);
-							photo.push(imgs[i].src);
-							photo.push(id);
+				var i = 0,
+					parent = document.getElementById('obs-photos'),
+					imgs = parent.getElementsByTagName('img');
+					
+					sql =
+						"SELECT id_photo " +
+						"FROM photo " + 
+						"ORDER BY id_photo DESC";
+					tx.executeSql(sql, [], function(tx, results) {
+						console.log(results);
+						var sql_photo =
+								"INSERT INTO photo " +
+								"(id_photo, chemin, ce_obs) VALUES " + 
+								"(?, ?, ?)",
+							id_photo = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
+
+						for (; i < imgs.length; i++) {
+							var photo = new Array();
+								photo.push(id_photo++);
+								photo.push(imgs[i].src);
+								photo.push(id);
 							tx.executeSql(sql_photo, photo);
-						},
-						function(error) {
-							alert('DB | Error processing SQL: ' + error);
-						});
-					}
+						}
+					},
+					function(error) {
+						alert('DB | Error processing SQL: ' + error);
+					});
 				});
 			},
 			function(error) {
@@ -2004,7 +2008,7 @@ directory.Router = Backbone.Router.extend({
 				console.log('DB | Error processing SQL: ' + error.code, error);
 				$('#obs-photos-info').addClass('alert-error');
 				$('#obs-photos-info').removeClass('alert-success');
-				$('#obs-photos-info').append('Erreur de suppression dans la base de données.')
+				$('#obs-photos-info').html('Erreur de suppression dans la base de données.')
 					.fadeIn(0)
 					.delay(1600)
 					.fadeOut('slow');	
@@ -2318,6 +2322,7 @@ function surPhotoSuccesCopie(entry) {
 				'</div>';
 		$('#obs-photos').append(elt);
 		$('#nbre-photos').html(nbre_photos);
+		$('#prendre-photos').button('another');
 	},
 	surPhotoErreurAjout);
 }
