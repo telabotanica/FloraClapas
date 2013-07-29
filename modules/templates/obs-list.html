@@ -14,25 +14,25 @@
 		<% if (obs.length == 0) { %>
 			<h4 class="text-center"> Aucune observation à transmettre. </h4>
 		<% } else { 	
-			var texte = 'Transmettre';
-			if (user != null) { 
-				texte += ' sur <span id="transmission-courriel">' + user + '</span>';
-			} 
+				var texte = 'Transmettre';
+				if (user != null) { 
+					texte += ' sur <span id="transmission-courriel">' + user + '</span>';
+				} 
 		%>
 		
-		<h4 class="text-center"> Observations à transmettre. </h4>	
-		<% if (obs.length >= 3) { %>
-			<hr class="fine-ultra"/>
-			<div class="text-center">
-				<button class="btn btn-warning transmettre-obs">
-					Transmettre
-				</button>
-			</div>
-		<% } %>
-			<ul>
-			<%	_.each(obs, function(observation) {
-					var attributs = observation.attributes;
-			%>
+			<h4 class="text-center"> Observations à transmettre. </h4>	
+			<% if (obs.length >= 3) { %>
+				<hr class="fine-ultra"/>
+				<div class="text-center">
+					<button class="btn btn-warning transmettre-obs">
+						Transmettre
+					</button>
+				</div>
+			<% } %>
+				<ul>
+				<%	_.each(obs, function(observation) {
+						var attributs = observation.attributes;
+				%>
 				<li style="margin:0px;" id="li_<%= attributs.id_obs %>">
 					<a href="#transmission" id="<%= attributs.id_obs %>" class="suppression-element suppression-obs"><span></span></a>
 					
@@ -49,12 +49,12 @@
 				</li>
 			<%	}, this); %>
 			</ul>
+			<div class="text-center">
+				<button class="transmettre-obs btn btn-warning">
+					<%= texte %>
+				</button>
+			</div>
 		<% } %>
-		<div class="text-center">
-			<button class="transmettre-obs btn btn-warning">
-				<%= texte %>
-			</button>
-		</div>
 		
 		
 		<hr class="fine"/>

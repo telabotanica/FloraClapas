@@ -1987,7 +1987,7 @@ directory.Router = Backbone.Router.extend({
 			navigator.camera.getPicture(
 				onPhotoSuccess, 
 				function(message){
-					alert('Erreur camera: ' + message);
+					//alert('Erreur camera: ' + message);
 					console.log('CAMERA failed because: ' + message);
 				}
 			);
