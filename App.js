@@ -1917,21 +1917,15 @@ directory.Router = Backbone.Router.extend({
 					var parent = document.getElementById('obs-photos'),
 						imgs = parent.getElementsByTagName('img');
 					for (var i = 0; i < imgs.length; i++) {
-						alert(imgs[i].src + ' ' + imgs[i].alt);
-						/*
-						directory.db.transaction(function(tx) {
-							var photo = new Array(),
-								sql =
-									"INSERT INTO photo " +
-									"(id_photo, chemin, ce_obs) VALUES " + 
-									"(?, ?, ?)";
-							
-							photo.push(id);
-							photo.push(chemin);
-							photo.push(ce_obs);
-							tx.executeSql(sql, photo);
-						});
-						*/
+						var photo = new Array();
+						sql =
+							"INSERT INTO photo " +
+							"(id_photo, chemin, ce_obs) VALUES " + 
+							"(?, ?, ?)";
+						photo.push(imgs[i].alt);
+						photo.push(imgs[i].src);
+						photo.push(id);
+						tx.executeSql(sql, photo);
 					}
 				});
 			},
