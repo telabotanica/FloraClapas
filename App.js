@@ -1916,8 +1916,9 @@ directory.Router = Backbone.Router.extend({
 					
 					var parent = document.getElementById('obs-photos'),
 						imgs = parent.getElementsByTagName('img');
-					alert(imgs.length);
 					for (var i = 0; i < imgs.length; i++) {
+						alert(imgs[i].src + ' ' + imgs[i].alt);
+						/*
 						directory.db.transaction(function(tx) {
 							var photo = new Array(),
 								sql =
@@ -1929,13 +1930,8 @@ directory.Router = Backbone.Router.extend({
 							photo.push(chemin);
 							photo.push(ce_obs);
 							tx.executeSql(sql, photo);
-							/*
-							if (i == imgs.length) {
-								alert(imgs[i].src + ' ' + imgs[i].alt);
-								alert('end');
-							}
-							*/
 						});
+						*/
 					}
 				});
 			},
