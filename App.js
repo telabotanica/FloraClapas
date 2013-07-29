@@ -1912,13 +1912,11 @@ directory.Router = Backbone.Router.extend({
 					obs.push($('#code_insee').val());
 					obs.push(($('#code_insee').val() > 0) ? 1 : 0);
 					obs.push($('#num_nom_select').val());
-					
 					tx.executeSql(sql, obs);
-					//window.location = '#transmission';
 					
 					var parent = document.getElementById('obs-photos'),
 						imgs = parent.getElementsByTagName('img');
-					
+					alert(imgs.length);
 					for (var i = 0; i < imgs.length; i++) {
 						directory.db.transaction(function(tx) {
 							var photo = new Array(),
@@ -1927,14 +1925,16 @@ directory.Router = Backbone.Router.extend({
 									"(id_photo, chemin, ce_obs) VALUES " + 
 									"(?, ?, ?)";
 							
-							//photo.push(id);
-							//photo.push(chemin);
-							//photo.push(ce_obs);
-							//tx.executeSql(sql, photo);
+							photo.push(id);
+							photo.push(chemin);
+							photo.push(ce_obs);
+							tx.executeSql(sql, photo);
+							/*
 							if (i == imgs.length) {
 								alert(imgs[i].src + ' ' + imgs[i].alt);
 								alert('end');
 							}
+							*/
 						});
 					}
 				});
@@ -1972,10 +1972,6 @@ directory.Router = Backbone.Router.extend({
 		
 		
 		$('#content').on('click', '.ajouter-photos', function(event) {
-			alert("test");
-			alert(fileSystem);
-			alert(navigator.camera);
-			/*
 			var options = { 
 				destinationType: destinationType.FILE_URI,
 				encodingType: Camera.EncodingType.JPEG
@@ -1983,16 +1979,13 @@ directory.Router = Backbone.Router.extend({
 			if (this.id == 'chercher-photos') {
 				options.sourceType = pictureSource.PHOTOLIBRARY;
 			}
-			*/
 			navigator.camera.getPicture(
 				onPhotoSuccess, 
 				function(message){
 					alert('Erreur camera: ' + message);
 					console.log('CAMERA failed because: ' + message);
 				}
-				
 			);
-			alert("end camera");
 		});
 		$('#content').on('click', '.supprimer-photos', function() {
 			var id = this.id;
@@ -2551,9 +2544,10 @@ function transmettreObs() {
 					"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
 				"FROM espece " +
 				"JOIN obs ON num_nom = ce_espece " +
-				"WHERE a_ete_transmise = '0' "
+				"WHERE a_ete_transmise = '0' " + 
 				"ORDER BY id_obs " +
-				"LIMIT 0, " + LIMITE_NBRE_TRANSMISSION;
+				"LIMIT " + LIMITE_NBRE_TRANSMISSION;
+			console.log(sql);
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre_obs = results.rows.length;
 				$('#total_obs').html(nbre_obs);	
