@@ -1925,7 +1925,10 @@ directory.Router = Backbone.Router.extend({
 						photo.push(imgs[i].alt);
 						photo.push(imgs[i].src);
 						photo.push(id);
-						tx.executeSql(sql, photo);
+						tx.executeSql(sql, photo, function(tx, results) {  },
+						function(error) {
+							alert('DB | Error processing SQL: ' + error.code, error);
+						});
 					}
 				});
 			},
@@ -2303,19 +2306,8 @@ function surPhotoSuccesCopie(entry) {
 				"FROM photo " + 
 				"ORDER BY id_photo DESC";
 		tx.executeSql(sql, [], function(tx, results) {
-			var photo = new Array(),
-				id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
-				sql =
-					"INSERT INTO photo " +
-					"(id_photo, chemin, ce_obs) VALUES " + 
-					"(?, ?, ?) ";
-				
-			//photo.push(id);
-			//photo.push(chemin);
-			//photo.push(ce_obs);
-			//tx.executeSql(sql, photo);
-			
-			var nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
+			var id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1,
+				nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
 				elt = 
 					'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
 						'<img src="' + chemin + '" alt="' + id + '" id="img_' + id + '"/>' +
