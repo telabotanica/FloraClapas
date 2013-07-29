@@ -1928,7 +1928,7 @@ directory.Router = Backbone.Router.extend({
 									"INSERT INTO photo " +
 									"(id_photo, chemin, ce_obs) VALUES " + 
 									"(?, ?, ?)",
-								id_photo = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1,
+								id_photo = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1;
 							photo.push(id_photo);
 							photo.push(imgs[i].src);
 							photo.push(id);
@@ -2008,7 +2008,7 @@ directory.Router = Backbone.Router.extend({
 			});
 		});
 		
-		//$('#content').on('blur', '#courriel', requeterIdentite);
+		
 		$('#content').on('keypress', '#courriel', function(event) {
 			if (event.which == 13) {
 				requeterIdentite(event);
