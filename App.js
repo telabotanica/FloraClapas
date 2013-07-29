@@ -1918,13 +1918,13 @@ directory.Router = Backbone.Router.extend({
 					var parent = document.getElementById('obs-photos'),
 						imgs = parent.getElementsByTagName('img');
 					for (var i = 0; i < imgs.length; i++) {
-						var photo = new Array(),
-							sql =
-								"SELECT id_photo " +
-								"FROM photo " + 
-								"ORDER BY id_photo DESC";
+						sql =
+							"SELECT id_photo " +
+							"FROM photo " + 
+							"ORDER BY id_photo DESC";
 						tx.executeSql(sql, [], function(tx, results) {
-							var sql_photo =
+							var photo = new Array(),
+								sql_photo =
 									"INSERT INTO photo " +
 									"(id_photo, chemin, ce_obs) VALUES " + 
 									"(?, ?, ?)",
@@ -1933,6 +1933,9 @@ directory.Router = Backbone.Router.extend({
 							photo.push(imgs[i].src);
 							photo.push(id);
 							tx.executeSql(sql_photo, photo);
+						},
+						function(error) {
+							alert('DB | Error processing SQL: ' + error);
 						});
 					}
 				});
