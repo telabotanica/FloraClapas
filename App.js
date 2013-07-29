@@ -1914,20 +1914,25 @@ directory.Router = Backbone.Router.extend({
 					obs.push($('#num_nom_select').val());
 					tx.executeSql(sql, obs);
 					
+					
 					var parent = document.getElementById('obs-photos'),
 						imgs = parent.getElementsByTagName('img');
 					for (var i = 0; i < imgs.length; i++) {
-						var photo = new Array();
-						sql =
-							"INSERT INTO photo " +
-							"(id_photo, chemin, ce_obs) VALUES " + 
-							"(?, ?, ?)";
-						photo.push(imgs[i].alt);
-						photo.push(imgs[i].src);
-						photo.push(id);
-						tx.executeSql(sql, photo, function(tx, results) {  },
-						function(error) {
-							alert('DB | Error processing SQL: ' + error.code, error);
+						var photo = new Array(),
+							sql =
+								"SELECT id_photo " +
+								"FROM photo " + 
+								"ORDER BY id_photo DESC";
+						tx.executeSql(sql, [], function(tx, results) {
+							var sql_photo =
+									"INSERT INTO photo " +
+									"(id_photo, chemin, ce_obs) VALUES " + 
+									"(?, ?, ?)",
+								id_photo = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1,
+							photo.push(id_photo);
+							photo.push(imgs[i].src);
+							photo.push(id);
+							tx.executeSql(sql_photo, photo);
 						});
 					}
 				});
@@ -2301,21 +2306,15 @@ function surPhotoSuccesCopie(entry) {
 		var hash = window.location.hash,
 			ce_obs = hash[hash.length - 1],
 			chemin = entry.fullPath,
-			sql =
-				"SELECT id_photo " +
-				"FROM photo " + 
-				"ORDER BY id_photo DESC";
-		tx.executeSql(sql, [], function(tx, results) {
-			var id = (results.rows.length == 0) ? 1 : results.rows.item(0).id_photo + 1,
-				nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
-				elt = 
-					'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
-						'<img src="' + chemin + '" alt="' + id + '" id="img_' + id + '"/>' +
-						'<span id="' + id + '" class="suppression-element supprimer-photos"><span></span></span>' + 
-					'</div>';
-			$('#obs-photos').append(elt);
-			$('#nbre-photos').html(nbre_photos);
-		});
+			id = Math.floor(Math.random()*100),
+			nbre_photos = parseInt($('#nbre-photos').html()) + 1 ,
+			elt = 
+				'<div class="pull-left miniature text-center" id="elt_' + id + '">' + 
+					'<img src="' + chemin + '" alt="' + id + '" id="img_' + id + '"/>' +
+					'<span id="' + id + '" class="suppression-element supprimer-photos"><span></span></span>' + 
+				'</div>';
+		$('#obs-photos').append(elt);
+		$('#nbre-photos').html(nbre_photos);
 	},
 	surPhotoErreurAjout);
 }
