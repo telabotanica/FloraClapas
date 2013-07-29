@@ -2023,10 +2023,14 @@ directory.Router = Backbone.Router.extend({
 		});
 		$('#content').on('click', '#valider_courriel', requeterIdentite);
 		$('#content').on('click', '.transmettre-obs', function(event) {
-			$('#nbre_obs').html('0');
-			$('#obs-transmission-infos').html('');
-			$('#transmission-modal').modal('show');
-			transmettreObs();
+			if (typeof $('#transmission-courriel').html() === 'undefined') {
+				window.location = '#compte';
+			} else {
+				$('#nbre_obs').html('0');
+				$('#obs-transmission-infos').html('');
+				$('#transmission-modal').modal('show');
+				transmettreObs();
+			}
 		});
 		
 		
