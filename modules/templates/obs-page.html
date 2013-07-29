@@ -25,14 +25,12 @@
 		<div class="text-center"> Nombre de photos : <span id="nbre-photos"><%= photos.length %></span>.</div>
 		
 		<hr class="fine"/>
-		<div id="obs-photos">
 		<% _.each(photos, function(photo) { %>
 			<div class="pull-left miniature text-center" id="elt_<%= photo.id_photo %>">
 				<img src="<%= photo.chemin %>" alt="<%= photo.id_photo %>" id="img_<%= photo.id_photo %>" /> 
 				<a href="#observation/<%= obs.id_obs %>" id="<%= photo.id_photo %>" class="suppression-element supprimer-photos"><span></span></a>
 			</div>
 		<% }); %>
-		</div>
 		<div class="clearfix"></div>
 	</div>
 </div>

@@ -40,10 +40,18 @@
 		</label>
 		
 		<hr class="fine"/>
-		<button id="sauver-obs" class="btn btn-success btn-block btn-large" disabled>
+		<div id="obs-photos-info" class="text-center"></div>
+		<button class="ajouter-photos btn-block btn btn-inverse btn-large" id="prendre-photos">
+			Ajouter une photo...
+		</button>
+		<div class="text-center"> Nombre de photos : <span id="nbre-photos">0</span>.</div>
+		<div id="obs-photos"></div>
+		
+		<hr class="fine"/>
+		<a href="#sauvegarde-obs-modal" role="button" id="sauver-obs" class="btn btn-success btn-block btn-large" data-toggle="modal">
 			<i class="icon-ok"></i>
 			Sauver
-		</button>
+		</a>
 		
 		<input id="num_nom_select" type="hidden" name="num_nom_select" value="<%= id %>" />
 	</div>
