@@ -31,7 +31,7 @@
 	padding: 10px;
 	background: #FFF;
 	margin-bottom: 40px;
-	overflow: scroll;
+	overflow: auto;
 }
 
 .description-parcours .photos:after {
