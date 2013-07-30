@@ -5,66 +5,65 @@
 	<h1>Saisie</h1>
 </div>
 
-<div class="tableview tableview-links row-fluid">
-	<div>
-		<label for="nom">Espèce :
-			<span id="nom" name="nom"><%= nom_sci %></span>
-		</label>
-		
-		<label for="date">Date :
-			<span id="date" name="date"><%= date %></span>
-		</label>
-		
-		<hr class="fine"/>
-		<button id="geolocaliser" class="btn btn-info btn-block" >
-			Recalculer ma position
-			<i class="icon-search"></i>
-		</button>
-		
-		<div id="obs-attente-icone" class="text-center"> <img src="css/images/ajax-loader.gif" /> </div>
-		<div id="geo-infos" class="text-center text-info infos">Calcul en cours...</div>
-		<label for="lat">
-			Latitude :
-			<span id="lat"></span>
-		</label>
-		
-		<label for="lng">
-			Longitude :
-			<span id="lng"></span>
-		</label>
-		
-		<label for="location">
-			Commune :
-			<span id="location"></span>
-			<input id="code_insee" type="hidden" name="code_insee" value="0" />
-		</label>
-		
-		<hr class="fine"/>
-		<div id="obs-photos-info" class="text-center"></div>
-		<button class="ajouter-photos btn-block btn btn-inverse btn-large" id="prendre-photos"
-				data-another-text="Prendre une autre photo...">
-			Ajouter une photo...
-		</button>
-		<div class="text-center"> Nombre de photos : <span id="nbre-photos">0</span>.</div>
-		<div id="obs-photos"></div>
-		<div class="clearfix"></div>
-		
-		<hr class="fine"/>
-		<a href="#sauvegarde-obs-modal" role="button" id="sauver-obs" class="btn btn-success btn-block btn-large" 
-			data-toggle="modal" disabled>
-			<i class="icon-ok"></i>
-			Enregistrer l'observation
-		</a>
-		
-		<input id="num_nom_select" type="hidden" name="num_nom_select" value="<%= id %>" />
-	</div>
+
+<div class="tableview tableview-links row-fluid margin-navbar">
+	<label for="nom">Espèce :
+		<span id="nom" name="nom"><%= nom_sci %></span>
+	</label>
+	
+	<label for="date">Date :
+		<span id="date" name="date"><%= date %></span>
+	</label>
+	
+	<hr class="fine"/>
+	<button id="geolocaliser" class="btn btn-info btn-block" >
+		Recalculer ma position
+		<i class="icon-search"></i>
+	</button>
+	
+	<div id="obs-attente-icone" class="text-center"> <img src="css/images/ajax-loader.gif" /> </div>
+	<div id="geo-infos" class="text-center text-info infos">Calcul en cours...</div>
+	<label for="lat">
+		Latitude :
+		<span id="lat"></span>
+	</label>
+	
+	<label for="lng">
+		Longitude :
+		<span id="lng"></span>
+	</label>
+	
+	<label for="location">
+		Commune :
+		<span id="location"></span>
+		<input id="code_insee" type="hidden" name="code_insee" value="0" />
+	</label>
+	
+	<hr class="fine"/>
+	<div id="obs-photos-info" class="text-center"></div>
+	<button class="ajouter-photos btn-block btn btn-inverse btn-large" id="prendre-photos"
+			data-another-text="Prendre une autre photo...">
+		Ajouter une photo...
+	</button>
+	<div class="text-center"> Nombre de photos : <span id="nbre-photos">0</span>.</div>
+	<div id="obs-photos"></div>
+	<div class="clearfix"></div>
+	
+	<hr class="fine"/>
+	<a href="#sauvegarde-obs-modal" role="button" id="sauver-obs" class="btn btn-success btn-block btn-large" 
+		data-toggle="modal" >
+		<i class="icon-ok"></i>
+		Enregistrer l'observation
+	</a>
+	
+	<input id="num_nom_select" type="hidden" name="num_nom_select" value="<%= id %>" />
 </div>
 
 
 <div class="navbar navbar-fixed-bottom">
 	<ul class="nav parc-nav row-fluid">
 		<li class="span4"><a href="#transmission">Mes obs.</a></li>
-		<li class="span4"><a href="#compte"><i class="icon-user icon-white"></i></a></li>
+		<li class="span4"><a href="#compte"><i class="icon-off icon-white"></i></a></li>
 		<li class="span4"><a href="#liste/0/Balade/0" >Liste</a></li>
 	</ul>
 </div>

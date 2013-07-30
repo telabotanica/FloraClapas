@@ -2404,7 +2404,6 @@ function surSuccesGeoloc(position) {
 				console.log('Geolocation ERROR: ' + textStatus);
 			},
 			complete : function(jqXHR, textStatus) {
-				$('#sauver-obs').removeAttr('disabled');
 				$('#obs-attente-icone').addClass('hide');
 			}
 		});
