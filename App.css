@@ -83,8 +83,9 @@ input[type="radio"].criterium  {
 }
 
 #resultats-recherche {
-	top: -16px;
+	top: 10px;
 	position: relative;
+	z-index:1000;
 	/*
 	background: #F00;
 	color: #FFF;

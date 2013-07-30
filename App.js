@@ -1049,18 +1049,6 @@ directory.views.ParcoursPage = Backbone.View.extend({
 
 		//console.log(this.model);	
 		this.model.bind('reset', this.render, this);	
-		
-		this.temp = new directory.models.EspeceCollection();
-		this.id_parcours = data.model.attributes.ce_critere;
-		//this.total = this.temp.countByParcours(this.id_parcours);
-		//console.log( this.temp.countByParcours(this.id_parcours));
-		this.temp.countVueByParcours(this.id_parcours);
-		this.utilisateur = new directory.models.EspeceCollection();
-		this.utilisateur.countByParcours(this.id_parcours);
-		this.utilisateur.bind('reset', this.render, this);
-		//this.nbre_vues = this.temp.countVueByParcours(this.id_parcours);
-		//this.temp.bind('reset', this.render, this);
-		
 		this.template = _.template(directory.utils.templateLoader.get('parcours-page'));
 	},
 	
@@ -1072,12 +1060,8 @@ directory.views.ParcoursPage = Backbone.View.extend({
 				arr_photos.push(temp_photos[i]);
 			}
 		}
-		console.log(directory.parcours);
-		//console.log((new directory.models.EspeceCollection()).findAll());
-		console.log(this.utilisateur.models, this.temp);
+		//console.log(directory.parcours);
 		this.model.attributes.photos = arr_photos;		
-		this.model.attributes.total = this.total;	
-		this.model.attributes.nbre_vues = this.nbre_vues;	
 	
 		$(this.el).html(this.template(this.model.toJSON()));
 		return this;
@@ -1105,11 +1089,13 @@ directory.views.ListPage = Backbone.View.extend({
 	
 	render: function(eventName) {
 		var lien = (this.model.id == 0) ? '' : '/'+this.model.id,
+			profil = (this.model.id == 0) ? 'transmission' : 'profil',
 			json = {
 				'nom_parcours' : this.model.name,
 				'id_parcours' : this.model.id,
 				'id_critere' : this.model.id_critere,
-				'lien_parcours' : 'parcours'+lien
+				'lien_parcours' : 'parcours'+lien,
+				'lien_profil' : profil
 			};
 		
 		$(this.el).html(this.template(json));
@@ -1131,14 +1117,14 @@ directory.views.EspeceListView = Backbone.View.extend({
 			arr_ids = new Array(),
 			nbre_triees = directory.liste.length;
 			
-		if (nbre_triees != 0 && directory.liste.total != 0) {
-			console.log(arr_temp);
-			console.log(directory.liste);
-			console.log(directory.nbre_criteres);
-			for (var pourcentage = directory.liste.total; pourcentage >= 0; pourcentage--) {
+		if (directory.nbre_choix != null) {
+			//console.log(arr_temp);
+			//console.log(directory.liste);
+			//console.log(directory.nbre_criteres);
+			for (var pourcentage = directory.nbre_choix; pourcentage >= 0; pourcentage--) {
 				for (var i = 0; i < arr_temp.length; i++) {
 					if (directory.nbre_criteres[arr_temp[i].attributes.num_nom] == pourcentage) {
-						arr_temp[i].attributes.pourcentage = pourcentage + '/' + directory.liste.total;
+						arr_temp[i].attributes.pourcentage = pourcentage + '/' + directory.nbre_choix;
 						arr_especes.push(arr_temp[i]);
 					}
 				}
@@ -1148,7 +1134,7 @@ directory.views.EspeceListView = Backbone.View.extend({
 				var index_liste = $.inArray(arr_temp[i].attributes.num_nom, directory.liste),
 					index_criteres = (typeof directory.nbre_criteres[arr_temp[i].attributes.num_nom] === 'undefined') ? -1 : 0;
 				if (index_liste == -1 && index_criteres == -1) {
-					arr_temp[i].attributes.pourcentage = 0 + '/' + directory.liste.total;
+					arr_temp[i].attributes.pourcentage = 0 + '/' + directory.nbre_choix;
 					arr_especes.push(arr_temp[i]);
 				}
 			}
@@ -1459,6 +1445,7 @@ directory.pheno['fructification'] = new Array();
 directory.pheno.liste = new Array();
 directory.nbre_criteres = new Array();
 directory.nbre_especes = null;
+directory.nbre_choix = null;
 directory.parcours = new Array();
 
 
@@ -1475,7 +1462,8 @@ directory.Router = Backbone.Router.extend({
 		'obs/:id_espece/:nom_sci' : 'nouvelleObs',
 		'observation/:id_obs' : 'detailsObs',
 		'transmission' : 'transmissionObs',
-		'compte' : 'compteUtilisateur'
+		'compte' : 'compteUtilisateur',
+		'profil/:nom_parcours' : 'compteDebutant'
 	},
 	
 	initialize: function() {
@@ -1720,6 +1708,7 @@ directory.Router = Backbone.Router.extend({
 			//console.log(arr_ids, directory.pheno.liste);
 			
 			if (nbre_choix > 0) {
+				$('#resultats-recherche').removeClass('hide');
 				var sql_conditions = '',
 					index = (id_parcours == 0) ? 0 : 1; 
 				for (var i = index; i < arr_ids.length; i++) {
@@ -1761,7 +1750,7 @@ directory.Router = Backbone.Router.extend({
 						sql_and + 
 						"GROUP BY num_nom " +
 						"ORDER BY " + sql_order_by + "nom_vernaculaire ASC " ;
-					console.log(sql, arr_ids);
+					//console.log(sql, arr_ids);
 					ta.executeSql(sql, arr_ids, function(tx, results) {
 						var nbre = results.rows.length,
 							arr_pheno = directory.pheno.liste;
@@ -1781,12 +1770,12 @@ directory.Router = Backbone.Router.extend({
 							if (directory.nbre_criteres[criteres[i]] == nbre_choix) {
 								directory.nbre_especes++;
 							}
-							directory.liste = criteres;
-							directory.liste.total = nbre_choix;
-							console.log(directory.liste);
-							console.log(directory.nbre_criteres, nbre_choix);
-							$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
 						}
+						directory.liste = criteres;
+						directory.nbre_choix = nbre_choix;
+						console.log(directory.liste);
+						console.log(directory.nbre_criteres, nbre_choix);
+						$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
 						
 						
 						var j = 0;
@@ -1853,7 +1842,7 @@ directory.Router = Backbone.Router.extend({
 									$('#resultats-recherche').html(' ' + directory.nbre_especes + ' ');
 								}
 								directory.liste = criteres;
-								directory.liste.total = nbre_choix;
+								directory.nbre_choix = nbre_choix;
 								console.log(directory.liste);
 								console.log(directory.nbre_criteres, nbre_choix);
 							});
@@ -1868,12 +1857,14 @@ directory.Router = Backbone.Router.extend({
 				directory.criteria = new Array();
 				directory.nbre_criteres = new Array();
 				directory.nbre_especes = null;
-				$('#resultats-recherche').html('');
+				directory.nbre_choix = null;
+				$('#resultats-recherche').addClass('hide');
+				$('#resultats-recherche').html(' ');
 			}
 		});
 		
 		
-		$('#content').on('click', '#criteres-reset', function(event) {			
+		$('#content').on('click', '.criteres-reset', function(event) {			
 			var parent = document.getElementById('criteres-liste'),
 				inputs = parent.getElementsByTagName('input');
 				
@@ -1885,7 +1876,9 @@ directory.Router = Backbone.Router.extend({
 			directory.criteria = new Array();
 			directory.nbre_criteres = new Array();
 			directory.nbre_especes = null;
-			$('#resultats-recherche').html('');
+			directory.nbre_choix = null;
+			$('#resultats-recherche').addClass('hide');
+			$('#resultats-recherche').html(' ');
 		});
 		
 		
@@ -2149,13 +2142,17 @@ directory.Router = Backbone.Router.extend({
 			}
 		});
 	},
-	
+
 	transmissionObs: function(data) {
 		this.slidePage(new directory.views.transmissionObs().render());
 	},
 	
 	compteUtilisateur: function(data) {
 		this.slidePage(new directory.views.comptePage().render());
+	},
+	
+	compteDebutant: function(data) {
+		console.log(data);
 	},
 	
 

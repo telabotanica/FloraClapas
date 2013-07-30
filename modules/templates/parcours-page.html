@@ -2,12 +2,12 @@
 	<a href="#" class="header-button header-button-left header-back-button">
 		<button>Retour</button>
 	</a>
-	<a href="#parcours" class="header-button header-button-icon header-button-right search" id="view-home-refresh">
-		<button>Liste des parcours</button>
+	<a href="#" class="header-button header-button-icon header-button-right" >
+		<button>Accueil</button>
 	</a>
 </div>
 
-<div class="row-fluid">
+<div class="row-fluid tableview">
 	<h4 class="text-center"><i><%= nom %></i></h4>
 	
 	<div class="description-parcours">
@@ -36,7 +36,7 @@
 				</button>
 			</a>
 			<br />
-			Espèces trouvées : <%= total %>
+			Espèces trouvées :
 		</div>
 		<hr class="fine"/>
 		<%= description %>
@@ -49,7 +49,7 @@
 		<li class="active span4"><a href="#parcours/<%= id %>">Parcours</a></li>
 		<li class="span3"><a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">Liste</a></li>
 		<li class="span2"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>"><i class="icon-search icon-white"></i></a></li>
-		<li class="span2"><a href="#transmission"><i class="icon-user icon-white"></i></a></li>
+		<li class="span2"><a href="#profil/<%= nom %>"><i class="icon-user icon-white"></i></a></li>
 	</ul>
 </div>
 

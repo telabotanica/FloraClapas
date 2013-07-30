@@ -3,6 +3,9 @@
 		<button>Retour</button>
 	</a>
 	<h1><i><%= nom_parcours %></i></h1>
+	<a href="#" class="header-button header-button-icon header-button-right" >
+		<button>Accueil</button>
+	</a>
 </div>
 
 <div class="scroll striped">
@@ -15,7 +18,9 @@
 			<li class="span4"><a href="#<%= lien_parcours %>">Parcours</a></li>
 			<li class="active span3"><a href="#liste/<%= id_parcours %>/<%= nom_parcours %>/<%= id_critere %>">Liste</a></li>
 			<li class="span2"><a href="#clef/<%= id_parcours %>/<%= nom_parcours %>/<%= id_critere %>"><i class="icon-search icon-white"></i></a></li>
-			<li class="span2"><a href="#transmission"><i class="icon-user icon-white"></i></a></li>
+			<li class="span2">
+				<a href="#<%= lien_profil %>/<%= nom_parcours %>"><i class="icon-user icon-white"></i></a>
+			</li>
 		</ul>
 	</div>
 </div>

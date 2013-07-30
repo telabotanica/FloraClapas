@@ -7,18 +7,19 @@
 
 <div class="text-center">
 	<a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>" class="btn btn-primary">Afficher les résultats</a>
-	<button id="criteres-reset" class="btn btn-warning">Réinitialiser la clef</button>
+	<button class="btn btn-warning criteres-reset">Réinitialiser la clef</button>
 </div>
 
 <div id="criteres-liste" class="margin-navbar"></div>
 
 <div class="navbar navbar-fixed-bottom">
+	<% var classe = (total != null) ? '' : 'hide'; %>
+	<small id="resultats-recherche" class="pull-right badge badge-important <%= classe %>"> <%= total %> </small>
 	<ul class="nav parc-nav row-fluid">
-		<li class="span5"><a href="#" class="header-back-button">Retour liste</a></li>
-		<li class="active span3"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>">Clef</a></li>
+		<li class="span5"><a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>" class="criteres-reset">Retour liste</a></li>
+		<li class="active span3"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>"><i class="icon-search"></i></a></li>
 		<li class="span4">
 			<a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">
-				<small id="resultats-recherche" class="pull-right badge badge-important"> <%= total %> </small>
 				Résultats
 			</a>
 		</li>
