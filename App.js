@@ -1,6 +1,5 @@
-"use strict";
+'use strict';
 
-// Creating the application namespace
 var directory = {
 	models: {},
 	views: {},
@@ -23,7 +22,6 @@ directory.utils.templateLoader = {
 				self.templates[name] = data;
 			}));
 		});
-		
 		$.when.apply(null, deferreds).done(callback);
 	},
 	
@@ -40,95 +38,88 @@ directory.dao.ParcoursDAO = function(db) {
 };
 _.extend(directory.dao.ParcoursDAO.prototype, {
 	findByName: function(key, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte " +
-					"FROM parcours " +
-					"WHERE nom LIKE ? " +
-					"ORDER BY nom";
-				tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
-					var len = results.rows.length,
-						parcours = [],
-						i = 0;
-					for (; i < len; i = i + 1) {
-						parcours[i] = results.rows.item(i);
-					}
-					callback(parcours);
-				});
-			},
-			function(tx, error) {
-				alert('Transaction Error: ' + error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, ce_critere " +
+				"FROM parcours " +
+				"WHERE nom LIKE ? " +
+				"ORDER BY nom";
+			tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
+				var len = results.rows.length,
+					parcours = [],
+					i = 0;
+				for (; i < len; i = i + 1) {
+					parcours[i] = results.rows.item(i);
+				}
+				callback(parcours);
+			});
+		},
+		function(tx, error) {
+			alert('Transaction Error: ' + error);
+		});
 	},
 	
 	findById: function(id, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos, ce_critere, est_commence " +
-					"FROM parcours " +
-					"WHERE id = :id_parcours";
-				tx.executeSql(sql, [id], function(tx, results) {
-					callback(results.rows.length === 1 ? results.rows.item(0) : null);
-				});
-			},
-			function(tx, error) {
-				alert('Transaction Error: ' + error);
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos, ce_critere, est_commence " +
+				"FROM parcours " +
+				"WHERE id = :id_parcours";
+			tx.executeSql(sql, [id], function(tx, results) {
+				callback(results.rows.length === 1 ? results.rows.item(0) : null);
+			});
+		},
+		function(tx, error) {
+			alert('Transaction Error: ' + error);
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	findAll: function(callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos " +
-					"FROM parcours";
-				tx.executeSql(sql, [], function(tx, results) {
-					callback(results.rows.item);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos " +
+				"FROM parcours";
+			tx.executeSql(sql, [], function(tx, results) {
+				callback(results.rows.item);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	populate: function(callback) {
-		directory.db.transaction(
-			function(tx) {
-				console.log('Dropping PARCOURS table');
-				tx.executeSql('DROP TABLE IF EXISTS parcours');
-				var sql =
-					"CREATE TABLE IF NOT EXISTS parcours (" +
-						"id INT NOT NULL ," +
-						"nom VARCHAR(255) NOT NULL ," +
-						"latitude_centre DECIMAL NULL ," +
-						"longitude_centre DECIMAL NULL ," +
-						"fichier_carte VARCHAR(255) NULL ," +
-						"photos VARCHAR(255) NULL ," +
-						"description TEXT NULL ," +
-						"est_commence BOOLEAN NULL , " +
-						"ce_critere INT NULL ," +
-					"PRIMARY KEY (id)," +
-					"CONSTRAINT ce_critere " +
-						"FOREIGN KEY (ce_critere)" +
-						"REFERENCES critere (id_critere)" + 
-						"ON DELETE NO ACTION " + 
-						"ON UPDATE NO ACTION " + 
-					")";
-				console.log('Creating PARCOURS table');
-				tx.executeSql(sql);
-			},
-			function(error) {
-				//alert('Transaction error ' + error);
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			},
-			function(tx) {	}
-		);
+		directory.db.transaction(function(tx) {
+			console.log('Dropping PARCOURS table');
+			tx.executeSql('DROP TABLE IF EXISTS parcours');
+			var sql =
+				"CREATE TABLE IF NOT EXISTS parcours (" +
+					"id INT NOT NULL ," +
+					"nom VARCHAR(255) NOT NULL ," +
+					"latitude_centre DECIMAL NULL ," +
+					"longitude_centre DECIMAL NULL ," +
+					"fichier_carte VARCHAR(255) NULL ," +
+					"photos VARCHAR(255) NULL ," +
+					"description TEXT NULL ," +
+					"est_commence BOOLEAN NULL , " +
+					"ce_critere INT NULL ," +
+				"PRIMARY KEY (id)," +
+				"CONSTRAINT ce_critere " +
+					"FOREIGN KEY (ce_critere)" +
+					"REFERENCES critere (id_critere)" + 
+					"ON DELETE NO ACTION " + 
+					"ON UPDATE NO ACTION " + 
+				")";
+			console.log('Creating PARCOURS table');
+			tx.executeSql(sql);
+		},
+		function(error) {
+			//alert('Transaction error ' + error);
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		},
+		function(tx) {	});
+		
 		console.log('Inserting parcours');
 		$.ajax({
 			type: 'GET',
@@ -175,156 +166,143 @@ directory.dao.EspeceDAO = function(db) {
 };
 _.extend(directory.dao.EspeceDAO.prototype, {
 	findByName: function(key, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT num_nom, nom_sci, famille, nom_vernaculaire,  photos " +
-					"FROM espece " + 
-					"WHERE nom_sci || ' ' || nom_vernaculaire || ' ' || famille LIKE ? " +
-					"ORDER BY nom_vernaculaire";
-				tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
-					var len = results.rows.length,
-						especes = [],
-						i = 0;
-					for (; i < len; i = i + 1) {
-						especes[i] = results.rows.item(i);
-					}
-					callback(especes);
-				});
-			},
-			function(tx, error) {
-				alert('Transaction Error: ' + error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT num_nom, nom_sci, famille, nom_vernaculaire,  photos " +
+				"FROM espece " + 
+				"WHERE nom_sci || ' ' || nom_vernaculaire || ' ' || famille LIKE ? " +
+				"ORDER BY nom_vernaculaire";
+			tx.executeSql(sql, ['%' + key + '%'], function(tx, results) {
+				var len = results.rows.length,
+					especes = [],
+					i = 0;
+				for (; i < len; i = i + 1) {
+					especes[i] = results.rows.item(i);
+				}
+				callback(especes);
+			});
+		},
+		function(tx, error) {
+			alert('Transaction Error: ' + error);
+		});
 	},
 	
 	findById: function(id, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT num_nom, nom_sci, famille, nom_vernaculaire, description, photos, referentiel, famille, num_taxon " +
-					"FROM espece " +
-					"WHERE num_nom = :id_espece";
-				tx.executeSql(sql, [id], function(tx, results) {
-					callback(results.rows.length === 1 ? results.rows.item(0) : null);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT num_nom, nom_sci, famille, nom_vernaculaire, description, photos, referentiel, famille, num_taxon " +
+				"FROM espece " +
+				"WHERE num_nom = :id_espece";
+			tx.executeSql(sql, [id], function(tx, results) {
+				callback(results.rows.length === 1 ? results.rows.item(0) : null);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	findByParcours: function(id, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT e.num_nom, e.nom_sci, e.famille, e.nom_vernaculaire, e.photos, c.vue " +
-					"FROM espece e " +
-					"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
-					"WHERE c.id_critere = :id_parcours " + 
-					"ORDER BY nom_vernaculaire";
-				tx.executeSql(sql, [id], function(tx, results) {
-					var nbre = results.rows.length,
-						especes = [],
-						i = 0;
-					for (; i < nbre; i = i + 1) {
-						especes[i] = results.rows.item(i);
-					}
-					callback(especes);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT e.num_nom, e.nom_sci, e.famille, e.nom_vernaculaire, e.photos, c.vue " +
+				"FROM espece e " +
+				"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
+				"WHERE c.id_critere = :id_parcours " + 
+				"ORDER BY nom_vernaculaire";
+			tx.executeSql(sql, [id], function(tx, results) {
+				var nbre = results.rows.length,
+					especes = [],
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					especes[i] = results.rows.item(i);
+				}
+				callback(especes);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 
 	countVueByParcours: function(id, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT count(e.num_nom) AS nbre_vues " +
-					"FROM espece e " +
-					"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
-					"WHERE c.id_critere = :id_parcours " + 
-					"AND vue = 1";
-				tx.executeSql(sql, [id], function(tx, results) {
-					//console.log(sql, id);
-					callback(results.rows.length === 1 ? results.rows.item(0) : null);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT count(e.num_nom) AS nbre_vues " +
+				"FROM espece e " +
+				"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
+				"WHERE c.id_critere = :id_parcours " + 
+				"AND vue = 1";
+			tx.executeSql(sql, [id], function(tx, results) {
+				//console.log(sql, id);
+				callback(results.rows.length === 1 ? results.rows.item(0) : null);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	countByParcours: function(id, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT count(e.num_nom) AS total " +
-					"FROM espece e " +
-					"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
-					"WHERE c.id_critere = :id_parcours ";
-				tx.executeSql(sql, [id], function(tx, results) {
-					//console.log(sql, id);
-					callback(results.rows.length === 1 ? results.rows.item(0) : null);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT count(e.num_nom) AS total " +
+				"FROM espece e " +
+				"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
+				"WHERE c.id_critere = :id_parcours ";
+			tx.executeSql(sql, [id], function(tx, results) {
+				//console.log(sql, id);
+				callback(results.rows.length === 1 ? results.rows.item(0) : null);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	findAll: function(callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT num_nom, nom_sci, famille, nom_vernaculaire, photos " +
-					"FROM espece " +
-					"ORDER BY nom_vernaculaire";
-				tx.executeSql(sql, [], function(tx, results) {
-					 var nbre = results.rows.length,
-						especes = [],
-						i = 0;
-					for (; i < nbre; i = i + 1) {
-						especes[i] = results.rows.item(i);
-					}
-					callback(especes);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT num_nom, nom_sci, famille, nom_vernaculaire, photos " +
+				"FROM espece " +
+				"ORDER BY nom_vernaculaire";
+			tx.executeSql(sql, [], function(tx, results) {
+				 var nbre = results.rows.length,
+					especes = [],
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					especes[i] = results.rows.item(i);
+				}
+				callback(especes);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	populate: function(callback) {
-		directory.db.transaction(
-			function(tx) {
-				console.log('Dropping ESPECE table');
-				tx.executeSql('DROP TABLE IF EXISTS espece');
-				var sql =
-					"CREATE TABLE IF NOT EXISTS espece (" +
-						"num_nom INT NOT NULL ," +
-						"nom_sci VARCHAR(255) NOT NULL ," +
-						"famille VARCHAR(255) NULL ," +
-						"num_taxon INT NULL ," +
-						"referentiel VARCHAR(45) NOT NULL DEFAULT 'bdtfx' ," +
-						"nom_vernaculaire VARCHAR(255) NULL ," +
-						"description TEXT NULL ," +
-						"photos VARCHAR(255) NULL ," +
-					"PRIMARY KEY (num_nom) )";
-				console.log('Creating ESPECE table');
-				tx.executeSql(sql);
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			},
-			function(tx) {	}
-		);
+		directory.db.transaction(function(tx) {
+			console.log('Dropping ESPECE table');
+			tx.executeSql('DROP TABLE IF EXISTS espece');
+			var sql =
+				"CREATE TABLE IF NOT EXISTS espece (" +
+					"num_nom INT NOT NULL ," +
+					"nom_sci VARCHAR(255) NOT NULL ," +
+					"famille VARCHAR(255) NULL ," +
+					"num_taxon INT NULL ," +
+					"referentiel VARCHAR(45) NOT NULL DEFAULT 'bdtfx' ," +
+					"nom_vernaculaire VARCHAR(255) NULL ," +
+					"description TEXT NULL ," +
+					"photos VARCHAR(255) NULL ," +
+				"PRIMARY KEY (num_nom) )";
+			console.log('Creating ESPECE table');
+			tx.executeSql(sql);
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		},
+		function(tx) {	});
+		
 		console.log('Inserting espece');
 		$.ajax({
 			type: 'GET',
@@ -350,17 +328,15 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 					);
 				}
 				//console.log(arr_sql);
-				directory.db.transaction(
-					function (tx) {
-						for (var c = 0; c < arr_sql.length; c++) {
-							tx.executeSql(arr_sql[c]);
-						}
-					}, 
-					function(error) {
-						console.log('DB | Error processing SQL: ' + error.code, error);
-					},
-					function(tx) {	}
-				);
+				directory.db.transaction(function (tx) {
+					for (var c = 0; c < arr_sql.length; c++) {
+						tx.executeSql(arr_sql[c]);
+					}
+				}, 
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				},
+				function(tx) {	});
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				console.log(textStatus);
@@ -377,62 +353,59 @@ directory.dao.CritereDAO = function(db) {
 };
 _.extend(directory.dao.CritereDAO.prototype, {
 	findAll: function(callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-						"SELECT c.id_critere, intitule, url_img, ce_parent FROM critere c " +
-						"WHERE ce_parent NOT IN ( " +
-							"SELECT id_critere FROM critere " +
-							"WHERE intitule LIKE '%parcours%' " + 
-						") " + 
-						"AND ce_parent NOT IN ( " +
-							"SELECT id_critere FROM critere " +
-							"WHERE intitule LIKE '%pheno%' " + 
-						") " + 
-						"AND intitule NOT LIKE '%parcours%' " +
-						"AND intitule NOT LIKE '%pheno%' ";
-				tx.executeSql(sql, [], function(tx, results) {
-					var nbre = results.rows.length,
-						criteres = [],
-						i = 0;
-					for (; i < nbre; i = i + 1) {
-						criteres[i] = results.rows.item(i);
-					}
-					callback(criteres);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+					"SELECT c.id_critere, intitule, url_img, ce_parent FROM critere c " +
+					"WHERE ce_parent NOT IN ( " +
+						"SELECT id_critere FROM critere " +
+						"WHERE intitule LIKE '%parcours%' " + 
+					") " + 
+					"AND ce_parent NOT IN ( " +
+						"SELECT id_critere FROM critere " +
+						"WHERE intitule LIKE '%pheno%' " + 
+					") " + 
+					"AND intitule NOT LIKE '%parcours%' " +
+					"AND intitule NOT LIKE '%pheno%' ";
+			tx.executeSql(sql, [], function(tx, results) {
+				var nbre = results.rows.length,
+					criteres = [],
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					criteres[i] = results.rows.item(i);
+				}
+				callback(criteres);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	populate: function(callback) {
-		this.db.transaction(
-			function(tx) {
-				console.log('Dropping CRITERE table');
-				tx.executeSql('DROP TABLE IF EXISTS critere');
-				var sql =
-					"CREATE TABLE IF NOT EXISTS critere (" +
-						"id_critere INT NOT NULL ," +
-						"intitule VARCHAR(45) NOT NULL ," +
-						"url_img VARCHAR(45) NULL ," +
-						"ce_parent INT NULL ," +
-						"PRIMARY KEY (id_critere) ," +
-						"CONSTRAINT ce_parent " +
-							"FOREIGN KEY (ce_parent)" +
-							"REFERENCES critere (id_critere)" + 
-							"ON DELETE NO ACTION " + 
-							"ON UPDATE NO ACTION " + 
-					")";
-				console.log('Creating CRITERE table');
-				tx.executeSql(sql);
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			},
-			function(tx) {	}
-		);
+		this.db.transaction(function(tx) {
+			console.log('Dropping CRITERE table');
+			tx.executeSql('DROP TABLE IF EXISTS critere');
+			var sql =
+				"CREATE TABLE IF NOT EXISTS critere (" +
+					"id_critere INT NOT NULL ," +
+					"intitule VARCHAR(45) NOT NULL ," +
+					"url_img VARCHAR(45) NULL ," +
+					"ce_parent INT NULL ," +
+					"PRIMARY KEY (id_critere) ," +
+					"CONSTRAINT ce_parent " +
+						"FOREIGN KEY (ce_parent)" +
+						"REFERENCES critere (id_critere)" + 
+						"ON DELETE NO ACTION " + 
+						"ON UPDATE NO ACTION " + 
+				")";
+			console.log('Creating CRITERE table');
+			tx.executeSql(sql);
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		},
+		function(tx) {	});
+		
 		console.log('Inserting critere');
 		$.ajax({
 			type: 'GET',
@@ -454,20 +427,18 @@ _.extend(directory.dao.CritereDAO.prototype, {
 					arr_sql.push(sql);
 				}
 				//console.log(arr_sql);
-				directory.db.transaction(
-					function (tx) {
-						for (var c = 0; c < arr_sql.length; c++) {
-							tx.executeSql(
-								"INSERT INTO critere " +
-								"(id_critere, intitule, url_img, ce_parent) VALUES (" + arr_sql[c] + ")"
-							);
-						}
-					}, 
-					function(error) {
-						console.log('DB | Error processing SQL: ' + error.code, error);
-					},
-					function(tx) {	}
-				);
+				directory.db.transaction(function (tx) {
+					for (var c = 0; c < arr_sql.length; c++) {
+						tx.executeSql(
+							"INSERT INTO critere " +
+							"(id_critere, intitule, url_img, ce_parent) VALUES (" + arr_sql[c] + ")"
+						);
+					}
+				}, 
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				},
+				function(tx) {	});
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				console.log(textStatus);
@@ -484,35 +455,34 @@ directory.dao.AvoirCritereDAO = function(db) {
 };
 _.extend(directory.dao.AvoirCritereDAO.prototype, {
 	populate: function(callback) {
-		directory.db.transaction(
-			function(tx) {
-				console.log('Dropping AVOIR_CRITERE table');
-				tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
-				var sql =
-					"CREATE TABLE IF NOT EXISTS avoir_critere (" +
-						"id_espece INT NOT NULL ," +
-						"id_critere INT NOT NULL ," +
-						"vue BOOLEAN NULL ," +
-						"PRIMARY KEY (id_espece, id_critere) , " +
-						"CONSTRAINT id_critere " + 
-							"FOREIGN KEY (id_critere)" +
-							"REFERENCES critere (id_critere) " +
-							"ON DELETE NO ACTION " +
-							"ON UPDATE NO ACTION," +
-						"CONSTRAINT id_espece " +
-							"FOREIGN KEY (id_espece)" +
-							"REFERENCES espece (num_nom)" +
-							"ON DELETE NO ACTION " + 
-							"ON UPDATE NO ACTION " + 
-					")";
-				console.log('Creating AVOIR_CRITERE table');
-				tx.executeSql(sql);
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			},
-			function(tx) {	}
-		);
+		directory.db.transaction(function(tx) {
+			console.log('Dropping AVOIR_CRITERE table');
+			tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
+			var sql =
+				"CREATE TABLE IF NOT EXISTS avoir_critere (" +
+					"id_espece INT NOT NULL ," +
+					"id_critere INT NOT NULL ," +
+					"vue BOOLEAN NULL ," +
+					"PRIMARY KEY (id_espece, id_critere) , " +
+					"CONSTRAINT id_critere " + 
+						"FOREIGN KEY (id_critere)" +
+						"REFERENCES critere (id_critere) " +
+						"ON DELETE NO ACTION " +
+						"ON UPDATE NO ACTION," +
+					"CONSTRAINT id_espece " +
+						"FOREIGN KEY (id_espece)" +
+						"REFERENCES espece (num_nom)" +
+						"ON DELETE NO ACTION " + 
+						"ON UPDATE NO ACTION " + 
+				")";
+			console.log('Creating AVOIR_CRITERE table');
+			tx.executeSql(sql);
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		},
+		function(tx) {	});
+		
 		console.log('Inserting avoir_critere');
 		$.ajax( {
 			type: 'GET',
@@ -536,20 +506,18 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 					}
 				}
 				//console.log(arr_sql);
-				directory.db.transaction(
-					function (tx) {
-						for (var c = 0; c < arr_sql.length; c++) {
-							tx.executeSql(
-								"INSERT INTO avoir_critere " +
-								"(id_espece, id_critere) VALUES (" + arr_sql[c] + ")"
-							);
-						}
-					}, 
-					function(error) {
-						console.log('DB | Error processing SQL: ' + error.code, error);
-					},
-					function(tx) {	}
-				);
+				directory.db.transaction(function (tx) {
+					for (var c = 0; c < arr_sql.length; c++) {
+						tx.executeSql(
+							"INSERT INTO avoir_critere " +
+							"(id_espece, id_critere) VALUES (" + arr_sql[c] + ")"
+						);
+					}
+				}, 
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				},
+				function(tx) {	});
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				console.log(textStatus);
@@ -566,103 +534,95 @@ directory.dao.ObsDAO = function(db) {
 };
 _.extend(directory.dao.ObsDAO.prototype, {
 	findById: function(id, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee " +
-					"FROM espece e " +
-					"JOIN obs o ON e.num_nom = o.ce_espece " +
-					"WHERE id_obs = :id_obs";
-				tx.executeSql(sql, [id], function(tx, results) {
-					callback(results.rows.length === 1 ? results.rows.item(0) : null);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee " +
+				"FROM espece e " +
+				"JOIN obs o ON e.num_nom = o.ce_espece " +
+				"WHERE id_obs = :id_obs";
+			tx.executeSql(sql, [id], function(tx, results) {
+				callback(results.rows.length === 1 ? results.rows.item(0) : null);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	findAll: function(callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee, a_ete_transmise " +
-					"FROM espece " +
-					"JOIN obs ON num_nom = ce_espece " +
-					"ORDER BY a_ete_transmise ASC, id_obs DESC";
-				tx.executeSql(sql, [], function(tx, results) {
-					 var nbre = results.rows.length,
-						especes = [],
-						i = 0;
-					for (; i < nbre; i = i + 1) {
-						especes[i] = results.rows.item(i);
-					}
-					callback(especes);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT num_nom, nom_sci, nom_vernaculaire, id_obs, date, commune, code_insee, a_ete_transmise " +
+				"FROM espece " +
+				"JOIN obs ON num_nom = ce_espece " +
+				"ORDER BY a_ete_transmise ASC, id_obs DESC";
+			tx.executeSql(sql, [], function(tx, results) {
+				 var nbre = results.rows.length,
+					especes = [],
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					especes[i] = results.rows.item(i);
+				}
+				callback(especes);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	findForTransmission: function(callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT num_nom, nom_sci, num_taxon, famille, referentiel, " + 
-							"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
-					"FROM espece " +
-					"JOIN obs ON num_nom = ce_espece " +
-					"ORDER BY id_obs DESC";
-				tx.executeSql(sql, [], function(tx, results) {
-					 var nbre = results.rows.length,
-						obs = [],
-						i = 0;
-					for (; i < nbre; i = i + 1) {
-						obs[i] = results.rows.item(i);
-					}
-					callback(obs);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT num_nom, nom_sci, num_taxon, famille, referentiel, " + 
+						"id_obs, latitude, longitude, date, commune, code_insee, mise_a_jour " +
+				"FROM espece " +
+				"JOIN obs ON num_nom = ce_espece " +
+				"ORDER BY id_obs DESC";
+			tx.executeSql(sql, [], function(tx, results) {
+				 var nbre = results.rows.length,
+					obs = [],
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					obs[i] = results.rows.item(i);
+				}
+				callback(obs);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	populate: function(callback) {
-		directory.db.transaction(
-			function(tx) {
-				//console.log('Dropping OBS table');
-				//tx.executeSql('DROP TABLE IF EXISTS obs');
-				var sql =
-					"CREATE TABLE IF NOT EXISTS obs (" +
-						"id_obs INT NOT NULL ,"+
-						"date DATE NOT NULL ," +
-						"latitude DECIMAL NULL ," +
-						"longitude DECIMAL NULL ," +
-						"commune VARCHAR(255) NULL ," +
-						"code_insee INT NULL ," +
-						"mise_a_jour TINYINT(1) NOT NULL DEFAULT 0 ," +
-						"a_ete_transmise TINYINT(1) NOT NULL DEFAULT 0 ," +
-						"ce_espece INT NOT NULL," +
-						"PRIMARY KEY (id_obs)," +
-						"CONSTRAINT ce_espece " +
-							"FOREIGN KEY (ce_espece)" +
-							"REFERENCES espece (num_nom)" +
-							"ON DELETE NO ACTION " +
-							"ON UPDATE NO ACTION " +
-					")";
-				console.log('Creating OBS table');
-				tx.executeSql(sql);
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			},
-			function(tx) {	}
-		);
+		directory.db.transaction(function(tx) {
+			//console.log('Dropping OBS table');
+			//tx.executeSql('DROP TABLE IF EXISTS obs');
+			var sql =
+				"CREATE TABLE IF NOT EXISTS obs (" +
+					"id_obs INT NOT NULL ,"+
+					"date DATE NOT NULL ," +
+					"latitude DECIMAL NULL ," +
+					"longitude DECIMAL NULL ," +
+					"commune VARCHAR(255) NULL ," +
+					"code_insee INT NULL ," +
+					"mise_a_jour TINYINT(1) NOT NULL DEFAULT 0 ," +
+					"a_ete_transmise TINYINT(1) NOT NULL DEFAULT 0 ," +
+					"ce_espece INT NOT NULL," +
+					"PRIMARY KEY (id_obs)," +
+					"CONSTRAINT ce_espece " +
+						"FOREIGN KEY (ce_espece)" +
+						"REFERENCES espece (num_nom)" +
+						"ON DELETE NO ACTION " +
+						"ON UPDATE NO ACTION " +
+				")";
+			console.log('Creating OBS table');
+			tx.executeSql(sql);
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		},
+		function(tx) {	});
 	}
 });
 _.extend(directory.dao.ObsDAO.prototype, directory.dao.baseDAOBD);
@@ -674,54 +634,50 @@ directory.dao.PhotoDAO = function(db) {
 };
 _.extend(directory.dao.PhotoDAO.prototype, {
 	findByObs: function(id, callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT id_photo, chemin " +
-					"FROM photo " +
-					"WHERE ce_obs = :id_obs";
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT id_photo, chemin " +
+				"FROM photo " +
+				"WHERE ce_obs = :id_obs";
 
-				tx.executeSql(sql, [id], function(tx, results) {
-					 var nbre = results.rows.length,
-						photos = [],
-						i = 0;
-					for (; i < nbre; i = i + 1) {
-						photos[i] = results.rows.item(i);
-					}
-					callback(photos);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+			tx.executeSql(sql, [id], function(tx, results) {
+				 var nbre = results.rows.length,
+					photos = [],
+					i = 0;
+				for (; i < nbre; i = i + 1) {
+					photos[i] = results.rows.item(i);
+				}
+				callback(photos);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	populate: function(callback) {
-		directory.db.transaction(
-			function(tx) {
-				//console.log('Dropping PHOTO table');
-				tx.executeSql('DROP TABLE IF EXISTS photo');
-				var sql =
-					"CREATE TABLE IF NOT EXISTS photo (" +
-						"id_photo INT NOT NULL ," +
-						"chemin TEXT NOT NULL ," +
-						"ce_obs INT NOT NULL ," +
-						"PRIMARY KEY (id_photo) ," +
-						"CONSTRAINT ce_obs " +
-							"FOREIGN KEY (ce_obs) " +
-							"REFERENCES obs (id_obs) " +
-							"ON DELETE NO ACTION " + 
-							"ON UPDATE NO ACTION " +
-					")";
-				console.log('Creating PHOTO table');
-				tx.executeSql(sql);
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			},
-			function(tx) {	}
-		);
+		directory.db.transaction(function(tx) {
+			//console.log('Dropping PHOTO table');
+			tx.executeSql('DROP TABLE IF EXISTS photo');
+			var sql =
+				"CREATE TABLE IF NOT EXISTS photo (" +
+					"id_photo INT NOT NULL ," +
+					"chemin TEXT NOT NULL ," +
+					"ce_obs INT NOT NULL ," +
+					"PRIMARY KEY (id_photo) ," +
+					"CONSTRAINT ce_obs " +
+						"FOREIGN KEY (ce_obs) " +
+						"REFERENCES obs (id_obs) " +
+						"ON DELETE NO ACTION " + 
+						"ON UPDATE NO ACTION " +
+				")";
+			console.log('Creating PHOTO table');
+			tx.executeSql(sql);
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		},
+		function(tx) {	});
 	}
 });
 _.extend(directory.dao.PhotoDAO.prototype, directory.dao.baseDAOBD);
@@ -733,45 +689,41 @@ directory.dao.UtilisateurDAO = function(db) {
 };
 _.extend(directory.dao.UtilisateurDAO.prototype, {
 	findOne: function(callback) {
-		this.db.transaction(
-			function(tx) {
-				var sql = 
-					"SELECT id_user, nom, prenom, email, compte_verifie " +
-					"FROM utilisateur " + 
-					"WHERE compte_verifie LIKE 'true' "
-					"ORDER BY id_user DESC";
-				tx.executeSql(sql, [], function(tx, results) {
-					callback(results.rows.length >= 1 ? results.rows.item(0) : null);
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+		this.db.transaction(function(tx) {
+			var sql = 
+				"SELECT id_user, nom, prenom, email, compte_verifie " +
+				"FROM utilisateur " + 
+				"WHERE compte_verifie LIKE 'true' "
+				"ORDER BY id_user DESC";
+			tx.executeSql(sql, [], function(tx, results) {
+				callback(results.rows.length >= 1 ? results.rows.item(0) : null);
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 	},
 	
 	populate: function(callback) {
-		directory.db.transaction(
-			function(tx) {
-				//console.log('Dropping UTILISATEUR table');
-				//tx.executeSql('DROP TABLE IF EXISTS utilisateur');
-				var sql =
-					"CREATE TABLE IF NOT EXISTS utilisateur (" +
-						"id_user INT NOT NULL, " +
-						"nom VARCHAR(255) NULL, " +
-						"prenom VARCHAR(255) NULL, " +
-						"email VARCHAR(255) NOT NULL, " +
-						"compte_verifie BOOLEAN NOT NULL, " +
-						"PRIMARY KEY (id_user) " +
-					")";
-				console.log('Creating UTILISATEUR table');
-				tx.executeSql(sql);
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			},
-			function(tx) {	}
-		);
+		directory.db.transaction(function(tx) {
+			//console.log('Dropping UTILISATEUR table');
+			//tx.executeSql('DROP TABLE IF EXISTS utilisateur');
+			var sql =
+				"CREATE TABLE IF NOT EXISTS utilisateur (" +
+					"id_user INT NOT NULL, " +
+					"nom VARCHAR(255) NULL, " +
+					"prenom VARCHAR(255) NULL, " +
+					"email VARCHAR(255) NOT NULL, " +
+					"compte_verifie BOOLEAN NOT NULL, " +
+					"PRIMARY KEY (id_user) " +
+				")";
+			console.log('Creating UTILISATEUR table');
+			tx.executeSql(sql);
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		},
+		function(tx) {	});
 	}
 });
 _.extend(directory.dao.UtilisateurDAO.prototype, directory.dao.baseDAOBD);
@@ -1061,8 +1013,15 @@ directory.views.ParcoursPage = Backbone.View.extend({
 			}
 		}
 		//console.log(directory.parcours);
-		this.model.attributes.photos = arr_photos;		
-	
+		this.model.attributes.total = null;
+		this.model.attributes.nbre_vues = null;
+		for (var i = 0; i < directory.parcours.length; i++) {
+			if (directory.parcours[i]['ce_critere'] == this.model.attributes.ce_critere) {
+				this.model.attributes.total = directory.parcours[i]['total'];
+				this.model.attributes.nbre_vues = directory.parcours[i]['nbre_vues'];
+			}
+		}
+		this.model.attributes.photos = arr_photos;
 		$(this.el).html(this.template(this.model.toJSON()));
 		return this;
 	}
@@ -1089,7 +1048,7 @@ directory.views.ListPage = Backbone.View.extend({
 	
 	render: function(eventName) {
 		var lien = (this.model.id == 0) ? '' : '/'+this.model.id,
-			profil = (this.model.id == 0) ? 'transmission' : 'profil',
+			profil = (this.model.id == 0) ? 'transmission' : 'profil/'+this.model.name,
 			json = {
 				'nom_parcours' : this.model.name,
 				'id_parcours' : this.model.id,
@@ -1359,7 +1318,7 @@ directory.views.ObsPage = Backbone.View.extend({
 	},
 
 	render: function(eventName) { 	
-		//console.log(this.model);
+		console.log(this.model);
 		var photos = new Array();
 		for (var i = 0; i < this.model.models.length; i++) {
 			photos.push(this.model.models[i].attributes);
@@ -1480,6 +1439,41 @@ directory.Router = Backbone.Router.extend({
 		},
 		function(error) {
 			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
+
+
+		directory.db.transaction(function (tx) {
+			var sql = 
+				"SELECT nom, ce_critere FROM parcours";
+			tx.executeSql(sql, [], function(tx, results) {
+				var nbre = results.rows.length,
+					i = 0;
+				
+				for (; i < nbre; i = i + 1) {
+					var nom = results.rows.item(i).nom,
+						ce_critere = results.rows.item(i).ce_critere,
+						sql_especes = 
+							"SELECT count(id_espece) AS total, COALESCE(NULL, NULL, '" + ce_critere + "') AS parcours " +
+							"FROM avoir_critere " +
+							"WHERE id_critere = " + ce_critere;
+					tx.executeSql(sql_especes, [], function(tx, results) {
+						var nbre = results.rows.length,
+							i = 0;
+						
+						for (; i < nbre; i = i + 1) {
+							var arr_parcours = new Array();
+							arr_parcours['ce_critere'] = results.rows.item(i).parcours;
+							arr_parcours['nbre_vues'] = 0;
+							arr_parcours['total'] = results.rows.item(i).total;
+							directory.parcours.push(arr_parcours);
+						}
+						//console.log(directory.parcours);
+					},
+					function(error) {
+						console.log('DB | Error processing SQL: ' + error.code, error);
+					});
+				}
+			});
 		});
 /*
 		directory.db.transaction(function (tx) {
@@ -1603,6 +1597,14 @@ directory.Router = Backbone.Router.extend({
 		
 		$('#content').on('click', '.choix-parcours', function(event) {
 			var id = this.id;
+			for (var i = 0; i < directory.parcours.length; i++) {
+				if (directory.parcours[i]['ce_critere'] == id) {
+					if (directory.parcours[i]['nbre_vues'] != 0) {
+						$('#parcours-modal').modal('show');	
+					}
+				}
+			}
+			/*
 			directory.db.transaction(function(tx) {
 				var sql =
 					"SELECT est_commence " +
@@ -1627,6 +1629,7 @@ directory.Router = Backbone.Router.extend({
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
 			});
+			*/
 		});
 		
 		$('#content').on('click', '.vue-espece', function(event) {
@@ -1641,7 +1644,16 @@ directory.Router = Backbone.Router.extend({
 						"SET vue = 1 " +
 						"WHERE id_espece = :num_nom " +
 						"AND id_critere = :ce_critere";
-				tx.executeSql(sql, [num_nom, ce_critere]);
+				tx.executeSql(sql, [num_nom, ce_critere], function(tx, results) {
+					for (var i = 0; i < directory.parcours.length; i++) {
+						if (directory.parcours[i]['ce_critere'] == ce_critere) {
+							directory.parcours[i]['nbre_vues'] += 1;
+							if (directory.parcours[i]['nbre_vues'] == directory.parcours[i]['total']) {
+								$('.toutes-vues').removeClass('hide');
+							}
+						}
+					}
+				});
 			},
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
@@ -1996,6 +2008,9 @@ directory.Router = Backbone.Router.extend({
 				
 				$('#elt_'+id).remove();
 				$('#nbre-photos').html($('#nbre-photos').html()-1);
+				if (nbre_photos < LIMITE_NBRE_PHOTOS) {
+					$('#prendre-photos').removeClass('hide');
+				}
 			},
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
@@ -2324,6 +2339,9 @@ function surPhotoSuccesCopie(entry) {
 		$('#obs-photos').append(elt);
 		$('#nbre-photos').html(nbre_photos);
 		$('#prendre-photos').button('another');
+		if (nbre_photos == LIMITE_NBRE_PHOTOS) {
+			$('#prendre-photos').addClass('hide');
+		}
 	},
 	surPhotoErreurAjout);
 }
