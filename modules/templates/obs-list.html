@@ -11,7 +11,9 @@
 <div id="obs-suppression-infos" class="text-center alert alert-success alert-block hide"></div>
 <div class="row-fluid">
 	<div class="tableview tableview-links margin-navbar">
-		<h4 class="text-center"> Observations à transmettre : <%= obs.length %> </h4>	
+		<h4 class="text-center"> 
+			Observations à transmettre : <span id="nbre-a-transmettre"> <%= obs.length %> </span>
+		</h4>	
 		<% if (obs.length == 0) { %>
 		<% } else { 	
 				var texte = 'Transmettre';
@@ -57,7 +59,9 @@
 		
 		
 		<hr class="fine"/>
-		<h4 class="text-center" > Observations déjà transmises : <%= transmises.length %> </h4>
+		<h4 class="text-center" > 
+			Observations déjà transmises : <span id="nbre-transmises"> <%= transmises.length %> </span>
+		</h4>
 		<% if (transmises.length > 0) { %>
 			<div id="obs-transmises-infos">
 				<button class="btn btn-danger supprimer-obs-transmises pull-right">

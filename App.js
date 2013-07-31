@@ -149,7 +149,11 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 					for (var c = 0; c < arr_sql.length; c++) {
 						tx.executeSql(arr_sql[c]);
 					}
-				});
+				}, 
+				function(error) {
+					console.log('DB | Error processing SQL: ' + error.code, error);
+				},
+				function(tx) {	});
 			},
 			error : function(jqXHR, textStatus, errorThrown) {
 				console.log(textStatus);
@@ -420,7 +424,7 @@ _.extend(directory.dao.CritereDAO.prototype, {
 						arr_valeurs = arr_lignes[i].split(';');
 					for (var j = 0; j < arr_valeurs.length; j++) {
 						sql += arr_valeurs[j];
-						if (j < (arr_valeurs.length - 1)) {
+						if (j < (arr_valeurs.length - 2)) {
 							sql += ',';
 						}
 					}
@@ -457,7 +461,7 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(function(tx) {
 			console.log('Dropping AVOIR_CRITERE table');
-			//tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
+			tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
 			var sql =
 				"CREATE TABLE IF NOT EXISTS avoir_critere (" +
 					"id_espece INT NOT NULL ," +
@@ -1609,6 +1613,7 @@ directory.Router = Backbone.Router.extend({
 						$('#nbre-vues').html('0');
 					}
 				}
+				$('.toutes-vues').addClass('hide');
 			},
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
@@ -2028,9 +2033,7 @@ directory.Router = Backbone.Router.extend({
 				
 				$('#elt_'+id).remove();
 				$('#nbre-photos').html($('#nbre-photos').html()-1);
-				if (nbre_photos < LIMITE_NBRE_PHOTOS) {
-					$('#prendre-photos').removeClass('hide');
-				}
+				$('#prendre-photos').removeClass('hide');
 			},
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
@@ -2039,7 +2042,7 @@ directory.Router = Backbone.Router.extend({
 				$('#obs-photos-info').html('Erreur de suppression dans la base de données.')
 					.fadeIn(0)
 					.delay(1600)
-					.fadeOut('slow');	
+					.fadeOut('slow');
 			});
 		});
 		
