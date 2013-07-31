@@ -457,7 +457,7 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(function(tx) {
 			console.log('Dropping AVOIR_CRITERE table');
-			tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
+			//tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
 			var sql =
 				"CREATE TABLE IF NOT EXISTS avoir_critere (" +
 					"id_espece INT NOT NULL ," +
@@ -1048,7 +1048,7 @@ directory.views.ListPage = Backbone.View.extend({
 	
 	render: function(eventName) {
 		var lien = (this.model.id == 0) ? '' : '/'+this.model.id,
-			profil = (this.model.id == 0) ? 'transmission' : 'profil/'+this.model.name,
+			profil = (this.model.id == 0) ? 'transmission' : 'profil/'+this.model.id+'/	'+this.model.name,
 			json = {
 				'nom_parcours' : this.model.name,
 				'id_parcours' : this.model.id,
@@ -1077,9 +1077,6 @@ directory.views.EspeceListView = Backbone.View.extend({
 			nbre_triees = directory.liste.length;
 			
 		if (directory.nbre_choix != null) {
-			//console.log(arr_temp);
-			//console.log(directory.liste);
-			//console.log(directory.nbre_criteres);
 			for (var pourcentage = directory.nbre_choix; pourcentage >= 0; pourcentage--) {
 				for (var i = 0; i < arr_temp.length; i++) {
 					if (directory.nbre_criteres[arr_temp[i].attributes.num_nom] == pourcentage) {
@@ -1152,26 +1149,24 @@ directory.views.EspecePage = Backbone.View.extend({
 		this.model.attributes.photos = arr_photos;
 		$(this.el).html(this.template(this.model.toJSON()));
 		
-		directory.db.transaction(
-			function(tx) {
-				var sql =
-					"SELECT vue " +
-					"FROM avoir_critere " +
-					"WHERE id_espece = :num_nom " +
-					"AND id_critere = :ce_critere ";
-				tx.executeSql(sql, [num_nom, ce_critere], function(tx, results) {
-					if (results.rows.length != 0) {
-						if (results.rows.item(0).vue == 1) {
-							$('#btn-vue-espece').html('Déjà vue !');
-							$('#btn-vue-espece').addClass('bleu');
-						}
+		directory.db.transaction(function(tx) {
+			var sql =
+				"SELECT vue " +
+				"FROM avoir_critere " +
+				"WHERE id_espece = :num_nom " +
+				"AND id_critere = :ce_critere ";
+			tx.executeSql(sql, [num_nom, ce_critere], function(tx, results) {
+				if (results.rows.length != 0) {
+					if (results.rows.item(0).vue == 1) {
+						$('#btn-vue-espece').html('Déjà vue !');
+						$('#btn-vue-espece').addClass('bleu');
 					}
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			}
-		);
+				}
+			});
+		},
+		function(error) {
+			console.log('DB | Error processing SQL: ' + error.code, error);
+		});
 		return this;
 	}
 });
@@ -1394,6 +1389,34 @@ directory.views.comptePage = Backbone.View.extend({
 });
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vue Page Compte
+directory.views.profilPage = Backbone.View.extend({
+	initialize: function(data) {
+		//console.log(data);
+		for (var i = 0; i < directory.parcours.length; i++) {
+			if (directory.parcours[i]['id'] == data.id) {
+				this.nbre_vues = directory.parcours[i]['nbre_vues'];
+				this.total = directory.parcours[i]['total'];
+			}
+		}
+		this.id = data.id;
+		this.nom = data.nom;
+		this.template = _.template(directory.utils.templateLoader.get('parcours-profil'));
+	},
+	
+	render: function(eventName) {
+		var json = {
+			'id' : this.id,
+			'nom' : this.nom,
+			'total' : this.total,
+			'nbre_vues' : this.nbre_vues
+		}
+		$(this.el).html(this.template(json));
+		return this;
+	}
+});
+
+
 // ------------------------------------------------------ Globals ------------------------------------------------- //
 directory.liste = new Array();
 directory.criteria = new Array();
@@ -1422,7 +1445,7 @@ directory.Router = Backbone.Router.extend({
 		'observation/:id_obs' : 'detailsObs',
 		'transmission' : 'transmissionObs',
 		'compte' : 'compteUtilisateur',
-		'profil/:nom_parcours' : 'compteDebutant'
+		'profil/:id_parcours/:nom_parcours' : 'compteDebutant'
 	},
 	
 	initialize: function() {
@@ -1440,34 +1463,51 @@ directory.Router = Backbone.Router.extend({
 		function(error) {
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		});
-
-
+		
+		
+		
 		directory.db.transaction(function (tx) {
 			var sql = 
-				"SELECT nom, ce_critere FROM parcours";
+				"SELECT id, ce_critere FROM parcours";
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre = results.rows.length,
 					i = 0;
 				
 				for (; i < nbre; i = i + 1) {
-					var nom = results.rows.item(i).nom,
+					var id = results.rows.item(i).id,
 						ce_critere = results.rows.item(i).ce_critere,
-						sql_especes = 
-							"SELECT count(id_espece) AS total, COALESCE(NULL, NULL, '" + ce_critere + "') AS parcours " +
+						sql_total = 
+							"SELECT count(id_espece) AS total, COALESCE(NULL, NULL, '" + ce_critere + "') AS parcours, " +
+							"COALESCE(NULL, NULL, '" + id + "') AS id " +
 							"FROM avoir_critere " +
 							"WHERE id_critere = " + ce_critere;
-					tx.executeSql(sql_especes, [], function(tx, results) {
+					tx.executeSql(sql_total, [], function(tx, results) {
 						var nbre = results.rows.length,
 							i = 0;
 						
 						for (; i < nbre; i = i + 1) {
 							var arr_parcours = new Array();
+							arr_parcours['id'] = results.rows.item(i).id;
 							arr_parcours['ce_critere'] = results.rows.item(i).parcours;
-							arr_parcours['nbre_vues'] = 0;
 							arr_parcours['total'] = results.rows.item(i).total;
 							directory.parcours.push(arr_parcours);
+							
+							var sql_vues = 
+								"SELECT count(id_espece) AS vues, COALESCE(NULL, NULL, '" + arr_parcours['ce_critere'] + "') AS parcours " +
+								"FROM avoir_critere " +
+								"WHERE id_critere = " + arr_parcours['ce_critere'] + " " +
+								"AND vue = 1";
+							tx.executeSql(sql_vues, [], function(tx, results) {
+								for (var i = 0; i < directory.parcours.length; i++) {
+									if (directory.parcours[i]['ce_critere'] == results.rows.item(0).parcours) {
+										directory.parcours[i]['nbre_vues'] = results.rows.item(0).vues;
+									}
+								}
+							},
+							function(error) {
+								console.log('DB | Error processing SQL: ' + error.code, error);
+							});
 						}
-						//console.log(directory.parcours);
 					},
 					function(error) {
 						console.log('DB | Error processing SQL: ' + error.code, error);
@@ -1475,35 +1515,9 @@ directory.Router = Backbone.Router.extend({
 				}
 			});
 		});
-/*
-		directory.db.transaction(function (tx) {
-			var sql = 
-				"SELECT ce_critere FROM parcours";
-			tx.executeSql(sql, [], function(ta, results) {
-				var nbre = results.rows.length,
-					i = 0;
-				
-				for (; i < nbre; i = i + 1) {
-					var ce_critere = results.rows.item(i).ce_critere,
-						sql_especes = 
-							"SELECT count(id_espece) AS total, COALESCE(NULL, NULL, " + ce_critere + ") AS ce_critere " +
-							"FROM avoir_espece " +
-							"WHERE id_critere = " + ce_critere;
-					console.log(sql_especes);
-					ta.executeSql(sql_especes, [ce_critere], function(tx, results) {
-						console.log(results);
-						if (directory.parcours[ce_critere] == undefined) {
-							directory.parcours[ce_critere] = new Array();
-						}
-						directory.parcours[ce_critere]['total'] = results.rows.item(0).total;
-					},
-					function(error) {
-						console.log('DB | Error processing SQL: ' + error.code, error);
-					});
-				}
-			});
-		});
-//*/
+		
+		
+		
 		directory.db.transaction(function (tx) {
 			var sql = 
 				"SELECT id_critere, intitule FROM critere " +
@@ -1588,6 +1602,13 @@ directory.Router = Backbone.Router.extend({
 						"FROM parcours " +
 						"WHERE id = :id_parcours)";
 				tx.executeSql(sql, [id]);
+				
+				for (var i = 0; i < directory.parcours.length; i++) {
+					if (directory.parcours[i]['id'] == id) {
+						directory.parcours[i]['nbre_vues'] = 0;
+						$('#nbre-vues').html('0');
+					}
+				}
 			},
 			function(error) {
 				console.log('DB | Error processing SQL: ' + error.code, error);
@@ -1920,16 +1941,15 @@ directory.Router = Backbone.Router.extend({
 					tx.executeSql(sql, obs);
 					
 					
-				var i = 0,
-					parent = document.getElementById('obs-photos'),
-					imgs = parent.getElementsByTagName('img');
+					var i = 0,
+						parent = document.getElementById('obs-photos'),
+						imgs = parent.getElementsByTagName('img');
 					
 					sql =
 						"SELECT id_photo " +
 						"FROM photo " + 
 						"ORDER BY id_photo DESC";
 					tx.executeSql(sql, [], function(tx, results) {
-						console.log(results);
 						var sql_photo =
 								"INSERT INTO photo " +
 								"(id_photo, chemin, ce_obs) VALUES " + 
@@ -2166,8 +2186,8 @@ directory.Router = Backbone.Router.extend({
 		this.slidePage(new directory.views.comptePage().render());
 	},
 	
-	compteDebutant: function(data) {
-		console.log(data);
+	compteDebutant: function(id, nom) {
+		this.slidePage(new directory.views.profilPage({id: id, nom: nom}).render());
 	},
 	
 
@@ -2235,7 +2255,7 @@ parcoursDAO.populate();
 
 $().ready(function() {
 	directory.utils.templateLoader.load(
-		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item', 
+		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item',  'parcours-profil', 
 		 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list', 
 		 'saisie-obs', 'compte', 'obs-list', 'obs-page'],
 		function() {

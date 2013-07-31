@@ -36,7 +36,7 @@
 				</button>
 			</a>
 			<br />
-			Espèces trouvées : <%= nbre_vues %> / <%= total %>
+			Espèces trouvées : <span id="nbre-vues"><%= nbre_vues %></span> / <%= total %>
 		</div>
 		<hr class="fine"/>
 		<%= description %>
@@ -49,7 +49,7 @@
 		<li class="active span4"><a href="#parcours/<%= id %>">Parcours</a></li>
 		<li class="span3"><a href="#liste/<%= id %>/<%= nom %>/<%= ce_critere %>">Liste</a></li>
 		<li class="span2"><a href="#clef/<%= id %>/<%= nom %>/<%= ce_critere %>"><i class="icon-search icon-white"></i></a></li>
-		<li class="span2"><a href="#profil/<%= nom %>"><i class="icon-user icon-white"></i></a></li>
+		<li class="span2"><a href="#profil/<%= id %>/<%= nom %>"><i class="icon-user icon-white"></i></a></li>
 	</ul>
 </div>
 
