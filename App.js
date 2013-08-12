@@ -62,7 +62,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 	findById: function(id, callback) {
 		this.db.transaction(function(tx) {
 			var sql = 
-				"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos, ce_critere, est_commence " +
+				"SELECT id, nom, latitude_centre, longitude_centre, fichier_carte, description, photos, ce_critere " +
 				"FROM parcours " +
 				"WHERE id = :id_parcours";
 			tx.executeSql(sql, [id], function(tx, results) {
@@ -102,7 +102,6 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 					"fichier_carte VARCHAR(255) NULL ," +
 					"photos VARCHAR(255) NULL ," +
 					"description TEXT NULL ," +
-					"est_commence BOOLEAN NULL , " +
 					"ce_critere INT NULL ," +
 				"PRIMARY KEY (id)," +
 				"CONSTRAINT ce_critere " +
@@ -662,7 +661,7 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 	populate: function(callback) {
 		directory.db.transaction(function(tx) {
 			//console.log('Dropping PHOTO table');
-			tx.executeSql('DROP TABLE IF EXISTS photo');
+			//tx.executeSql('DROP TABLE IF EXISTS photo');
 			var sql =
 				"CREATE TABLE IF NOT EXISTS photo (" +
 					"id_photo INT NOT NULL ," +
@@ -1593,12 +1592,6 @@ directory.Router = Backbone.Router.extend({
 				id = arr_hash[arr_hash.length-1];
 			directory.db.transaction(function(tx) {
 				var sql =
-					"UPDATE parcours " +
-					"SET est_commence = 0 " +
-					"WHERE id = :id_parcours";
-				tx.executeSql(sql, [id]);
-				
-				sql =
 					"UPDATE avoir_critere " +
 					"SET vue = 0 " +
 					"WHERE id_critere = " +
@@ -1630,32 +1623,6 @@ directory.Router = Backbone.Router.extend({
 					}
 				}
 			}
-			/*
-			directory.db.transaction(function(tx) {
-				var sql =
-					"SELECT est_commence " +
-					"FROM parcours " +
-					"WHERE id = :id_parcours";
-				tx.executeSql(sql, [id], function(tx, results) {
-					if (results.rows.item(0).est_commence == 1) {
-						$('#parcours-modal').modal('show');	
-					}
-				});
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			});
-			directory.db.transaction(function(tx) {
-				var sql =
-					"UPDATE parcours " +
-					"SET est_commence = 1 " +
-					"WHERE id = :id_parcours";
-				tx.executeSql(sql, [id]);
-			},
-			function(error) {
-				console.log('DB | Error processing SQL: ' + error.code, error);
-			});
-			*/
 		});
 		
 		$('#content').on('click', '.vue-espece', function(event) {
@@ -2255,7 +2222,6 @@ parcoursDAO.populate();
 (new directory.dao.PhotoDAO(directory.db)).populate();
 (new directory.dao.UtilisateurDAO(directory.db)).populate();
 
-
 $().ready(function() {
 	directory.utils.templateLoader.load(
 		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item',  'parcours-profil', 
@@ -2314,6 +2280,22 @@ function supprimerObs(id, flag) {
 				.delay(1600)
 				.fadeOut('slow');
 		}		
+
+		if ($('#'+id).hasClass('a-transmettre')) {
+			var nbre = parseInt($('#nbre-a-transmettre').html()) - 1;
+			$('#nbre-a-transmettre').html(nbre);
+			if (nbre == 0) {
+				$('.transmettre-obs').addClass('hide');
+			}
+		} else {
+			if ($('#'+id).hasClass('transmises')) {
+				var nbre = parseInt($('#nbre-transmises').html()) - 1;
+				$('#nbre-transmises').html(nbre);
+				if (nbre == 0) {
+					$('#obs-transmises-infos').addClass('hide');
+				}
+			}
+		}
 		$('#li_'+id).remove();
 	},
 	function(error) {
@@ -2425,7 +2407,10 @@ function surSuccesGeoloc(position) {
 		$('#lat').html(lat);
 		$('#lng').html(lng);
 
+		$('#geo-infos').html(''); 
+		$('#sauver-obs').removeClass('hide');
 		console.log('Geolocation SUCCESS');
+		/*
 		var url_service = SERVICE_NOM_COMMUNE_URL;
 		var urlNomCommuneFormatee = url_service.replace('{lat}', lat).replace('{lon}', lng);
 		$.ajax({
@@ -2448,13 +2433,18 @@ function surSuccesGeoloc(position) {
 				$('#obs-attente-icone').addClass('hide');
 			}
 		});
+		//*/
+	} else {
+		$('#geo-infos').addClass('text-error');
+		$('#geo-infos').removeClass('text-info');
+		$('#geo-infos').html('Impossible de continuer l\'enregistrement.'); 
 	}
 }
 function surErreurGeoloc(error){
+	$('#obs-attente-icone').addClass('hide');
 	$('#geo-infos').addClass('text-error');
 	$('#geo-infos').removeClass('text-info');
 	$('#geo-infos').html('Calcul impossible.');
-	$('#obs-attente-icone').addClass('hide');
 	console.log('Echec de la géolocalisation, code: ' + error.code + ' message: '+ error.message);
 }
 
@@ -2544,7 +2534,7 @@ function miseAJourCourriel(courriel) {
 				}
 			}
 
-			console.log(sql, parametres);
+			//console.log(sql, parametres);
 			if (sql != '') {
 				tx.executeSql(sql, parametres);
 			}
@@ -2577,7 +2567,7 @@ function transmettreObs() {
 				"WHERE a_ete_transmise = '0' " + 
 				"ORDER BY id_obs " +
 				"LIMIT " + LIMITE_NBRE_TRANSMISSION;
-			console.log(sql);
+			//console.log(sql);
 			tx.executeSql(sql, [], function(tx, results) {
 				var nbre_obs = results.rows.length;
 				$('#total_obs').html(nbre_obs);	
