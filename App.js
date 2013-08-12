@@ -227,40 +227,6 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 			console.log('DB | Error processing SQL: ' + error.code, error);
 		});
 	},
-
-	countVueByParcours: function(id, callback) {
-		this.db.transaction(function(tx) {
-			var sql = 
-				"SELECT count(e.num_nom) AS nbre_vues " +
-				"FROM espece e " +
-				"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
-				"WHERE c.id_critere = :id_parcours " + 
-				"AND vue = 1";
-			tx.executeSql(sql, [id], function(tx, results) {
-				//console.log(sql, id);
-				callback(results.rows.length === 1 ? results.rows.item(0) : null);
-			});
-		},
-		function(error) {
-			console.log('DB | Error processing SQL: ' + error.code, error);
-		});
-	},
-	countByParcours: function(id, callback) {
-		this.db.transaction(function(tx) {
-			var sql = 
-				"SELECT count(e.num_nom) AS total " +
-				"FROM espece e " +
-				"JOIN avoir_critere c ON e.num_nom = c.id_espece " +
-				"WHERE c.id_critere = :id_parcours ";
-			tx.executeSql(sql, [id], function(tx, results) {
-				//console.log(sql, id);
-				callback(results.rows.length === 1 ? results.rows.item(0) : null);
-			});
-		},
-		function(error) {
-			console.log('DB | Error processing SQL: ' + error.code, error);
-		});
-	},
 	
 	findAll: function(callback) {
 		this.db.transaction(function(tx) {
@@ -423,7 +389,7 @@ _.extend(directory.dao.CritereDAO.prototype, {
 						arr_valeurs = arr_lignes[i].split(';');
 					for (var j = 0; j < arr_valeurs.length; j++) {
 						sql += arr_valeurs[j];
-						if (j < (arr_valeurs.length - 2)) {
+						if (j < (arr_valeurs.length - 1)) {
 							sql += ',';
 						}
 					}
@@ -825,24 +791,6 @@ directory.models.EspeceCollection = Backbone.Collection.extend({
 		especeDAO.findByParcours(key, function(data) {
 			self.reset(data);
 			//console.log('EspeceCollection | findByParcours ', data);
-		});
-	},
-	
-	countVueByParcours: function(key) {
-		var especeDAO = new directory.dao.EspeceDAO(directory.db),
-			self = this;
-		especeDAO.countVueByParcours(key, function(data) {
-			self.reset(data);
-			//console.log('EspeceCollection | countVueByParcours ', data);
-		});
-	},
-	countByParcours: function(key) {
-		var especeDAO = new directory.dao.EspeceDAO(directory.db),
-			self = this;
-		especeDAO.countByParcours(key, function(data) {
-			self.reset(data);
-			return(data);
-			//console.log('EspeceCollection | countByParcours ', data);
 		});
 	},
 	
@@ -2212,17 +2160,21 @@ directory.Router = Backbone.Router.extend({
 
 // Bootstrap the application
 directory.db = window.openDatabase('FloraClapasApp', '1.0', 'Data Base Flora Clapas', 1024*1024*20);
-var parcoursDAO = new directory.dao.ParcoursDAO(directory.db);
-var especeDAO = new directory.dao.EspeceDAO(directory.db);
-especeDAO.populate();
-parcoursDAO.populate();
-(new directory.dao.CritereDAO(directory.db)).populate();
-(new directory.dao.AvoirCritereDAO(directory.db)).populate();
-(new directory.dao.ObsDAO(directory.db)).populate();
-(new directory.dao.PhotoDAO(directory.db)).populate();
-(new directory.dao.UtilisateurDAO(directory.db)).populate();
+directory.storage = window.localStorage;
 
 $().ready(function() {
+	if (directory.storage.getItem('first_use') == undefined) {
+		(new directory.dao.EspeceDAO(directory.db)).populate();
+		(new directory.dao.ParcoursDAO(directory.db)).populate();
+		(new directory.dao.CritereDAO(directory.db)).populate();
+		(new directory.dao.AvoirCritereDAO(directory.db)).populate();
+		(new directory.dao.ObsDAO(directory.db)).populate();
+		(new directory.dao.PhotoDAO(directory.db)).populate();
+		(new directory.dao.UtilisateurDAO(directory.db)).populate();
+		
+		directory.storage.setItem('first_use', true);
+	}
+	
 	directory.utils.templateLoader.load(
 		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item',  'parcours-profil', 
 		 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list', 
@@ -2230,7 +2182,8 @@ $().ready(function() {
 		function() {
 			directory.app = new directory.Router();
 			Backbone.history.start();
-		});
+		}
+	);
 });
 
 
@@ -2439,6 +2392,7 @@ function surSuccesGeoloc(position) {
 		$('#geo-infos').removeClass('text-info');
 		$('#geo-infos').html('Impossible de continuer l\'enregistrement.'); 
 	}
+	$('#obs-attente-icone').addClass('hide');
 }
 function surErreurGeoloc(error){
 	$('#obs-attente-icone').addClass('hide');
