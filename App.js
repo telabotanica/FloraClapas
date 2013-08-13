@@ -2166,7 +2166,7 @@ directory.Router = Backbone.Router.extend({
 });
 
 // Bootstrap the application
-directory.db = window.openDatabase('FloraClapasApp', '2.0', 'Data Base Flora Clapas', 1024*1024*20);
+directory.db = window.openDatabase('FloraClapasApp', '1.0', 'Data Base Flora Clapas', 1024*1024*20);
 directory.storage = window.localStorage;
 
 $().ready(function() {
