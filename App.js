@@ -93,6 +93,7 @@ _.extend(directory.dao.ParcoursDAO.prototype, {
 		directory.db.transaction(function(tx) {
 			console.log('Dropping PARCOURS table');
 			tx.executeSql('DROP TABLE IF EXISTS parcours');
+			
 			var sql =
 				"CREATE TABLE IF NOT EXISTS parcours (" +
 					"id INT NOT NULL ," +
@@ -253,6 +254,7 @@ _.extend(directory.dao.EspeceDAO.prototype, {
 		directory.db.transaction(function(tx) {
 			console.log('Dropping ESPECE table');
 			tx.executeSql('DROP TABLE IF EXISTS espece');
+			
 			var sql =
 				"CREATE TABLE IF NOT EXISTS espece (" +
 					"num_nom INT NOT NULL ," +
@@ -354,6 +356,7 @@ _.extend(directory.dao.CritereDAO.prototype, {
 		this.db.transaction(function(tx) {
 			console.log('Dropping CRITERE table');
 			tx.executeSql('DROP TABLE IF EXISTS critere');
+			
 			var sql =
 				"CREATE TABLE IF NOT EXISTS critere (" +
 					"id_critere INT NOT NULL ," +
@@ -427,6 +430,7 @@ _.extend(directory.dao.AvoirCritereDAO.prototype, {
 		directory.db.transaction(function(tx) {
 			console.log('Dropping AVOIR_CRITERE table');
 			tx.executeSql('DROP TABLE IF EXISTS avoir_critere');
+			
 			var sql =
 				"CREATE TABLE IF NOT EXISTS avoir_critere (" +
 					"id_espece INT NOT NULL ," +
@@ -567,6 +571,7 @@ _.extend(directory.dao.ObsDAO.prototype, {
 		directory.db.transaction(function(tx) {
 			//console.log('Dropping OBS table');
 			//tx.executeSql('DROP TABLE IF EXISTS obs');
+			
 			var sql =
 				"CREATE TABLE IF NOT EXISTS obs (" +
 					"id_obs INT NOT NULL ,"+
@@ -628,6 +633,7 @@ _.extend(directory.dao.PhotoDAO.prototype, {
 		directory.db.transaction(function(tx) {
 			//console.log('Dropping PHOTO table');
 			//tx.executeSql('DROP TABLE IF EXISTS photo');
+			
 			var sql =
 				"CREATE TABLE IF NOT EXISTS photo (" +
 					"id_photo INT NOT NULL ," +
@@ -677,6 +683,7 @@ _.extend(directory.dao.UtilisateurDAO.prototype, {
 		directory.db.transaction(function(tx) {
 			//console.log('Dropping UTILISATEUR table');
 			//tx.executeSql('DROP TABLE IF EXISTS utilisateur');
+			
 			var sql =
 				"CREATE TABLE IF NOT EXISTS utilisateur (" +
 					"id_user INT NOT NULL, " +
@@ -1404,7 +1411,7 @@ directory.Router = Backbone.Router.extend({
 		
 		
 		directory.db.transaction(function (tx) {
-			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (1, 'img/51162.jpg', 1)");
+			//tx.executeSql("UPDATE obs SET a_ete_transmise = 1");
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (2, 'img/61872.jpg', 1)");
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (3, 'img/62318.jpg', 1)");
 			//tx.executeSql("INSERT INTO photo (id_photo, chemin, ce_obs) VALUES (4, 'img/87533.jpg', 1)");
@@ -2159,11 +2166,11 @@ directory.Router = Backbone.Router.extend({
 });
 
 // Bootstrap the application
-directory.db = window.openDatabase('FloraClapasApp', '1.0', 'Data Base Flora Clapas', 1024*1024*20);
+directory.db = window.openDatabase('FloraClapasApp', '2.0', 'Data Base Flora Clapas', 1024*1024*20);
 directory.storage = window.localStorage;
 
 $().ready(function() {
-	if (directory.storage.getItem('first_use') == undefined) {
+	if (directory.storage.getItem('version') != VERSION_APP) {
 		(new directory.dao.EspeceDAO(directory.db)).populate();
 		(new directory.dao.ParcoursDAO(directory.db)).populate();
 		(new directory.dao.CritereDAO(directory.db)).populate();
@@ -2171,8 +2178,8 @@ $().ready(function() {
 		(new directory.dao.ObsDAO(directory.db)).populate();
 		(new directory.dao.PhotoDAO(directory.db)).populate();
 		(new directory.dao.UtilisateurDAO(directory.db)).populate();
-		
-		directory.storage.setItem('first_use', true);
+
+		directory.storage.setItem('version', VERSION_APP);
 	}
 	
 	directory.utils.templateLoader.load(
@@ -2237,6 +2244,9 @@ function supprimerObs(id, flag) {
 		if ($('#'+id).hasClass('a-transmettre')) {
 			var nbre = parseInt($('#nbre-a-transmettre').html()) - 1;
 			$('#nbre-a-transmettre').html(nbre);
+			if (nbre < 3) {
+				$('#obs-a-transmettre-btn').addClass('hide');
+			}
 			if (nbre == 0) {
 				$('.transmettre-obs').addClass('hide');
 			}
