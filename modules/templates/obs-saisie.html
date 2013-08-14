@@ -48,13 +48,12 @@
 	<hr class="fine"/>
 	<div id="obs-photos-info" class="text-center"></div>
 	<div class="text-center">
-		<button class="ajouter-photos btn-large btn btn-inverse" id="prendre-photos"
-				data-another-text="Prendre une autre photo...">
+		<button class="ajouter-photos btn-large btn btn-inverse" id="prendre-photos">
 			<i class="icon-picture icon-white"></i>
 			<br />
-			Ajouter une photo...
+			<span id="prendre-photos-texte">Ajouter une photo...</span> 
 		</button>
-		<br />
+		<br /> <br />
 		 Nombre de photos : <span id="nbre-photos">0</span> / <%= LIMITE_NBRE_PHOTOS %>.
 	</div>
 	<div id="obs-photos"></div>
