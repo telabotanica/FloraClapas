@@ -17,18 +17,18 @@
 	
 	<hr class="fine"/>
 	<div class="text-center">
+		<div id="geo-infos" class="text-info infos">
+			Calcul en cours...
+		</div>
+		<div id="obs-attente-icone"> 
+			<img src="css/images/ajax-loader.gif" /> 
+		</div>
 		<button id="geolocaliser" class="btn btn-info" >
 			Recalculer ma position
 			<i class="icon-search"></i>
 		</button>
 	</div>
 	
-	<div id="geo-infos" class="text-center text-info infos">
-		Calcul en cours...
-	</div>
-	<div id="obs-attente-icone" class="text-center"> 
-		<img src="css/images/ajax-loader.gif" /> 
-	</div>
 	<label for="lat">
 		Latitude :
 		<span id="lat"></span>
@@ -60,12 +60,13 @@
 	<div class="clearfix"></div>
 	
 	<hr class="fine"/>
-	<a href="#sauvegarde-obs-modal" role="button" id="sauver-obs" class="hide btn btn-success btn-block btn-large  margin-navbar" 
-		data-toggle="modal" >
-		<i class="icon-ok"></i>
-		Enregistrer l'observation
-	</a>
-	
+	<div class="text-center">
+		<a href="#sauvegarde-obs-modal" role="button" id="sauver-obs" class="hide btn btn-success btn-large  margin-navbar" 
+			data-toggle="modal" >
+			<i class="icon-ok"></i>
+			Enregistrer l'observation
+		</a>
+	</div>
 	<input id="num_nom_select" type="hidden" name="num_nom_select" value="<%= id %>" />
 </div>
 
@@ -73,7 +74,7 @@
 <div class="navbar navbar-fixed-bottom">
 	<ul class="nav parc-nav row-fluid">
 		<li class="span4"><a href="#transmission">Mes obs.</a></li>
-		<li class="span4"><a href="#compte"><i class="icon-off icon-white"></i></a></li>
+		<li class="span4"><a href="#compte"><i class="offset1 icon-envelope icon-white offset1"></i></a></li>
 		<li class="span4"><a href="#liste/0/Balade/0" >Liste</a></li>
 	</ul>
 </div>
