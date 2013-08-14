@@ -911,7 +911,7 @@ directory.views.SearchPage = Backbone.View.extend({
 	templateLoader: directory.utils.templateLoader,
 
 	initialize: function() {
-		this.template = _.template(this.templateLoader.get('search-page'));
+		this.template = _.template(this.templateLoader.get('parcours-liste'));
 		this.model.findByName('');
 	},
 	
@@ -939,7 +939,7 @@ directory.views.ParcoursListItemView = Backbone.View.extend({
 	tagName: 'li',
 	
 	initialize: function(data) {
-		this.template = _.template(directory.utils.templateLoader.get('parcours-list-item'));
+		this.template = _.template(directory.utils.templateLoader.get('parcours-liste-item'));
 	},
 	
 	render: function(eventName) {
@@ -1001,7 +1001,7 @@ directory.views.ListPage = Backbone.View.extend({
 		} else {
 			this.model.findByParcours(this.model.id_critere);
 		}
-		this.template = _.template(this.templateLoader.get('list-page'));
+		this.template = _.template(this.templateLoader.get('espece-liste'));
 	},
 	
 	render: function(eventName) {
@@ -1071,7 +1071,7 @@ directory.views.EspeceListItemView = Backbone.View.extend({
 	
 	initialize: function(data) {
 		//console.log(data);
-		this.template = _.template(directory.utils.templateLoader.get('espece-list-item'));
+		this.template = _.template(directory.utils.templateLoader.get('espece-liste-item'));
 	},
 	
 	render: function(eventName) {
@@ -1142,7 +1142,7 @@ directory.views.CriterePage = Backbone.View.extend({
 		this.model.ce_critere = data.model.attributes.ce_parcours;
 		this.model.findAll(this.model.id);
 		this.model.bind('reset', this.render, this);
-		this.template = _.template(directory.utils.templateLoader.get('critere-list'));
+		this.template = _.template(directory.utils.templateLoader.get('critere-liste'));
 	},
 	
 	render: function(eventName) {
@@ -1171,7 +1171,7 @@ directory.views.CriterePage = Backbone.View.extend({
 		arr_feuillaison.push('feuillaison;;pheno_feuille.png');
 		
 		arr_fructification.push('Des fruits sont-ils présents ?');
-		arr_fructification.push('fructification;Il y a des fruits.;manager.png');
+		arr_fructification.push('fructification;Il y a des fruits.;mail.png');
 		
 		arr_criteres.push(arr_floraison);
 		arr_criteres.push(arr_feuillaison);
@@ -1196,7 +1196,7 @@ directory.views.CriterePage = Backbone.View.extend({
 directory.views.CritereListItemView = Backbone.View.extend({
 	initialize: function(data) {
 		//console.log(data);
-		this.template = _.template(directory.utils.templateLoader.get('critere-list-item'));
+		this.template = _.template(directory.utils.templateLoader.get('critere-liste-item'));
 	},
 	
 	render: function(eventName) {
@@ -1224,7 +1224,7 @@ directory.views.Accueil = Backbone.View.extend({
 	
 	initialize: function(data) {
 		//console.log(data);
-		this.template = _.template(this.templateLoader.get('accueil-page'));
+		this.template = _.template(this.templateLoader.get('accueil'));
 	},
 
 	render: function(eventName) {
@@ -1247,7 +1247,7 @@ directory.views.saisieObs = Backbone.View.extend({
 				( (''+mois).length < 2 ? '0' : '') + mois + '/' +
 				annee;
 		this.model.attributes.date = aujourdhui;
-		this.template = _.template(directory.utils.templateLoader.get('saisie-obs'));
+		this.template = _.template(directory.utils.templateLoader.get('obs-saisie'));
 	},
 	
 	render: function(eventName) {
@@ -1298,7 +1298,7 @@ directory.views.transmissionObs = Backbone.View.extend({
 		this.utilisateur.findOne();
 		this.utilisateur.bind('reset', this.render, this);
 		
-		this.template = _.template(directory.utils.templateLoader.get('obs-list'));
+		this.template = _.template(directory.utils.templateLoader.get('obs-liste'));
 	},
 
 	render: function(eventName) { 
@@ -1813,13 +1813,7 @@ directory.Router = Backbone.Router.extend({
 					console.log('DB | Error processing SQL: ' + error.code, error);
 				});	
 			} else {
-				directory.liste = new Array();
-				directory.criteria = new Array();
-				directory.nbre_criteres = new Array();
-				directory.nbre_especes = null;
-				directory.nbre_choix = null;
-				$('#resultats-recherche').addClass('hide');
-				$('#resultats-recherche').html(' ');
+				reinitialiserClef(true);
 			}
 		});
 		
@@ -1832,13 +1826,7 @@ directory.Router = Backbone.Router.extend({
 				inputs[i].checked = false;
 				$('#img_'+inputs[i].id).removeClass('selection-critere');
 			}
-			directory.liste = new Array();
-			directory.criteria = new Array();
-			directory.nbre_criteres = new Array();
-			directory.nbre_especes = null;
-			directory.nbre_choix = null;
-			$('#resultats-recherche').addClass('hide');
-			$('#resultats-recherche').html(' ');
+			reinitialiserClef(true);
 		});
 		
 		
@@ -2019,6 +2007,7 @@ directory.Router = Backbone.Router.extend({
 	},
 	
 	accueil: function() {
+		reinitialiserClef(false);
 		var self = this;
 		self.slidePage(new directory.views.Accueil().render());
 	},
@@ -2082,8 +2071,7 @@ directory.Router = Backbone.Router.extend({
 	nouvelleObs: function(num_nom, nom_sci) {
 		var obs = new directory.models.Obs({ id: num_nom, nom_sci: nom_sci }),
 			self = this;
-		directory.liste = new Array();
-		directory.criteria = new Array();
+		reinitialiserClef(false);
 		obs.fetch({
 			success: function(data) {
 				//console.log(data);
@@ -2183,9 +2171,9 @@ $().ready(function() {
 	}
 	
 	directory.utils.templateLoader.load(
-		['search-page', 'accueil-page', 'parcours-page', 'parcours-list-item',  'parcours-profil', 
-		 'espece-list-item', 'list-page', 'espece-page', 'critere-list-item', 'critere-list', 
-		 'saisie-obs', 'compte', 'obs-list', 'obs-page'],
+		['accueil', 'parcours-liste', 'parcours-liste-item', 'parcours-page', 'parcours-profil', 
+		 'espece-liste', 'espece-liste-item', 'espece-page', 'critere-liste', 'critere-liste-item', 
+		 'obs-liste', 'obs-page', 'obs-saisie', 'compte'],
 		function() {
 			directory.app = new directory.Router();
 			Backbone.history.start();
@@ -2213,6 +2201,21 @@ function moisPhenoEstCouvert( debut, fin) {
 	}
 	
 	return(flag);
+}
+
+
+
+function reinitialiserClef(flag) {
+	directory.liste = new Array();
+	directory.criteria = new Array();
+	directory.nbre_criteres = new Array();
+	directory.nbre_especes = null;
+	directory.nbre_choix = null;
+	
+	if (flag) {
+		$('#resultats-recherche').addClass('hide');
+		$('#resultats-recherche').html(' ');
+	}
 }
 
 

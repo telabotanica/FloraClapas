@@ -15,10 +15,6 @@
 			Espèces trouvées : <span id="nbre-vues"><%= nbre_vues %></span> / <span id="total-especes"><%= total %></span>
 		</div>
 		<hr class="fine-ultra"/>
-		<p>
-			Retrouvez-les toutes pour faire apparaître une image sur votre profil ! 
-		</p>
-		<canvas id="canvas-profil" style="width:100%;" height="100"></canvas>
 	</div>
 </div>
 
@@ -29,36 +25,3 @@
 		<li class="active offset1 span4"><a href="#profil/<%= nom %>"><i class="icon-user"></i></a></li>
 	</ul>
 </div>
-
-
-<script>
-var canvas = $("#canvas-profil"),
-	ctx = document.getElementById("canvas-profil").getContext('2d'),
-	x = 0,
-	y = 0,
-	width = canvas.width(),
-	height = canvas.height(),
-	img = new Image();
-	img.src = "css/images/lionheart.jpg";
-	
-var nbre_vues = parseInt($('#nbre-vues').html()),
-	total = parseInt($('#total-especes').html()),
-	pourcent = nbre_vues / total;
-//console.log(pourcent, x, y, width, height);
-
-	ctx.clearRect(x, y, width, height);
-	ctx.drawImage(img, 
-		x,
-		y,
-		width * pourcent,
-		height,
-		x,
-		y,
-		width * pourcent,
-		height
-	);
-	
-	ctx.lineWidth = 5;
-	ctx.strokeStyle = "#2B3891";
-	ctx.strokeRect(x, y, width, height);
-</script>

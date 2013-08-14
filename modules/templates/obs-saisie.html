@@ -16,10 +16,12 @@
 	</label>
 	
 	<hr class="fine"/>
-	<button id="geolocaliser" class="btn btn-info btn-block" >
-		Recalculer ma position
-		<i class="icon-search"></i>
-	</button>
+	<div class="text-center">
+		<button id="geolocaliser" class="btn btn-info" >
+			Recalculer ma position
+			<i class="icon-search"></i>
+		</button>
+	</div>
 	
 	<div id="geo-infos" class="text-center text-info infos">
 		Calcul en cours...
@@ -45,11 +47,16 @@
 	
 	<hr class="fine"/>
 	<div id="obs-photos-info" class="text-center"></div>
-	<button class="ajouter-photos btn-block btn btn-inverse" id="prendre-photos"
-			data-another-text="Prendre une autre photo...">
-		Ajouter une photo...
-	</button>
-	<div class="text-center"> Nombre de photos : <span id="nbre-photos">0</span> / <%= LIMITE_NBRE_PHOTOS %>.</div>
+	<div class="text-center">
+		<button class="ajouter-photos btn-large btn btn-inverse" id="prendre-photos"
+				data-another-text="Prendre une autre photo...">
+			<i class="icon-picture icon-white"></i>
+			<br />
+			Ajouter une photo...
+		</button>
+		<br />
+		 Nombre de photos : <span id="nbre-photos">0</span> / <%= LIMITE_NBRE_PHOTOS %>.
+	</div>
 	<div id="obs-photos"></div>
 	<div class="clearfix"></div>
 	
